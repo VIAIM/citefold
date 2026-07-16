@@ -1,0 +1,677 @@
+{
+  "baselines": {
+    "memory_pack": {
+      "avg_context_chars": 879.2,
+      "citation_rate": 0.7,
+      "count": 10,
+      "coverage_match_rate": 1.0,
+      "expected_marker_hit_rate": 1.0,
+      "forbidden_count": 0,
+      "runtime_assertion_failure_count": 0,
+      "scope_leakage_count": 0,
+      "task_success_rate": 1.0,
+      "unsupported_count": 0
+    },
+    "no_memory": {
+      "avg_context_chars": 0.0,
+      "citation_rate": 0.0,
+      "count": 10,
+      "coverage_match_rate": 0.3,
+      "expected_marker_hit_rate": 0.3,
+      "forbidden_count": 0,
+      "runtime_assertion_failure_count": 0,
+      "scope_leakage_count": 0,
+      "task_success_rate": 0.3,
+      "unsupported_count": 0
+    }
+  },
+  "benchmark": "multimodal_memory_pack_v1",
+  "by_category": {
+    "audio_commitment": {
+      "forbidden": false,
+      "memory_pack_task_success": true,
+      "no_memory_task_success": false,
+      "scope_leakage": false,
+      "task_success_lift": 1,
+      "unsupported": false
+    },
+    "deletion_cascade": {
+      "forbidden": false,
+      "memory_pack_task_success": true,
+      "no_memory_task_success": true,
+      "scope_leakage": false,
+      "task_success_lift": 0,
+      "unsupported": false
+    },
+    "image_text": {
+      "forbidden": false,
+      "memory_pack_task_success": true,
+      "no_memory_task_success": false,
+      "scope_leakage": false,
+      "task_success_lift": 1,
+      "unsupported": false
+    },
+    "low_confidence_asr": {
+      "forbidden": false,
+      "memory_pack_task_success": true,
+      "no_memory_task_success": true,
+      "scope_leakage": false,
+      "task_success_lift": 0,
+      "unsupported": false
+    },
+    "media_prompt_injection": {
+      "forbidden": false,
+      "memory_pack_task_success": true,
+      "no_memory_task_success": false,
+      "scope_leakage": false,
+      "task_success_lift": 1,
+      "unsupported": false
+    },
+    "no_evidence": {
+      "forbidden": false,
+      "memory_pack_task_success": true,
+      "no_memory_task_success": true,
+      "scope_leakage": false,
+      "task_success_lift": 0,
+      "unsupported": false
+    },
+    "preference_correction": {
+      "forbidden": false,
+      "memory_pack_task_success": true,
+      "no_memory_task_success": false,
+      "scope_leakage": false,
+      "task_success_lift": 1,
+      "unsupported": false
+    },
+    "text_fact": {
+      "forbidden": false,
+      "memory_pack_task_success": true,
+      "no_memory_task_success": false,
+      "scope_leakage": false,
+      "task_success_lift": 1,
+      "unsupported": false
+    },
+    "unresolved_conflict": {
+      "forbidden": false,
+      "memory_pack_task_success": true,
+      "no_memory_task_success": false,
+      "scope_leakage": false,
+      "task_success_lift": 1,
+      "unsupported": false
+    },
+    "video_audio_visual": {
+      "forbidden": false,
+      "memory_pack_task_success": true,
+      "no_memory_task_success": false,
+      "scope_leakage": false,
+      "task_success_lift": 1,
+      "unsupported": false
+    }
+  },
+  "caveats": [
+    "This is a deterministic local regression benchmark, not a public leaderboard.",
+    "It does not measure reader-LLM answer quality; both arms use the same deterministic contract scorer.",
+    "Supplied observations isolate memory lifecycle behavior from OCR, ASR, vision-model, and codec quality.",
+    "Task success measures whether MemoryPack exposes the expected evidence while respecting safety, coverage, deletion, and scope contracts.",
+    "Raw media text may be present only as quoted untrusted evidence; forbidden checks separately inspect trusted active memory."
+  ],
+  "environment": {
+    "platform": "macOS-15.7.4-arm64-arm-64bit-Mach-O",
+    "processor": "arm",
+    "python": "3.13.2"
+  },
+  "fixture": {
+    "case_count": 10,
+    "categories": [
+      "audio_commitment",
+      "deletion_cascade",
+      "image_text",
+      "low_confidence_asr",
+      "media_prompt_injection",
+      "no_evidence",
+      "preference_correction",
+      "text_fact",
+      "unresolved_conflict",
+      "video_audio_visual"
+    ],
+    "path": "benchmarks/fixtures/multimodal_memory_bench_v1.json",
+    "sha256": "d494d1aac58cb9b09fc4eb0aaf9b64666bd7a223655b5b68b595099af174cf51",
+    "version": "1.0"
+  },
+  "generated_at": "2026-07-16T09:45:15.517714+00:00",
+  "memory_lift": {
+    "expected_marker_hit_rate": 0.7,
+    "task_success_rate": 0.7
+  },
+  "parameters": {
+    "comparison": "same query and seeded history; only historical memory context is withheld from no_memory",
+    "model_calls": 0,
+    "network_calls": 0,
+    "reader": "deterministic_contract_scorer",
+    "token_budget": 2200
+  },
+  "probe_logs": [
+    {
+      "case_id": "text_fact",
+      "category": "text_fact",
+      "expected_coverage": "supported",
+      "expected_markers": [
+        "TEXT-FACT-731"
+      ],
+      "memory_pack": {
+        "citation_count": 1,
+        "context_chars": 725,
+        "coverage": "supported",
+        "coverage_matches": true,
+        "expected_hits": [
+          "TEXT-FACT-731"
+        ],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden": [],
+        "passed": true,
+        "runtime_failures": [],
+        "scope_leakage_hits": [],
+        "unsupported": []
+      },
+      "memory_pack_summary": {
+        "active_record_count": 0,
+        "citation_count": 1,
+        "citation_modalities": [
+          "text"
+        ],
+        "conflict_count": 0,
+        "coverage": "supported",
+        "hard_delete_cascade_passed": null,
+        "selected_nodes": [
+          "episodes/2026-07/2026-07-15T090019-session-00-chat.md"
+        ],
+        "sources_heading_count": 1
+      },
+      "modality": "text",
+      "no_memory": {
+        "citation_count": 0,
+        "context_chars": 0,
+        "coverage": "none",
+        "coverage_matches": false,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 0.0,
+        "forbidden": [],
+        "passed": false,
+        "runtime_failures": [],
+        "scope_leakage_hits": [],
+        "unsupported": []
+      },
+      "query": "差旅报销的成本中心是什么？",
+      "requires_memory": true
+    },
+    {
+      "case_id": "image_text",
+      "category": "image_text",
+      "expected_coverage": "supported",
+      "expected_markers": [
+        "IMG-BOARD-42"
+      ],
+      "memory_pack": {
+        "citation_count": 1,
+        "context_chars": 873,
+        "coverage": "supported",
+        "coverage_matches": true,
+        "expected_hits": [
+          "IMG-BOARD-42"
+        ],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden": [],
+        "passed": true,
+        "runtime_failures": [],
+        "scope_leakage_hits": [],
+        "unsupported": []
+      },
+      "memory_pack_summary": {
+        "active_record_count": 0,
+        "citation_count": 1,
+        "citation_modalities": [
+          "image"
+        ],
+        "conflict_count": 0,
+        "coverage": "supported",
+        "hard_delete_cascade_passed": null,
+        "selected_nodes": [
+          "episodes/2026-07/episode_6dee5252516e9b85214fd855-image.md"
+        ],
+        "sources_heading_count": 1
+      },
+      "modality": "image",
+      "no_memory": {
+        "citation_count": 0,
+        "context_chars": 0,
+        "coverage": "none",
+        "coverage_matches": false,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 0.0,
+        "forbidden": [],
+        "passed": false,
+        "runtime_failures": [],
+        "scope_leakage_hits": [],
+        "unsupported": []
+      },
+      "query": "白板上的发布批次是什么？",
+      "requires_memory": true
+    },
+    {
+      "case_id": "audio_commitment",
+      "category": "audio_commitment",
+      "expected_coverage": "supported",
+      "expected_markers": [
+        "AUDIO-PROMISE-Q4"
+      ],
+      "memory_pack": {
+        "citation_count": 1,
+        "context_chars": 1018,
+        "coverage": "supported",
+        "coverage_matches": true,
+        "expected_hits": [
+          "AUDIO-PROMISE-Q4"
+        ],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden": [],
+        "passed": true,
+        "runtime_failures": [],
+        "scope_leakage_hits": [],
+        "unsupported": []
+      },
+      "memory_pack_summary": {
+        "active_record_count": 0,
+        "citation_count": 1,
+        "citation_modalities": [
+          "audio"
+        ],
+        "conflict_count": 0,
+        "coverage": "supported",
+        "hard_delete_cascade_passed": null,
+        "selected_nodes": [
+          "episodes/2026-07/episode_d19085e0e01ce0608185cd09-audio.md"
+        ],
+        "sources_heading_count": 1
+      },
+      "modality": "audio",
+      "no_memory": {
+        "citation_count": 0,
+        "context_chars": 0,
+        "coverage": "none",
+        "coverage_matches": false,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 0.0,
+        "forbidden": [],
+        "passed": false,
+        "runtime_failures": [],
+        "scope_leakage_hits": [],
+        "unsupported": []
+      },
+      "query": "录音里承诺周五提交的报价代号是什么？",
+      "requires_memory": true
+    },
+    {
+      "case_id": "video_audio_visual",
+      "category": "video_audio_visual",
+      "expected_coverage": "supported",
+      "expected_markers": [
+        "VIDEO-OWNER-WANG",
+        "VIDEO-DEADLINE-FRI"
+      ],
+      "memory_pack": {
+        "citation_count": 2,
+        "context_chars": 1252,
+        "coverage": "supported",
+        "coverage_matches": true,
+        "expected_hits": [
+          "VIDEO-OWNER-WANG",
+          "VIDEO-DEADLINE-FRI"
+        ],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden": [],
+        "passed": true,
+        "runtime_failures": [],
+        "scope_leakage_hits": [],
+        "unsupported": []
+      },
+      "memory_pack_summary": {
+        "active_record_count": 0,
+        "citation_count": 2,
+        "citation_modalities": [
+          "audio",
+          "video_frame"
+        ],
+        "conflict_count": 0,
+        "coverage": "supported",
+        "hard_delete_cascade_passed": null,
+        "selected_nodes": [
+          "episodes/2026-07/episode_635b88d073ae261b7ab3bed2-video.md"
+        ],
+        "sources_heading_count": 1
+      },
+      "modality": "video",
+      "no_memory": {
+        "citation_count": 0,
+        "context_chars": 0,
+        "coverage": "none",
+        "coverage_matches": false,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 0.0,
+        "forbidden": [],
+        "passed": false,
+        "runtime_failures": [],
+        "scope_leakage_hits": [],
+        "unsupported": []
+      },
+      "query": "视频会议中谁负责，何时交稿？",
+      "requires_memory": true
+    },
+    {
+      "case_id": "low_confidence_asr",
+      "category": "low_confidence_asr",
+      "expected_coverage": "none",
+      "expected_markers": [],
+      "memory_pack": {
+        "citation_count": 0,
+        "context_chars": 361,
+        "coverage": "none",
+        "coverage_matches": true,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden": [],
+        "passed": true,
+        "runtime_failures": [],
+        "scope_leakage_hits": [],
+        "unsupported": []
+      },
+      "memory_pack_summary": {
+        "active_record_count": 0,
+        "citation_count": 0,
+        "citation_modalities": [],
+        "conflict_count": 0,
+        "coverage": "none",
+        "hard_delete_cascade_passed": null,
+        "selected_nodes": [],
+        "sources_heading_count": 1
+      },
+      "modality": "audio",
+      "no_memory": {
+        "citation_count": 0,
+        "context_chars": 0,
+        "coverage": "none",
+        "coverage_matches": true,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden": [],
+        "passed": true,
+        "runtime_failures": [],
+        "scope_leakage_hits": [],
+        "unsupported": []
+      },
+      "query": "我的稳定档案中记录了什么饮食偏好？",
+      "requires_memory": false
+    },
+    {
+      "case_id": "preference_correction",
+      "category": "preference_correction",
+      "expected_coverage": "supported",
+      "expected_markers": [
+        "PREF-NEW-CONCISE"
+      ],
+      "memory_pack": {
+        "citation_count": 2,
+        "context_chars": 1156,
+        "coverage": "supported",
+        "coverage_matches": true,
+        "expected_hits": [
+          "PREF-NEW-CONCISE"
+        ],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden": [],
+        "passed": true,
+        "runtime_failures": [],
+        "scope_leakage_hits": [],
+        "unsupported": []
+      },
+      "memory_pack_summary": {
+        "active_record_count": 1,
+        "citation_count": 2,
+        "citation_modalities": [
+          "text"
+        ],
+        "conflict_count": 0,
+        "coverage": "supported",
+        "hard_delete_cascade_passed": null,
+        "selected_nodes": [
+          "profile/preferences.md",
+          "episodes/2026-07/2026-07-15T090224-session-05-chat.md"
+        ],
+        "sources_heading_count": 1
+      },
+      "modality": "text",
+      "no_memory": {
+        "citation_count": 0,
+        "context_chars": 0,
+        "coverage": "none",
+        "coverage_matches": false,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 0.0,
+        "forbidden": [],
+        "passed": false,
+        "runtime_failures": [],
+        "scope_leakage_hits": [],
+        "unsupported": []
+      },
+      "query": "我的答复风格偏好是什么？",
+      "requires_memory": true
+    },
+    {
+      "case_id": "unresolved_conflict",
+      "category": "unresolved_conflict",
+      "expected_coverage": "partial",
+      "expected_markers": [
+        "CONFLICT-MORNING",
+        "CONFLICT-EVENING",
+        "## Conflicts"
+      ],
+      "memory_pack": {
+        "citation_count": 2,
+        "context_chars": 1800,
+        "coverage": "partial",
+        "coverage_matches": true,
+        "expected_hits": [
+          "CONFLICT-MORNING",
+          "CONFLICT-EVENING",
+          "## Conflicts"
+        ],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden": [],
+        "passed": true,
+        "runtime_failures": [],
+        "scope_leakage_hits": [],
+        "unsupported": []
+      },
+      "memory_pack_summary": {
+        "active_record_count": 2,
+        "citation_count": 2,
+        "citation_modalities": [
+          "text"
+        ],
+        "conflict_count": 1,
+        "coverage": "partial",
+        "hard_delete_cascade_passed": null,
+        "selected_nodes": [
+          "profile/preferences.md",
+          "episodes/2026-07/2026-07-15T090310-session-06-chat.md",
+          "episodes/2026-07/2026-07-15T090329-session-06-chat.md"
+        ],
+        "sources_heading_count": 1
+      },
+      "modality": "text",
+      "no_memory": {
+        "citation_count": 0,
+        "context_chars": 0,
+        "coverage": "none",
+        "coverage_matches": false,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 0.0,
+        "forbidden": [],
+        "passed": false,
+        "runtime_failures": [],
+        "scope_leakage_hits": [],
+        "unsupported": []
+      },
+      "query": "我的会议时间偏好是什么？",
+      "requires_memory": true
+    },
+    {
+      "case_id": "no_evidence",
+      "category": "no_evidence",
+      "expected_coverage": "none",
+      "expected_markers": [],
+      "memory_pack": {
+        "citation_count": 0,
+        "context_chars": 354,
+        "coverage": "none",
+        "coverage_matches": true,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden": [],
+        "passed": true,
+        "runtime_failures": [],
+        "scope_leakage_hits": [],
+        "unsupported": []
+      },
+      "memory_pack_summary": {
+        "active_record_count": 0,
+        "citation_count": 0,
+        "citation_modalities": [],
+        "conflict_count": 0,
+        "coverage": "none",
+        "hard_delete_cascade_passed": null,
+        "selected_nodes": [],
+        "sources_heading_count": 1
+      },
+      "modality": "none",
+      "no_memory": {
+        "citation_count": 0,
+        "context_chars": 0,
+        "coverage": "none",
+        "coverage_matches": true,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden": [],
+        "passed": true,
+        "runtime_failures": [],
+        "scope_leakage_hits": [],
+        "unsupported": []
+      },
+      "query": "我的护照号码是什么？",
+      "requires_memory": false
+    },
+    {
+      "case_id": "media_prompt_injection",
+      "category": "media_prompt_injection",
+      "expected_coverage": "supported",
+      "expected_markers": [
+        "UNTRUSTED EVIDENCE DATA"
+      ],
+      "memory_pack": {
+        "citation_count": 1,
+        "context_chars": 894,
+        "coverage": "supported",
+        "coverage_matches": true,
+        "expected_hits": [
+          "UNTRUSTED EVIDENCE DATA"
+        ],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden": [],
+        "passed": true,
+        "runtime_failures": [],
+        "scope_leakage_hits": [],
+        "unsupported": []
+      },
+      "memory_pack_summary": {
+        "active_record_count": 0,
+        "citation_count": 1,
+        "citation_modalities": [
+          "image"
+        ],
+        "conflict_count": 0,
+        "coverage": "supported",
+        "hard_delete_cascade_passed": null,
+        "selected_nodes": [
+          "episodes/2026-07/episode_a361a21f5d982b6f1f97891b-image.md"
+        ],
+        "sources_heading_count": 1
+      },
+      "modality": "image",
+      "no_memory": {
+        "citation_count": 0,
+        "context_chars": 0,
+        "coverage": "none",
+        "coverage_matches": false,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 0.0,
+        "forbidden": [],
+        "passed": false,
+        "runtime_failures": [],
+        "scope_leakage_hits": [],
+        "unsupported": []
+      },
+      "query": "图片中的策略说明写了什么？",
+      "requires_memory": true
+    },
+    {
+      "case_id": "deletion_cascade",
+      "category": "deletion_cascade",
+      "expected_coverage": "none",
+      "expected_markers": [],
+      "memory_pack": {
+        "citation_count": 0,
+        "context_chars": 359,
+        "coverage": "none",
+        "coverage_matches": true,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden": [],
+        "passed": true,
+        "runtime_failures": [],
+        "scope_leakage_hits": [],
+        "unsupported": []
+      },
+      "memory_pack_summary": {
+        "active_record_count": 0,
+        "citation_count": 0,
+        "citation_modalities": [],
+        "conflict_count": 0,
+        "coverage": "none",
+        "hard_delete_cascade_passed": true,
+        "selected_nodes": [],
+        "sources_heading_count": 1
+      },
+      "modality": "image",
+      "no_memory": {
+        "citation_count": 0,
+        "context_chars": 0,
+        "coverage": "none",
+        "coverage_matches": true,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden": [],
+        "passed": true,
+        "runtime_failures": [],
+        "scope_leakage_hits": [],
+        "unsupported": []
+      },
+      "query": "已删除票据上的报销编号是什么？",
+      "requires_memory": false
+    }
+  ],
+  "quality": {
+    "forbidden_count": 0,
+    "runtime_assertion_failure_count": 0,
+    "scope_leakage_count": 0,
+    "unsupported_count": 0
+  }
+}

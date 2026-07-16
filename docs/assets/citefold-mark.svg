@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">Citefold mark</title>
+  <desc id="desc">A folded evidence page framed by citation brackets.</desc>
+  <defs>
+    <linearGradient id="paper" x1="58" y1="50" x2="198" y2="206" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F5FFFD"/>
+      <stop offset="1" stop-color="#CFF7F0"/>
+    </linearGradient>
+    <linearGradient id="fold" x1="149" y1="56" x2="194" y2="101" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#79E6D5"/>
+      <stop offset="1" stop-color="#2CC8B2"/>
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="56" fill="#071522"/>
+  <path d="M54 67a12 12 0 0 1 12-12h83l45 45v89a12 12 0 0 1-12 12H66a12 12 0 0 1-12-12V67Z" fill="url(#paper)"/>
+  <path d="M149 55v33a12 12 0 0 0 12 12h33L149 55Z" fill="url(#fold)"/>
+  <path d="M91 102H78v52h13M157 102h13v52h-13" fill="none" stroke="#0B5A5C" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M108 111h32M108 128h43M108 145h27" fill="none" stroke="#25BFA9" stroke-width="7" stroke-linecap="round"/>
+  <circle cx="181" cy="181" r="8" fill="#2CC8B2"/>
+</svg>

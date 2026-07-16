@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use Citefold in research, please cite this software."
+title: "Citefold"
+abstract: >-
+  Citefold is an evidence-backed multimodal memory engine for agents, with
+  scoped storage, versioned corrections, deletion, and cited recall packs.
+type: software
+authors:
+  - name: "Citefold contributors"
+version: 0.1.0
+license: Apache-2.0
+repository-code: "https://github.com/jappre/citefold"
+url: "https://github.com/jappre/citefold"
+keywords:
+  - agent memory
+  - artificial intelligence
+  - evidence
+  - multimodal
+  - retrieval

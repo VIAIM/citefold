@@ -1,0 +1,814 @@
+{
+  "baselines": {
+    "memory_pack": {
+      "avg_context_chars": 1321.3333333333333,
+      "avg_selected_nodes": 2.1666666666666665,
+      "citation_rate": 1.0,
+      "count": 24,
+      "expected_marker_hit_rate": 1.0,
+      "forbidden_hit_count": 0,
+      "probes_with_forbidden_hits": 0,
+      "task_success_rate": 1.0
+    },
+    "no_memory": {
+      "avg_context_chars": 14.333333333333334,
+      "avg_selected_nodes": 0.0,
+      "citation_rate": 0.0,
+      "count": 24,
+      "expected_marker_hit_rate": 0.3333333333333333,
+      "forbidden_hit_count": 0,
+      "probes_with_forbidden_hits": 0,
+      "task_success_rate": 0.3333333333333333
+    }
+  },
+  "benchmark": "officelife_memory_bench",
+  "by_category": {
+    "asr_noise_guard": {
+      "count": 4,
+      "memory_pack_task_success_rate": 1.0,
+      "no_memory_task_success_rate": 1.0,
+      "task_success_lift": 0.0
+    },
+    "meeting_followup": {
+      "count": 4,
+      "memory_pack_task_success_rate": 1.0,
+      "no_memory_task_success_rate": 0.0,
+      "task_success_lift": 1.0
+    },
+    "no_evidence": {
+      "count": 4,
+      "memory_pack_task_success_rate": 1.0,
+      "no_memory_task_success_rate": 1.0,
+      "task_success_lift": 0.0
+    },
+    "people_followup": {
+      "count": 4,
+      "memory_pack_task_success_rate": 1.0,
+      "no_memory_task_success_rate": 0.0,
+      "task_success_lift": 1.0
+    },
+    "preference_recall": {
+      "count": 4,
+      "memory_pack_task_success_rate": 1.0,
+      "no_memory_task_success_rate": 0.0,
+      "task_success_lift": 1.0
+    },
+    "task_tracking": {
+      "count": 4,
+      "memory_pack_task_success_rate": 1.0,
+      "no_memory_task_success_rate": 0.0,
+      "task_success_lift": 1.0
+    }
+  },
+  "caveats": [
+    "This is a deterministic office/life scenario benchmark for Citefold, not a public leaderboard.",
+    "It measures MemoryPack usefulness against a no-memory context on synthetic probes.",
+    "No-memory is expected to fail memory-required probes; the important signal is lift without leakage or unsupported-context regressions."
+  ],
+  "environment": {
+    "platform": "macOS-15.7.4-arm64-arm-64bit-Mach-O",
+    "processor": "arm",
+    "python": "3.13.2"
+  },
+  "generated_at": "2026-07-16T09:45:30.066356+00:00",
+  "memory_lift": {
+    "expected_marker_hit_rate": 0.6666666666666667,
+    "task_success_rate": 0.6666666666666667
+  },
+  "parameters": {
+    "probes": 24,
+    "scenarios": 4,
+    "tenants": 2,
+    "users_per_tenant": 2
+  },
+  "probe_logs": [
+    {
+      "category": "preference_recall",
+      "expected_markers": [
+        "pref-t0-u0"
+      ],
+      "forbidden_marker_count": 18,
+      "memory_pack": {
+        "context_chars": 900,
+        "expected_hits": [
+          "pref-t0-u0"
+        ],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden_hits": [],
+        "has_sources": true,
+        "passed": true,
+        "selected_node_count": 1
+      },
+      "no_memory": {
+        "context_chars": 12,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 0.0,
+        "forbidden_hits": [],
+        "has_sources": false,
+        "passed": false,
+        "selected_node_count": 0
+      },
+      "probe_id": "t0-u0-preference",
+      "query": "我的回答风格偏好是什么？",
+      "requires_memory": true,
+      "scope": "tenant-0/user-0/personal"
+    },
+    {
+      "category": "task_tracking",
+      "expected_markers": [
+        "task-t0-u0",
+        "waiting-t0-u0"
+      ],
+      "forbidden_marker_count": 18,
+      "memory_pack": {
+        "context_chars": 1773,
+        "expected_hits": [
+          "task-t0-u0",
+          "waiting-t0-u0"
+        ],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden_hits": [],
+        "has_sources": true,
+        "passed": true,
+        "selected_node_count": 3
+      },
+      "no_memory": {
+        "context_chars": 21,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 0.0,
+        "forbidden_hits": [],
+        "has_sources": false,
+        "passed": false,
+        "selected_node_count": 0
+      },
+      "probe_id": "t0-u0-task",
+      "query": "我现在有什么待办，哪些事情还在等别人回复？",
+      "requires_memory": true,
+      "scope": "tenant-0/user-0/personal"
+    },
+    {
+      "category": "people_followup",
+      "expected_markers": [
+        "Alex-t0-u0"
+      ],
+      "forbidden_marker_count": 18,
+      "memory_pack": {
+        "context_chars": 1983,
+        "expected_hits": [
+          "Alex-t0-u0"
+        ],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden_hits": [],
+        "has_sources": true,
+        "passed": true,
+        "selected_node_count": 4
+      },
+      "no_memory": {
+        "context_chars": 16,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 0.0,
+        "forbidden_hits": [],
+        "has_sources": false,
+        "passed": false,
+        "selected_node_count": 0
+      },
+      "probe_id": "t0-u0-people",
+      "query": "Alex 这个客户应该怎么跟进？",
+      "requires_memory": true,
+      "scope": "tenant-0/user-0/personal"
+    },
+    {
+      "category": "meeting_followup",
+      "expected_markers": [
+        "voice-task-t0-u0"
+      ],
+      "forbidden_marker_count": 18,
+      "memory_pack": {
+        "context_chars": 1620,
+        "expected_hits": [
+          "voice-task-t0-u0"
+        ],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden_hits": [],
+        "has_sources": true,
+        "passed": true,
+        "selected_node_count": 3
+      },
+      "no_memory": {
+        "context_chars": 10,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 0.0,
+        "forbidden_hits": [],
+        "has_sources": false,
+        "passed": false,
+        "selected_node_count": 0
+      },
+      "probe_id": "t0-u0-meeting",
+      "query": "客户方案有什么安排？",
+      "requires_memory": true,
+      "scope": "tenant-0/user-0/personal"
+    },
+    {
+      "category": "asr_noise_guard",
+      "expected_markers": [],
+      "forbidden_marker_count": 19,
+      "memory_pack": {
+        "context_chars": 1301,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden_hits": [],
+        "has_sources": true,
+        "passed": true,
+        "selected_node_count": 2
+      },
+      "no_memory": {
+        "context_chars": 17,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden_hits": [],
+        "has_sources": false,
+        "passed": true,
+        "selected_node_count": 0
+      },
+      "probe_id": "t0-u0-noise",
+      "query": "我的长期偏好里有没有临时语音误听？",
+      "requires_memory": false,
+      "scope": "tenant-0/user-0/personal"
+    },
+    {
+      "category": "no_evidence",
+      "expected_markers": [],
+      "forbidden_marker_count": 23,
+      "memory_pack": {
+        "context_chars": 351,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden_hits": [],
+        "has_sources": true,
+        "passed": true,
+        "selected_node_count": 0
+      },
+      "no_memory": {
+        "context_chars": 10,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden_hits": [],
+        "has_sources": false,
+        "passed": true,
+        "selected_node_count": 0
+      },
+      "probe_id": "t0-u0-no-evidence",
+      "query": "我的护照号码是什么？",
+      "requires_memory": false,
+      "scope": "tenant-0/user-0/personal"
+    },
+    {
+      "category": "preference_recall",
+      "expected_markers": [
+        "pref-t0-u1"
+      ],
+      "forbidden_marker_count": 18,
+      "memory_pack": {
+        "context_chars": 900,
+        "expected_hits": [
+          "pref-t0-u1"
+        ],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden_hits": [],
+        "has_sources": true,
+        "passed": true,
+        "selected_node_count": 1
+      },
+      "no_memory": {
+        "context_chars": 12,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 0.0,
+        "forbidden_hits": [],
+        "has_sources": false,
+        "passed": false,
+        "selected_node_count": 0
+      },
+      "probe_id": "t0-u1-preference",
+      "query": "我的回答风格偏好是什么？",
+      "requires_memory": true,
+      "scope": "tenant-0/user-1/personal"
+    },
+    {
+      "category": "task_tracking",
+      "expected_markers": [
+        "task-t0-u1",
+        "waiting-t0-u1"
+      ],
+      "forbidden_marker_count": 18,
+      "memory_pack": {
+        "context_chars": 1773,
+        "expected_hits": [
+          "task-t0-u1",
+          "waiting-t0-u1"
+        ],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden_hits": [],
+        "has_sources": true,
+        "passed": true,
+        "selected_node_count": 3
+      },
+      "no_memory": {
+        "context_chars": 21,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 0.0,
+        "forbidden_hits": [],
+        "has_sources": false,
+        "passed": false,
+        "selected_node_count": 0
+      },
+      "probe_id": "t0-u1-task",
+      "query": "我现在有什么待办，哪些事情还在等别人回复？",
+      "requires_memory": true,
+      "scope": "tenant-0/user-1/personal"
+    },
+    {
+      "category": "people_followup",
+      "expected_markers": [
+        "Alex-t0-u1"
+      ],
+      "forbidden_marker_count": 18,
+      "memory_pack": {
+        "context_chars": 1983,
+        "expected_hits": [
+          "Alex-t0-u1"
+        ],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden_hits": [],
+        "has_sources": true,
+        "passed": true,
+        "selected_node_count": 4
+      },
+      "no_memory": {
+        "context_chars": 16,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 0.0,
+        "forbidden_hits": [],
+        "has_sources": false,
+        "passed": false,
+        "selected_node_count": 0
+      },
+      "probe_id": "t0-u1-people",
+      "query": "Alex 这个客户应该怎么跟进？",
+      "requires_memory": true,
+      "scope": "tenant-0/user-1/personal"
+    },
+    {
+      "category": "meeting_followup",
+      "expected_markers": [
+        "voice-task-t0-u1"
+      ],
+      "forbidden_marker_count": 18,
+      "memory_pack": {
+        "context_chars": 1620,
+        "expected_hits": [
+          "voice-task-t0-u1"
+        ],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden_hits": [],
+        "has_sources": true,
+        "passed": true,
+        "selected_node_count": 3
+      },
+      "no_memory": {
+        "context_chars": 10,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 0.0,
+        "forbidden_hits": [],
+        "has_sources": false,
+        "passed": false,
+        "selected_node_count": 0
+      },
+      "probe_id": "t0-u1-meeting",
+      "query": "客户方案有什么安排？",
+      "requires_memory": true,
+      "scope": "tenant-0/user-1/personal"
+    },
+    {
+      "category": "asr_noise_guard",
+      "expected_markers": [],
+      "forbidden_marker_count": 19,
+      "memory_pack": {
+        "context_chars": 1301,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden_hits": [],
+        "has_sources": true,
+        "passed": true,
+        "selected_node_count": 2
+      },
+      "no_memory": {
+        "context_chars": 17,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden_hits": [],
+        "has_sources": false,
+        "passed": true,
+        "selected_node_count": 0
+      },
+      "probe_id": "t0-u1-noise",
+      "query": "我的长期偏好里有没有临时语音误听？",
+      "requires_memory": false,
+      "scope": "tenant-0/user-1/personal"
+    },
+    {
+      "category": "no_evidence",
+      "expected_markers": [],
+      "forbidden_marker_count": 23,
+      "memory_pack": {
+        "context_chars": 351,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden_hits": [],
+        "has_sources": true,
+        "passed": true,
+        "selected_node_count": 0
+      },
+      "no_memory": {
+        "context_chars": 10,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden_hits": [],
+        "has_sources": false,
+        "passed": true,
+        "selected_node_count": 0
+      },
+      "probe_id": "t0-u1-no-evidence",
+      "query": "我的护照号码是什么？",
+      "requires_memory": false,
+      "scope": "tenant-0/user-1/personal"
+    },
+    {
+      "category": "preference_recall",
+      "expected_markers": [
+        "pref-t1-u0"
+      ],
+      "forbidden_marker_count": 18,
+      "memory_pack": {
+        "context_chars": 900,
+        "expected_hits": [
+          "pref-t1-u0"
+        ],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden_hits": [],
+        "has_sources": true,
+        "passed": true,
+        "selected_node_count": 1
+      },
+      "no_memory": {
+        "context_chars": 12,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 0.0,
+        "forbidden_hits": [],
+        "has_sources": false,
+        "passed": false,
+        "selected_node_count": 0
+      },
+      "probe_id": "t1-u0-preference",
+      "query": "我的回答风格偏好是什么？",
+      "requires_memory": true,
+      "scope": "tenant-1/user-0/personal"
+    },
+    {
+      "category": "task_tracking",
+      "expected_markers": [
+        "task-t1-u0",
+        "waiting-t1-u0"
+      ],
+      "forbidden_marker_count": 18,
+      "memory_pack": {
+        "context_chars": 1773,
+        "expected_hits": [
+          "task-t1-u0",
+          "waiting-t1-u0"
+        ],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden_hits": [],
+        "has_sources": true,
+        "passed": true,
+        "selected_node_count": 3
+      },
+      "no_memory": {
+        "context_chars": 21,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 0.0,
+        "forbidden_hits": [],
+        "has_sources": false,
+        "passed": false,
+        "selected_node_count": 0
+      },
+      "probe_id": "t1-u0-task",
+      "query": "我现在有什么待办，哪些事情还在等别人回复？",
+      "requires_memory": true,
+      "scope": "tenant-1/user-0/personal"
+    },
+    {
+      "category": "people_followup",
+      "expected_markers": [
+        "Alex-t1-u0"
+      ],
+      "forbidden_marker_count": 18,
+      "memory_pack": {
+        "context_chars": 1983,
+        "expected_hits": [
+          "Alex-t1-u0"
+        ],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden_hits": [],
+        "has_sources": true,
+        "passed": true,
+        "selected_node_count": 4
+      },
+      "no_memory": {
+        "context_chars": 16,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 0.0,
+        "forbidden_hits": [],
+        "has_sources": false,
+        "passed": false,
+        "selected_node_count": 0
+      },
+      "probe_id": "t1-u0-people",
+      "query": "Alex 这个客户应该怎么跟进？",
+      "requires_memory": true,
+      "scope": "tenant-1/user-0/personal"
+    },
+    {
+      "category": "meeting_followup",
+      "expected_markers": [
+        "voice-task-t1-u0"
+      ],
+      "forbidden_marker_count": 18,
+      "memory_pack": {
+        "context_chars": 1620,
+        "expected_hits": [
+          "voice-task-t1-u0"
+        ],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden_hits": [],
+        "has_sources": true,
+        "passed": true,
+        "selected_node_count": 3
+      },
+      "no_memory": {
+        "context_chars": 10,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 0.0,
+        "forbidden_hits": [],
+        "has_sources": false,
+        "passed": false,
+        "selected_node_count": 0
+      },
+      "probe_id": "t1-u0-meeting",
+      "query": "客户方案有什么安排？",
+      "requires_memory": true,
+      "scope": "tenant-1/user-0/personal"
+    },
+    {
+      "category": "asr_noise_guard",
+      "expected_markers": [],
+      "forbidden_marker_count": 19,
+      "memory_pack": {
+        "context_chars": 1301,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden_hits": [],
+        "has_sources": true,
+        "passed": true,
+        "selected_node_count": 2
+      },
+      "no_memory": {
+        "context_chars": 17,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden_hits": [],
+        "has_sources": false,
+        "passed": true,
+        "selected_node_count": 0
+      },
+      "probe_id": "t1-u0-noise",
+      "query": "我的长期偏好里有没有临时语音误听？",
+      "requires_memory": false,
+      "scope": "tenant-1/user-0/personal"
+    },
+    {
+      "category": "no_evidence",
+      "expected_markers": [],
+      "forbidden_marker_count": 23,
+      "memory_pack": {
+        "context_chars": 351,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden_hits": [],
+        "has_sources": true,
+        "passed": true,
+        "selected_node_count": 0
+      },
+      "no_memory": {
+        "context_chars": 10,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden_hits": [],
+        "has_sources": false,
+        "passed": true,
+        "selected_node_count": 0
+      },
+      "probe_id": "t1-u0-no-evidence",
+      "query": "我的护照号码是什么？",
+      "requires_memory": false,
+      "scope": "tenant-1/user-0/personal"
+    },
+    {
+      "category": "preference_recall",
+      "expected_markers": [
+        "pref-t1-u1"
+      ],
+      "forbidden_marker_count": 18,
+      "memory_pack": {
+        "context_chars": 900,
+        "expected_hits": [
+          "pref-t1-u1"
+        ],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden_hits": [],
+        "has_sources": true,
+        "passed": true,
+        "selected_node_count": 1
+      },
+      "no_memory": {
+        "context_chars": 12,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 0.0,
+        "forbidden_hits": [],
+        "has_sources": false,
+        "passed": false,
+        "selected_node_count": 0
+      },
+      "probe_id": "t1-u1-preference",
+      "query": "我的回答风格偏好是什么？",
+      "requires_memory": true,
+      "scope": "tenant-1/user-1/personal"
+    },
+    {
+      "category": "task_tracking",
+      "expected_markers": [
+        "task-t1-u1",
+        "waiting-t1-u1"
+      ],
+      "forbidden_marker_count": 18,
+      "memory_pack": {
+        "context_chars": 1773,
+        "expected_hits": [
+          "task-t1-u1",
+          "waiting-t1-u1"
+        ],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden_hits": [],
+        "has_sources": true,
+        "passed": true,
+        "selected_node_count": 3
+      },
+      "no_memory": {
+        "context_chars": 21,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 0.0,
+        "forbidden_hits": [],
+        "has_sources": false,
+        "passed": false,
+        "selected_node_count": 0
+      },
+      "probe_id": "t1-u1-task",
+      "query": "我现在有什么待办，哪些事情还在等别人回复？",
+      "requires_memory": true,
+      "scope": "tenant-1/user-1/personal"
+    },
+    {
+      "category": "people_followup",
+      "expected_markers": [
+        "Alex-t1-u1"
+      ],
+      "forbidden_marker_count": 18,
+      "memory_pack": {
+        "context_chars": 1983,
+        "expected_hits": [
+          "Alex-t1-u1"
+        ],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden_hits": [],
+        "has_sources": true,
+        "passed": true,
+        "selected_node_count": 4
+      },
+      "no_memory": {
+        "context_chars": 16,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 0.0,
+        "forbidden_hits": [],
+        "has_sources": false,
+        "passed": false,
+        "selected_node_count": 0
+      },
+      "probe_id": "t1-u1-people",
+      "query": "Alex 这个客户应该怎么跟进？",
+      "requires_memory": true,
+      "scope": "tenant-1/user-1/personal"
+    },
+    {
+      "category": "meeting_followup",
+      "expected_markers": [
+        "voice-task-t1-u1"
+      ],
+      "forbidden_marker_count": 18,
+      "memory_pack": {
+        "context_chars": 1620,
+        "expected_hits": [
+          "voice-task-t1-u1"
+        ],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden_hits": [],
+        "has_sources": true,
+        "passed": true,
+        "selected_node_count": 3
+      },
+      "no_memory": {
+        "context_chars": 10,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 0.0,
+        "forbidden_hits": [],
+        "has_sources": false,
+        "passed": false,
+        "selected_node_count": 0
+      },
+      "probe_id": "t1-u1-meeting",
+      "query": "客户方案有什么安排？",
+      "requires_memory": true,
+      "scope": "tenant-1/user-1/personal"
+    },
+    {
+      "category": "asr_noise_guard",
+      "expected_markers": [],
+      "forbidden_marker_count": 19,
+      "memory_pack": {
+        "context_chars": 1301,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden_hits": [],
+        "has_sources": true,
+        "passed": true,
+        "selected_node_count": 2
+      },
+      "no_memory": {
+        "context_chars": 17,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden_hits": [],
+        "has_sources": false,
+        "passed": true,
+        "selected_node_count": 0
+      },
+      "probe_id": "t1-u1-noise",
+      "query": "我的长期偏好里有没有临时语音误听？",
+      "requires_memory": false,
+      "scope": "tenant-1/user-1/personal"
+    },
+    {
+      "category": "no_evidence",
+      "expected_markers": [],
+      "forbidden_marker_count": 23,
+      "memory_pack": {
+        "context_chars": 351,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden_hits": [],
+        "has_sources": true,
+        "passed": true,
+        "selected_node_count": 0
+      },
+      "no_memory": {
+        "context_chars": 10,
+        "expected_hits": [],
+        "expected_marker_hit_rate": 1.0,
+        "forbidden_hits": [],
+        "has_sources": false,
+        "passed": true,
+        "selected_node_count": 0
+      },
+      "probe_id": "t1-u1-no-evidence",
+      "query": "我的护照号码是什么？",
+      "requires_memory": false,
+      "scope": "tenant-1/user-1/personal"
+    }
+  ],
+  "quality": {
+    "missing_expected_marker_count": 0,
+    "missing_expected_markers": [],
+    "scope_leakage": [],
+    "scope_leakage_count": 0,
+    "unsupported_context": [],
+    "unsupported_context_count": 0
+  }
+}

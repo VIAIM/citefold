@@ -1,0 +1,66 @@
+site_name: Citefold
+site_description: Evidence-backed multimodal memory for agents.
+site_url: https://jappre.github.io/citefold/
+repo_url: https://github.com/jappre/citefold
+repo_name: jappre/citefold
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  logo: assets/citefold-mark.svg
+  favicon: assets/citefold-mark.svg
+  palette:
+    - scheme: default
+      primary: teal
+      accent: teal
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - scheme: slate
+      primary: teal
+      accent: teal
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+    - content.tabs.link
+
+nav:
+  - Home: index.md
+  - Quickstart: quickstart.md
+  - Concepts: concepts.md
+  - Architecture: architecture.md
+  - CLI: cli.md
+  - Multimodal: multimodal.md
+  - Providers:
+      - OpenRouter: providers/openrouter.md
+  - Security: security.md
+  - Benchmarks: benchmarks.md
+  - Integrations: integrations.md
+  - Limitations: limitations.md
+  - Roadmap: roadmap.md
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/jappre/citefold
+
+copyright: Copyright &copy; Citefold contributors · Apache-2.0

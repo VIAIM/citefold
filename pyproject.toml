@@ -1,0 +1,77 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "citefold"
+version = "0.1.0"
+description = "Evidence-backed multimodal memory for agents."
+readme = "README.md"
+requires-python = ">=3.9"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE", "THIRD_PARTY_NOTICES.md"]
+authors = [{ name = "Citefold contributors" }]
+maintainers = [{ name = "Citefold maintainers" }]
+keywords = [
+  "agents",
+  "artificial-intelligence",
+  "evidence",
+  "memory",
+  "multimodal",
+  "retrieval",
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+  "Operating System :: MacOS",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Typing :: Typed",
+]
+dependencies = []
+
+[project.optional-dependencies]
+test = [
+  "pytest>=8,<9",
+]
+dev = [
+  "build>=1.2,<2",
+  "pytest>=8,<9",
+  "twine>=5,<7",
+]
+docs = [
+  "mkdocs>=1.6,<2",
+  "mkdocs-material>=9.5,<10",
+]
+
+[project.scripts]
+citefold = "citefold.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/jappre/citefold"
+Documentation = "https://github.com/jappre/citefold/blob/main/docs/index.md"
+Changelog = "https://github.com/jappre/citefold/blob/main/CHANGELOG.md"
+Issues = "https://github.com/jappre/citefold/issues"
+Source = "https://github.com/jappre/citefold"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["citefold*"]
+
+[tool.setuptools.package-data]
+citefold = ["py.typed"]
+
+[tool.pytest.ini_options]
+addopts = "-ra"
+testpaths = ["tests"]

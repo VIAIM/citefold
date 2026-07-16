@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 240" role="img" aria-labelledby="title desc">
+  <title id="title">Citefold</title>
+  <desc id="desc">Citefold wordmark with the tagline Every memory remembers its source.</desc>
+  <defs>
+    <linearGradient id="paper" x1="40" y1="32" x2="208" y2="208" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F5FFFD"/>
+      <stop offset="1" stop-color="#CFF7F0"/>
+    </linearGradient>
+    <linearGradient id="fold" x1="150" y1="41" x2="198" y2="89" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#79E6D5"/>
+      <stop offset="1" stop-color="#2CC8B2"/>
+    </linearGradient>
+  </defs>
+  <rect width="960" height="240" rx="28" fill="#FFFFFF"/>
+  <g transform="translate(24 16)">
+    <rect width="208" height="208" rx="46" fill="#071522"/>
+    <path d="M43 54a10 10 0 0 1 10-10h73l39 39v73a10 10 0 0 1-10 10H53a10 10 0 0 1-10-10V54Z" fill="url(#paper)"/>
+    <path d="M126 44v29a10 10 0 0 0 10 10h29l-39-39Z" fill="url(#fold)"/>
+    <path d="M75 84H64v46h11M132 84h11v46h-11" fill="none" stroke="#0B5A5C" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M90 92h28M90 107h37M90 122h23" fill="none" stroke="#25BFA9" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="154" cy="149" r="7" fill="#2CC8B2"/>
+  </g>
+  <text x="270" y="115" fill="#071522" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="82" font-weight="750" letter-spacing="-3">Citefold</text>
+  <text x="274" y="166" fill="#38606A" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="24" font-weight="500" letter-spacing=".2">Every memory remembers its source.</text>
+</svg>

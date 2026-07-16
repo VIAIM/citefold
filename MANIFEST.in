@@ -1,0 +1,19 @@
+include README.md
+include README.zh-CN.md
+include LICENSE
+include NOTICE
+include THIRD_PARTY_NOTICES.md
+include CHANGELOG.md
+include CONTRIBUTING.md
+include CODE_OF_CONDUCT.md
+include SECURITY.md
+include CITATION.cff
+include ROADMAP.md
+include pyproject.toml
+include mkdocs.yml
+recursive-include assets *.svg
+recursive-include citefold *.py py.typed
+recursive-include tests *.py
+recursive-include benchmarks *.py *.md *.json
+recursive-include docs *.md *.svg
+recursive-include examples *.py

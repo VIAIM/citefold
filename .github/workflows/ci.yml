@@ -1,0 +1,139 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Python ${{ matrix.python-version }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install test environment
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[test]"
+
+      - name: Run tests
+        run: python -m pytest
+
+  build:
+    name: Build and install distributions
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install build tools
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install ".[dev]"
+
+      - name: Build wheel and source distribution
+        run: python -m build
+
+      - name: Check package metadata
+        run: python -m twine check --strict dist/*
+
+      - name: Verify distribution contents
+        run: |
+          python - <<'PY'
+          import glob
+          import tarfile
+          import zipfile
+
+          wheel = glob.glob("dist/*.whl")
+          sdist = glob.glob("dist/*.tar.gz")
+          assert len(wheel) == 1, wheel
+          assert len(sdist) == 1, sdist
+
+          with zipfile.ZipFile(wheel[0]) as archive:
+              wheel_names = archive.namelist()
+          forbidden = ("tests/", "benchmarks/", "docs/", "examples/")
+          leaked = [name for name in wheel_names if name.startswith(forbidden)]
+          assert not leaked, f"non-runtime files leaked into wheel: {leaked}"
+          assert "citefold/py.typed" in wheel_names
+
+          with tarfile.open(sdist[0], "r:gz") as archive:
+              names = archive.getnames()
+          root = names[0].split("/", 1)[0]
+          required = {
+              f"{root}/README.md",
+              f"{root}/README.zh-CN.md",
+              f"{root}/LICENSE",
+              f"{root}/assets/citefold-wordmark.svg",
+              f"{root}/tests/test_citefold.py",
+              f"{root}/benchmarks/fixtures/multimodal_memory_bench_v1.json",
+              f"{root}/docs/architecture.md",
+              f"{root}/examples/quickstart.py",
+          }
+          missing = sorted(required - set(names))
+          assert not missing, f"source distribution is missing: {missing}"
+          PY
+
+      - name: Smoke-test installed wheel
+        run: |
+          python -m venv "${RUNNER_TEMP}/citefold-smoke"
+          "${RUNNER_TEMP}/citefold-smoke/bin/python" -m pip install --no-deps dist/*.whl
+          "${RUNNER_TEMP}/citefold-smoke/bin/citefold" --help
+          cd "${RUNNER_TEMP}"
+          "${RUNNER_TEMP}/citefold-smoke/bin/python" - <<'PY'
+          from pathlib import Path
+          from tempfile import TemporaryDirectory
+
+          from citefold import Citefold, MemoryScope
+
+          with TemporaryDirectory() as root:
+              memory = Citefold(Path(root))
+              scope = MemoryScope("smoke", "user", "personal", "ci", "session")
+              memory.ingest_text(
+                  scope,
+                  "Please remember: I prefer green tea.",
+                  source="ci_smoke",
+              )
+              pack = memory.recall(scope, "What drink do I prefer?")
+              assert pack.selected_nodes
+              assert pack.citations
+          PY
+
+      - name: Upload distributions
+        uses: actions/upload-artifact@v7
+        with:
+          name: citefold-distributions
+          path: dist/
+          if-no-files-found: error
