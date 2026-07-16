@@ -172,8 +172,17 @@ class MultimodalIngestTest(unittest.TestCase):
             self.assertTrue(any(item.get("asset_id") == asset["asset_id"] for item in pack.citations))
 
     def test_audio_segments_have_timecodes_and_model_claims_stay_pending(self) -> None:
+        class FakeMedia:
+            def probe_duration_ms(self, _path):
+                return 1000
+
+            def standardize_audio(self, source, target):
+                data = bytearray(source.read_bytes())
+                data[-1] ^= 1
+                target.write_bytes(data)
+
         with tempfile.TemporaryDirectory() as tmp:
-            memory = Citefold(tmp, clock=fixed_clock)
+            memory = Citefold(tmp, clock=fixed_clock, media_processor=FakeMedia())
             audio_path = Path(tmp) / "commitment.wav"
             make_silent_wav(audio_path)
 
