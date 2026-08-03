@@ -7,6 +7,7 @@ The benchmark suite keeps retrieval, end-to-end QA, synthetic task utility, and 
 | Runner | Network/model calls | Purpose |
 |---|---:|---|
 | `officelife_memory_benchmark.py` | 0 / 0 | MemoryPack vs no-memory on scoped synthetic office/life probes |
+| `officelife_track_b_benchmark.py` | 0 / 0 | Private-artifact preflight and aggregate calculations for custodian-supplied Track B inputs |
 | `multimodal_memory_benchmark.py` | 0 / 0 | Multimodal evidence, conflict, correction, injection, and deletion contracts |
 | `longmemeval_citefold_benchmark.py` | 0 / 0 | Citefold MemoryPack/session retrieval used for the published diagnostic |
 | `longmemeval_retrieval_benchmark.py` | 0 / 0 | Separate lexical retrieval baseline; not the published Citefold score |
@@ -40,6 +41,53 @@ python -m benchmarks.longmemeval_citefold_benchmark \
 ```
 
 Use `--limit` for a smoke test. Do not report a limited run as the full benchmark.
+
+## Track B operator harness — no public score yet
+
+The frozen
+[`OFFICELIFE_TRACK_B_EXECUTION_PROFILE_V1.md`](OFFICELIFE_TRACK_B_EXECUTION_PROFILE_V1.md)
+and offline runner validate and summarize artifacts supplied by the hidden-test
+custodian. The runner does not collect histories, execute the paired agent arms,
+blind outputs, obtain human ratings, or verify the complete private audit bundle.
+Its unit tests generate temporary synthetic fixtures to exercise schemas,
+arithmetic, failure semantics, gate boundaries, and redaction only. They do not
+measure Citefold's real-world effect.
+
+Keep the dataset, manifest, evaluation, preflight output, raw answers, and audit
+records in an access-controlled directory outside the repository. A private
+structural preflight can be run with:
+
+```bash
+python -m benchmarks.officelife_track_b_benchmark preflight \
+  /private/path/dataset.json \
+  /private/path/manifest.json \
+  --strict \
+  --output-json /private/path/preflight.json
+```
+
+After the custodian has supplied a complete paired evaluation artifact, run the
+calculation with the frozen bootstrap defaults:
+
+```bash
+python -m benchmarks.officelife_track_b_benchmark summarize \
+  /private/path/dataset.json \
+  /private/path/manifest.json \
+  /private/path/evaluation.json \
+  --output-json /private/path/summary-candidate.json \
+  --output-md /private/path/summary-candidate.md \
+  --enforce-computed-gates
+```
+
+`--enforce-computed-gates` only changes the process exit code for the offline
+calculation. It never marks the run qualified or claimable.
+
+The preflight JSON contains per-user pseudonymous identifiers and is not a
+publication artifact. The aggregate output is a non-claimable diagnostic
+summary, not a sanitized publication artifact. A strict allowlist-based public
+projector is still pending, as are the sealed run manifest, controlled
+execution, latency artifact, private audit bundle, consent, privacy review, and
+re-identification review. A qualifying calculation must retain the frozen
+defaults of 100,000 user-cluster bootstrap repetitions and seed `20260804`.
 
 ## End-to-end QA
 
@@ -76,6 +124,7 @@ The current result set establishes:
 - multimodal memory lifecycle behavior independent of media-model quality.
 
 It does not establish production readiness, official leaderboard status, or real-world OCR/ASR/vision quality.
+There is no qualifying Track B result yet.
 
 ## Adding a result
 

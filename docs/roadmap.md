@@ -19,6 +19,10 @@ The roadmap follows evidence and release gates. It is directional and may change
 ## 0.2 — review and compatibility
 
 - Bulk candidate-review UX and richer filtering/explanation metadata.
+- [x] Freeze the Track B execution profile and add private-artifact preflight
+  and aggregate gate calculation.
+- [ ] Complete an independently custodied qualifying Track B run on consented,
+  de-identified longitudinal data.
 - [x] Public pin/unpin operations.
 - [x] Explicit root storage schema and fail-closed status inspection.
 - [x] Preflighted v0.1 → v0.2 migration with verified backup and restore commands.

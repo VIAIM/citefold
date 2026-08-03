@@ -10,7 +10,8 @@ The numbers below are **checked-in measurements generated on 2026-07-16**. Retri
 |---|---:|---:|---|
 | LongMemEval-S retrieval diagnostic (`0.1.0` source snapshot) | 470 answerable questions | Recall-any@5 `0.9723`; Recall-all@5 `0.8447`; MRR `0.9139` | Whether at least one/all gold sessions were returned |
 | LongMemEval-S end-to-end QA (historical pre-release) | 500 questions | Overall `0.6180`; answerable `0.6043`; abstention `0.8333` | Reader answer judged by another model |
-| OfficeLifeMemoryBench | 24 synthetic probes | MemoryPack `1.0000`; no-memory `0.3333`; lift `+0.6667` | Whether scoped memory exposes expected markers without forbidden context |
+| OfficeLifeMemoryBench Track A | 24 synthetic probes | MemoryPack `1.0000`; no-memory `0.3333`; lift `+0.6667` | Whether scoped memory exposes expected markers without forbidden context |
+| OfficeLifeMemoryBench Track B | Qualifying dataset/run pending | No result | Frozen protocol/profile and offline validation harness only |
 | Multimodal lifecycle | 10 deterministic fixtures | MemoryPack `1.0000`; no-memory `0.3000`; lift `+0.7000` | Whether evidence, conflicts, deletion, and safety contracts survive multiple modalities |
 
 ## LongMemEval-S retrieval
@@ -38,7 +39,7 @@ The actual upstream provider was not pinned, and the judge was not the official 
 
 Question-type accuracy varied substantially: single-session-user `0.9000`, knowledge-update `0.8205`, temporal-reasoning `0.6617`, and multi-session `0.3835`. The aggregate should not hide those weaknesses.
 
-## OfficeLifeMemoryBench
+## OfficeLifeMemoryBench Track A
 
 This deterministic benchmark compares the same task contract with and without a MemoryPack across preferences, tasks, people follow-up, meeting/voice follow-up, ASR-noise guards, no-evidence prompts, and scope isolation.
 
@@ -50,6 +51,21 @@ This deterministic benchmark compares the same task contract with and without a 
 - [Machine-readable result](https://github.com/VIAIM/citefold/blob/main/benchmarks/results/current/officelife-memory-bench-evidence-multimodal-v5-2026-07-16.json)
 
 This establishes deterministic behavior on synthetic probes, not field productivity.
+
+## OfficeLifeMemoryBench Track B
+
+Track B now has a frozen execution profile and an offline private-input
+preflight/aggregate-calculation harness. It does not collect participant data,
+run the paired agent arms, conduct blinded judging, execute the controlled
+latency assay, or verify the complete private audit bundle. Its generated
+synthetic unit fixtures test evaluator behavior and redaction guards only.
+
+No qualifying consented hidden dataset has been run, so Citefold has no
+trustworthy Track B product-effect score. A result remains non-claimable until
+independent custody, consented collection and annotation, a sealed paired run,
+human adjudication, privacy review, and the full audit chain are complete. See
+the [frozen execution profile](https://github.com/VIAIM/citefold/blob/main/benchmarks/OFFICELIFE_TRACK_B_EXECUTION_PROFILE_V1.md)
+and [benchmark operator guide](https://github.com/VIAIM/citefold/blob/main/benchmarks/README.md).
 
 ## Multimodal lifecycle
 
@@ -104,3 +120,5 @@ When sharing a score, include:
 7. the caveat that limits the claim.
 
 Do not combine retrieval recall, QA accuracy, and deterministic contract success into one “memory accuracy” number.
+Do not report Track B calculation-harness output as user benefit or a qualifying
+product-effect result.
