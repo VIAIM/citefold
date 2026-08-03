@@ -164,10 +164,13 @@ These gates are provisional until the first pilot establishes variance and annot
 ## Current Status
 
 Track A is implemented in `officelife_memory_benchmark.py`. Track B now has a
-frozen execution profile and an offline private-artifact preflight/aggregate
-calculation harness with synthetic contract tests. The harness does not collect
-data, execute paired agent arms, obtain blinded human ratings, run the
-controlled latency assay, or establish product lift. No qualifying consented
-hidden dataset or trustworthy Track B product-effect score exists yet. The next
-step is independent custody, consented collection and annotation, followed by a
-sealed paired run and complete audit.
+frozen execution profile, the versioned
+`officelife-track-b-artifact-contract-v1` dataset/sealed-run schemas, a
+fail-closed private structural validator, and a legacy post-run aggregate
+calculator. The tools do not collect data, enforce the controlled executor's
+file-access boundary, execute paired agent arms, obtain blinded human ratings,
+run the controlled latency assay, verify a complete audit bundle, or establish
+product lift. No qualifying consented hidden dataset or trustworthy Track B
+product-effect score exists yet. The next step is independent custody,
+consented collection and annotation, followed by controlled execution,
+adjudication, latency measurement, public projection, and complete audit.

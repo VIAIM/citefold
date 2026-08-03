@@ -1,0 +1,284 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:viaim:officelife-track-b:artifact-contract-v1:common",
+  "title": "OfficeLifeMemoryBench Track B common artifact definitions",
+  "$defs": {
+    "contractVersion": {
+      "const": "officelife-track-b-artifact-contract-v1"
+    },
+    "protocolVersion": {
+      "const": "1.0"
+    },
+    "executionProfileVersion": {
+      "const": "officelife-track-b-execution-profile-v1"
+    },
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9_.-]{0,127})$"
+    },
+    "schemaVersion": {
+      "$ref": "#/$defs/identifier"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "utcTimestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-([0-2][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]+)?Z$"
+    },
+    "safeDisplayString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[ -~]+$"
+    },
+    "relativePath": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "pattern": "^(?!/)(?!.*\\.\\.)(?!.*\\\\)[A-Za-z0-9._/-]+$"
+    },
+    "mediaType": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9!#$&^_.+-]+/[A-Za-z0-9!#$&^_.+-]+$"
+    },
+    "split": {
+      "enum": [
+        "development",
+        "validation",
+        "hidden_test"
+      ]
+    },
+    "sourceSurface": {
+      "enum": [
+        "text_chat",
+        "realtime_voice",
+        "third_party_agents"
+      ]
+    },
+    "surfaceMembership": {
+      "enum": [
+        "text_chat",
+        "realtime_voice",
+        "third_party_agents",
+        "cross_channel"
+      ]
+    },
+    "scenarioFamily": {
+      "enum": [
+        "stable_preferences",
+        "open_loops",
+        "people_followup",
+        "meeting_decisions",
+        "stale_or_superseded",
+        "correction",
+        "no_evidence",
+        "scope_isolation",
+        "deletion",
+        "cross_channel"
+      ]
+    },
+    "memoryRequirement": {
+      "enum": [
+        "required",
+        "optional",
+        "absent"
+      ]
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tenant_id",
+        "user_id",
+        "namespace",
+        "connected_agent_authorization_ids"
+      ],
+      "properties": {
+        "tenant_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "user_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "namespace": {
+          "$ref": "#/$defs/identifier"
+        },
+        "connected_agent_authorization_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/identifier"
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "artifactReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_id",
+        "path",
+        "sha256",
+        "size_bytes",
+        "media_type"
+      ],
+      "properties": {
+        "artifact_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "path": {
+          "$ref": "#/$defs/relativePath"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "size_bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "media_type": {
+          "$ref": "#/$defs/mediaType"
+        }
+      }
+    },
+    "inventoryEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "The role is a unique ASCII identifier within its enclosing files inventory; semantic validation enforces role uniqueness.",
+      "required": [
+        "path",
+        "role",
+        "artifact_kind",
+        "sha256",
+        "size_bytes",
+        "schema_version",
+        "record_count",
+        "sensitivity",
+        "access_class",
+        "media_type"
+      ],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/relativePath"
+        },
+        "role": {
+          "$ref": "#/$defs/identifier"
+        },
+        "artifact_kind": {
+          "enum": [
+            "jsonl-records",
+            "json-document",
+            "text",
+            "binary",
+            "package",
+            "schema",
+            "codebook",
+            "policy",
+            "config"
+          ]
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "size_bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "schema_version": {
+          "$ref": "#/$defs/schemaVersion"
+        },
+        "record_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sensitivity": {
+          "enum": [
+            "public",
+            "internal",
+            "confidential",
+            "restricted"
+          ]
+        },
+        "access_class": {
+          "enum": [
+            "generator_input",
+            "executor_input",
+            "custodian_only",
+            "governance",
+            "run_config",
+            "audit_only",
+            "public_projection",
+            "identity_vault"
+          ]
+        },
+        "media_type": {
+          "$ref": "#/$defs/mediaType"
+        }
+      }
+    },
+    "inventoryLink": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "file_role",
+        "sha256"
+      ],
+      "properties": {
+        "file_role": {
+          "$ref": "#/$defs/identifier"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "versionedInventoryLink": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "file_role",
+        "sha256"
+      ],
+      "properties": {
+        "version": {
+          "$ref": "#/$defs/identifier"
+        },
+        "file_role": {
+          "$ref": "#/$defs/identifier"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "namedScalar": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "value"
+      ],
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/identifier"
+        },
+        "value": {
+          "type": [
+            "string",
+            "number",
+            "boolean",
+            "null"
+          ]
+        }
+      }
+    }
+  }
+}

@@ -77,9 +77,19 @@ jobs:
               names = archive.getnames()
           root = names[0].split("/", 1)[0]
           required = {
+              f"{root}/benchmarks/OFFICELIFE_TRACK_B_ARTIFACT_CONTRACT_V1.md",
               f"{root}/benchmarks/OFFICELIFE_TRACK_B_EXECUTION_PROFILE_V1.md",
               f"{root}/benchmarks/officelife_track_b_benchmark.py",
+              f"{root}/benchmarks/officelife_track_b_contract.py",
+              f"{root}/benchmarks/schemas/officelife_track_b/v1/common.schema.json",
+              f"{root}/benchmarks/schemas/officelife_track_b/v1/dataset-manifest.schema.json",
+              f"{root}/benchmarks/schemas/officelife_track_b/v1/event.schema.json",
+              f"{root}/benchmarks/schemas/officelife_track_b/v1/sealed-run-manifest.schema.json",
+              f"{root}/benchmarks/schemas/officelife_track_b/v1/task-input.schema.json",
+              f"{root}/benchmarks/schemas/officelife_track_b/v1/task-label.schema.json",
+              f"{root}/benchmarks/schemas/officelife_track_b/v1/user.schema.json",
               f"{root}/tests/test_officelife_track_b_benchmark.py",
+              f"{root}/tests/test_officelife_track_b_contract.py",
           }
           missing = sorted(required - set(names))
           assert not missing, f"source distribution is missing: {missing}"
