@@ -2,25 +2,40 @@
 
 This path stays local and makes no network or model calls.
 
-## Install from source
+## Install from PyPI
 
-PyPI publishing is planned for the first release but is not available yet.
+Create an isolated environment and install the alpha release:
 
 ```bash
-git clone https://github.com/VIAIM/citefold.git
-cd citefold
 python3 -m venv .venv
 source .venv/bin/activate
-python -m pip install -e .
+python -m pip install citefold
 ```
 
-Verify the installed CLI and example:
+Verify the installed CLI:
 
 ```bash
 citefold --help
 citefold init
 citefold doctor
 citefold demo
+```
+
+## Install from source
+
+Clone the repository to run the checked-in examples or contribute:
+
+```bash
+git clone https://github.com/VIAIM/citefold.git
+cd citefold
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e ".[dev]"
+```
+
+Run the deterministic Python example:
+
+```bash
 python examples/quickstart.py
 ```
 

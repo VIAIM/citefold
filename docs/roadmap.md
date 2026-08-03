@@ -12,8 +12,8 @@ The roadmap follows evidence and release gates. It is directional and may change
 - [x] Candidate list/approve/reject CLI workflow plus local init/doctor/demo commands.
 - [x] Optional privacy-constrained OpenRouter adapter.
 - [x] Retrieval, QA, synthetic A/B, and multimodal lifecycle reports.
-- [ ] Freeze package metadata and publish signed/tagged `0.1.0` artifacts.
-- [ ] Verify CI on every declared Python/OS combination.
+- [ ] Freeze package metadata and publish tagged `0.1.0` artifacts with PyPI attestations.
+- [x] Verify CI on every declared Python/OS combination.
 - [ ] Publish PyPI distribution from the same release artifacts.
 
 ## 0.2 — review and compatibility

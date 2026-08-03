@@ -7,11 +7,7 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## Unreleased
 
-## 0.1.0 — initial source publication (2026-07-16)
-
-Status: the version is declared in package metadata and the source is prepared
-for its first public push. No `v0.1.0` tag or PyPI distribution has been
-published yet.
+## 0.1.0 — 2026-08-03
 
 ### Added
 

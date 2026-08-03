@@ -8,6 +8,7 @@ type: software
 authors:
   - name: "Citefold contributors"
 version: 0.1.0
+date-released: 2026-08-03
 license: Apache-2.0
 repository-code: "https://github.com/VIAIM/citefold"
 url: "https://github.com/VIAIM/citefold"

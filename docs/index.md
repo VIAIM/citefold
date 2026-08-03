@@ -6,7 +6,7 @@ Citefold is an evidence-backed multimodal memory library for agents. It stores r
 
 ## Start here
 
-- [Quickstart](quickstart.md) — install from source and run local ingest → recall.
+- [Quickstart](quickstart.md) — install Citefold and run local ingest → recall.
 - [Concepts](concepts.md) — understand evidence, candidates, records, and coverage.
 - [Architecture](architecture.md) — trace write, read, correction, and deletion paths.
 - [CLI](cli.md) — use the current command surface.

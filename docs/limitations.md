@@ -6,7 +6,6 @@ The current release is an evidence-first alpha, not a production memory service.
 
 - API and on-disk schemas may change before 1.0.
 - There is no general migration tool yet.
-- The package is not yet published to PyPI; install from the repository.
 - Candidate list/approve/reject exists in both Python and CLI paths; a bulk or graphical review workflow is not included.
 - Pin/unpin behavior is represented internally but has no public operation.
 
