@@ -60,7 +60,7 @@ appointed representative at an online or offline event.
 GitHub private reporting is not enabled for this repository yet. Do not put
 incident details, identities, or other sensitive information in a public
 issue. Open only a minimal
-[private-channel request](https://github.com/jappre/citefold/issues/new?template=private_channel_request.yml),
+[private-channel request](https://github.com/VIAIM/citefold/issues/new?template=private_channel_request.yml),
 and a community leader will arrange a private channel. All complaints received
 through that channel will be reviewed and investigated promptly and fairly.
 

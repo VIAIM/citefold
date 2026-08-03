@@ -84,4 +84,4 @@ Applications should map user deletion requirements across every copy of the data
 
 ## Reporting vulnerabilities
 
-Do not open a public issue for a suspected vulnerability. Follow the private process in [SECURITY.md](https://github.com/jappre/citefold/blob/main/SECURITY.md).
+Do not open a public issue for a suspected vulnerability. Follow the private process in [SECURITY.md](https://github.com/VIAIM/citefold/blob/main/SECURITY.md).

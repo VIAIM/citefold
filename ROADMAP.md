@@ -34,4 +34,4 @@ over feature count. Items are directions, not delivery commitments.
   deletion tests.
 
 Feature requests and design proposals belong in
-[GitHub Issues](https://github.com/jappre/citefold/issues).
+[GitHub Issues](https://github.com/VIAIM/citefold/issues).

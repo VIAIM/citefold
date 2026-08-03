@@ -18,7 +18,7 @@ fixes.
 GitHub private vulnerability reporting is not enabled for this repository yet.
 Do not put vulnerability details, credentials, personal data, or private memory
 in a public issue. To request a private channel, open the minimal
-[private-channel request](https://github.com/jappre/citefold/issues/new?template=private_channel_request.yml).
+[private-channel request](https://github.com/VIAIM/citefold/issues/new?template=private_channel_request.yml).
 That public request must contain no report details. A maintainer will arrange a
 private channel; only then provide:
 

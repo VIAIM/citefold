@@ -57,11 +57,11 @@ docs = [
 citefold = "citefold.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/jappre/citefold"
-Documentation = "https://github.com/jappre/citefold/blob/main/docs/index.md"
-Changelog = "https://github.com/jappre/citefold/blob/main/CHANGELOG.md"
-Issues = "https://github.com/jappre/citefold/issues"
-Source = "https://github.com/jappre/citefold"
+Homepage = "https://github.com/VIAIM/citefold"
+Documentation = "https://github.com/VIAIM/citefold/blob/main/docs/index.md"
+Changelog = "https://github.com/VIAIM/citefold/blob/main/CHANGELOG.md"
+Issues = "https://github.com/VIAIM/citefold/issues"
+Source = "https://github.com/VIAIM/citefold"
 
 [tool.setuptools]
 include-package-data = true

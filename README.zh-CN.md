@@ -8,7 +8,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/jappre/citefold/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/jappre/citefold/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://github.com/VIAIM/citefold/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/VIAIM/citefold/actions/workflows/ci.yml/badge.svg"></a>
   <img alt="Python 3.9+" src="https://img.shields.io/badge/Python-3.9%2B-3776AB?logo=python&logoColor=white">
   <a href="LICENSE"><img alt="Apache 2.0" src="https://img.shields.io/badge/License-Apache--2.0-2CC8B2"></a>
   <img alt="状态：alpha" src="https://img.shields.io/badge/Status-alpha-F2A65A">
@@ -51,7 +51,7 @@ flowchart LR
 Citefold 的本地文本路径只使用 Python 标准库。当前 PyPI 尚未发布，直接从源码安装：
 
 ```bash
-git clone https://github.com/jappre/citefold.git
+git clone https://github.com/VIAIM/citefold.git
 cd citefold
 python -m pip install -e .
 citefold demo
