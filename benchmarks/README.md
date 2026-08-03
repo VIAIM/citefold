@@ -8,6 +8,7 @@ The benchmark suite keeps retrieval, end-to-end QA, synthetic task utility, and 
 |---|---:|---|
 | `officelife_memory_benchmark.py` | 0 / 0 | MemoryPack vs no-memory on scoped synthetic office/life probes |
 | `officelife_track_b_contract.py` | 0 / 0 | Fail-closed validation of the strict Track B dataset and sealed-run artifact contract |
+| `officelife_track_b_executor.py` | handler-defined | Label-free worker handoff and private paired-arm execution; current callable adapter is test-only |
 | `officelife_track_b_benchmark.py` | 0 / 0 | Legacy private-artifact diagnostic and aggregate calculator; not the controlled executor or public projector |
 | `multimodal_memory_benchmark.py` | 0 / 0 | Multimodal evidence, conflict, correction, injection, and deletion contracts |
 | `longmemeval_citefold_benchmark.py` | 0 / 0 | Citefold MemoryPack/session retrieval used for the published diagnostic |
@@ -54,10 +55,15 @@ checks local Draft 2020-12 schemas, exhaustive byte inventories, hashes,
 cross-file references, event lifecycle, task/label separation, frozen system
 identity, clone-resistant conservative structural counts, and minimum
 hidden-test dataset gates. Those counts are lower bounds, not proof of semantic
-sample diversity. The validator does not collect histories, execute the paired
-agent arms, blind outputs, obtain human ratings, or verify the complete private
-audit bundle. Its unit tests build temporary synthetic fixtures; they do not
-measure Citefold's real-world effect.
+sample diversity. The separate
+[`OFFICELIFE_TRACK_B_EXECUTOR_V1.md`](OFFICELIFE_TRACK_B_EXECUTOR_V1.md)
+contract prepares an exhaustive label-free worker bundle and executes paired
+arms with frozen order, retries, provider identity checks, output blinding,
+crash recovery, and result-bound private audit events. Its only implemented
+handler is an in-process callable and its snapshot adapter is opaque, so every
+output remains test-only, non-qualifying, and non-claimable. Neither tool
+collects participant histories, obtains human ratings, or measures Citefold's
+real-world effect.
 
 Keep the dataset, run inputs, labels, validation reports, raw answers, and audit
 records in access-controlled directories outside the repository. Install the
@@ -85,6 +91,14 @@ qualification. Exit `0` means the requested checks passed, `3` means the
 contract is valid but dataset status or enforced minimum gates failed, and `4`
 means the contract is invalid.
 
+The executor is a Python contract rather than an operator CLI. Custodian code
+calls `prepare_worker_bundle(...)`, then a separately launched label-free worker
+calls `execute_worker_bundle(...)` with a handler implementing the documented
+`ArmRequest`/`HandlerResult` interface. A formal run still requires a future
+external-process adapter, OS-enforced denial of the custodian roots, and a
+validated non-opaque snapshot adapter; the callable entrypoint fails closed if
+configured as though those controls existed.
+
 The older single-file diagnostic remains available for already prepared private
 evaluation artifacts. It combines information that a controlled generator must
 not receive, so it is post-run only. After the custodian has supplied a complete
@@ -106,10 +120,11 @@ calculation. It never marks the run qualified or claimable.
 The preflight JSON contains per-user pseudonymous identifiers and is not a
 publication artifact. The aggregate output is a non-claimable diagnostic
 summary, not a sanitized publication artifact. A strict allowlist-based public
-projector is still pending, as are controlled execution, adjudication, the
-latency artifact, private audit bundle, consent, privacy review, and
-re-identification review. A qualifying calculation must retain the frozen
-defaults of 100,000 user-cluster bootstrap repetitions and seed `20260804`.
+projector is still pending, as are the qualifying external-process executor and
+snapshot adapter, adjudication, the latency artifact, custody evidence,
+consent, privacy review, and re-identification review. A qualifying calculation
+must retain the frozen defaults of 100,000 user-cluster bootstrap repetitions
+and seed `20260804`.
 
 ## End-to-end QA
 

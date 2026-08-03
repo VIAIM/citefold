@@ -27,9 +27,10 @@ over feature count. Items are directions, not delivery commitments.
 - Publish latency, storage-growth, concurrency, and long-running retention
   measurements.
 - Use the frozen OfficeLifeMemoryBench Track B execution profile, strict
-  dataset/sealed-run artifact contract, and private diagnostic tools to complete
-  an independently custodied, consented, de-identified paired evaluation. No
-  qualifying Track B score exists yet.
+  dataset/sealed-run artifact contract, label-free controlled-execution draft,
+  and private diagnostic tools to complete an independently custodied,
+  consented, de-identified paired evaluation. The current callable and opaque
+  snapshot adapters are test-only; no qualifying Track B score exists yet.
 - Improve configuration and operator ergonomics around the existing storage
   status, migration, backup, and recovery commands.
 

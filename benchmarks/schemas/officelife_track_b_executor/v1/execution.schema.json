@@ -1,0 +1,405 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:viaim:officelife-track-b:executor-v1",
+  "title": "OfficeLifeMemoryBench Track B controlled executor artifacts",
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|\\+00:00)$"
+    },
+    "relativePath": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "pattern": "^(?!/)(?!.*\\.\\.)(?!.*\\\\)[A-Za-z0-9._/-]+$"
+    },
+    "artifactReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "size_bytes"],
+      "properties": {
+        "path": {"$ref": "#/$defs/relativePath"},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "size_bytes": {"type": "integer", "minimum": 0}
+      }
+    },
+    "inventoryEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "role",
+        "sha256",
+        "size_bytes",
+        "media_type",
+        "source_bundle",
+        "source_role",
+        "source_access_class"
+      ],
+      "properties": {
+        "path": {"$ref": "#/$defs/relativePath"},
+        "role": {"$ref": "#/$defs/identifier"},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "size_bytes": {"type": "integer", "minimum": 0},
+        "media_type": {"type": "string", "minLength": 3, "maxLength": 128},
+        "source_bundle": {"enum": ["dataset", "run", "derived"]},
+        "source_role": {
+          "oneOf": [
+            {"$ref": "#/$defs/identifier"},
+            {"type": "null"}
+          ]
+        },
+        "source_access_class": {
+          "enum": ["generator_input", "executor_input", "run_config", "derived"]
+        }
+      }
+    },
+    "executorConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "executor_contract_version",
+        "handler_id",
+        "handler_protocol",
+        "snapshot_adapter_id",
+        "agent_id",
+        "session_id_policy",
+        "worker_isolation"
+      ],
+      "properties": {
+        "schema_version": {"const": "officelife-track-b-executor-config-v1"},
+        "executor_contract_version": {"const": "officelife-track-b-executor-v1"},
+        "handler_id": {"$ref": "#/$defs/identifier"},
+        "handler_protocol": {"enum": ["callable-test-v1", "external-process-v1"]},
+        "snapshot_adapter_id": {"$ref": "#/$defs/identifier"},
+        "agent_id": {"$ref": "#/$defs/identifier"},
+        "session_id_policy": {"const": "sha256-task-v1"},
+        "worker_isolation": {"enum": ["logical-test-only", "os-sandbox-required"]}
+      }
+    },
+    "workerRunConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "executor_contract_version",
+        "run_id",
+        "iteration_id",
+        "agent_turn_contract",
+        "citefold",
+        "reader_model",
+        "system_artifacts",
+        "memory",
+        "generation",
+        "provider_policy",
+        "randomization",
+        "executor_config"
+      ],
+      "properties": {
+        "schema_version": {"const": "officelife-track-b-worker-run-config-v1"},
+        "executor_contract_version": {"const": "officelife-track-b-executor-v1"},
+        "run_id": {"$ref": "#/$defs/identifier"},
+        "iteration_id": {"$ref": "#/$defs/identifier"},
+        "agent_turn_contract": {"const": "agent-turn-v1"},
+        "citefold": {"type": "object"},
+        "reader_model": {"type": "object"},
+        "system_artifacts": {"type": "object"},
+        "memory": {"type": "object"},
+        "generation": {"type": "object"},
+        "provider_policy": {"type": "object"},
+        "randomization": {"type": "object"},
+        "executor_config": {"$ref": "#/$defs/executorConfig"}
+      }
+    },
+    "workerManifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "executor_contract_version",
+        "contract_version",
+        "protocol_version",
+        "execution_profile_version",
+        "generated_at",
+        "dataset_release_id",
+        "run_id",
+        "iteration_id",
+        "selected_split",
+        "source_dataset_manifest_sha256",
+        "source_run_manifest_sha256",
+        "source_task_inputs_sha256",
+        "preflight_report_sha256",
+        "task_ids",
+        "files",
+        "qualification_eligible",
+        "nonqualification_reasons"
+      ],
+      "properties": {
+        "schema_version": {"const": "officelife-track-b-worker-manifest-v1"},
+        "executor_contract_version": {"const": "officelife-track-b-executor-v1"},
+        "contract_version": {"const": "officelife-track-b-artifact-contract-v1"},
+        "protocol_version": {"const": "1.0"},
+        "execution_profile_version": {"const": "officelife-track-b-execution-profile-v1"},
+        "generated_at": {"$ref": "#/$defs/timestamp"},
+        "dataset_release_id": {"$ref": "#/$defs/identifier"},
+        "run_id": {"$ref": "#/$defs/identifier"},
+        "iteration_id": {"$ref": "#/$defs/identifier"},
+        "selected_split": {"const": "hidden_test"},
+        "source_dataset_manifest_sha256": {"$ref": "#/$defs/sha256"},
+        "source_run_manifest_sha256": {"$ref": "#/$defs/sha256"},
+        "source_task_inputs_sha256": {"$ref": "#/$defs/sha256"},
+        "preflight_report_sha256": {"$ref": "#/$defs/sha256"},
+        "task_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/identifier"}
+        },
+        "files": {
+          "type": "array",
+          "minItems": 6,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/inventoryEntry"}
+        },
+        "qualification_eligible": {"const": false},
+        "nonqualification_reasons": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/identifier"}
+        }
+      }
+    },
+    "handlerResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "outcome",
+        "content",
+        "actual_model_id",
+        "actual_model_version",
+        "actual_upstream_provider",
+        "actual_route",
+        "fallback_used",
+        "memory_pack",
+        "trace",
+        "usage",
+        "error_category"
+      ],
+      "properties": {
+        "outcome": {"enum": ["answer", "refusal", "product_timeout", "product_failure"]},
+        "content": {"type": ["string", "null"], "maxLength": 1048576},
+        "actual_model_id": {"type": "string", "minLength": 1, "maxLength": 256},
+        "actual_model_version": {"type": "string", "minLength": 1, "maxLength": 256},
+        "actual_upstream_provider": {"$ref": "#/$defs/identifier"},
+        "actual_route": {"type": "string", "minLength": 1, "maxLength": 256},
+        "fallback_used": {"type": "boolean"},
+        "memory_pack": {"type": ["object", "null"]},
+        "trace": {"type": "object"},
+        "usage": {"type": "object"},
+        "error_category": {
+          "oneOf": [
+            {"$ref": "#/$defs/identifier"},
+            {"type": "null"}
+          ]
+        }
+      }
+    },
+    "executionBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "executor_contract_version",
+        "worker_manifest_sha256",
+        "run_id",
+        "iteration_id",
+        "handler_id",
+        "handler_protocol",
+        "snapshot_adapter_id",
+        "worker_isolation"
+      ],
+      "properties": {
+        "schema_version": {"const": "officelife-track-b-execution-binding-v1"},
+        "executor_contract_version": {"const": "officelife-track-b-executor-v1"},
+        "worker_manifest_sha256": {"$ref": "#/$defs/sha256"},
+        "run_id": {"$ref": "#/$defs/identifier"},
+        "iteration_id": {"$ref": "#/$defs/identifier"},
+        "handler_id": {"$ref": "#/$defs/identifier"},
+        "handler_protocol": {"enum": ["callable-test-v1", "external-process-v1"]},
+        "snapshot_adapter_id": {"$ref": "#/$defs/identifier"},
+        "worker_isolation": {"enum": ["logical-test-only", "os-sandbox-required"]}
+      }
+    },
+    "armOutput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "executor_contract_version",
+        "execution_id",
+        "task_id",
+        "arm",
+        "execution_order",
+        "blinded_output_id",
+        "paired_input_sha256",
+        "request_sha256",
+        "outcome",
+        "content",
+        "trace",
+        "attempt_count",
+        "error_category",
+        "actual_model_id",
+        "actual_model_version",
+        "actual_upstream_provider",
+        "actual_route",
+        "fallback_used",
+        "usage"
+      ],
+      "properties": {
+        "schema_version": {"const": "officelife-track-b-arm-output-v1"},
+        "executor_contract_version": {"const": "officelife-track-b-executor-v1"},
+        "execution_id": {"$ref": "#/$defs/identifier"},
+        "task_id": {"$ref": "#/$defs/identifier"},
+        "arm": {"enum": ["no_memory", "memory_pack"]},
+        "execution_order": {"type": "integer", "minimum": 0, "maximum": 1},
+        "blinded_output_id": {"$ref": "#/$defs/identifier"},
+        "paired_input_sha256": {"$ref": "#/$defs/sha256"},
+        "request_sha256": {"$ref": "#/$defs/sha256"},
+        "outcome": {"enum": ["answer", "refusal", "product_timeout", "product_failure", "infrastructure_error"]},
+        "content": {"type": ["string", "null"], "maxLength": 1048576},
+        "trace": {"$ref": "#/$defs/artifactReference"},
+        "attempt_count": {"type": "integer", "minimum": 1},
+        "error_category": {
+          "oneOf": [
+            {"$ref": "#/$defs/identifier"},
+            {"type": "null"}
+          ]
+        },
+        "actual_model_id": {"type": ["string", "null"], "maxLength": 256},
+        "actual_model_version": {"type": ["string", "null"], "maxLength": 256},
+        "actual_upstream_provider": {"type": ["string", "null"], "maxLength": 128},
+        "actual_route": {"type": ["string", "null"], "maxLength": 256},
+        "fallback_used": {"type": ["boolean", "null"]},
+        "usage": {"type": "object"}
+      }
+    },
+    "blindedOutput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "blinded_output_id", "outcome", "content"],
+      "properties": {
+        "schema_version": {"const": "officelife-track-b-blinded-output-v1"},
+        "blinded_output_id": {"$ref": "#/$defs/identifier"},
+        "outcome": {"enum": ["answer", "refusal", "product_timeout", "product_failure", "infrastructure_error"]},
+        "content": {"type": ["string", "null"], "maxLength": 1048576}
+      }
+    },
+    "unblindingRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "blinded_output_id", "task_id", "arm", "execution_order", "execution_id"],
+      "properties": {
+        "schema_version": {"const": "officelife-track-b-unblinding-record-v1"},
+        "blinded_output_id": {"$ref": "#/$defs/identifier"},
+        "task_id": {"$ref": "#/$defs/identifier"},
+        "arm": {"enum": ["no_memory", "memory_pack"]},
+        "execution_order": {"type": "integer", "minimum": 0, "maximum": 1},
+        "execution_id": {"$ref": "#/$defs/identifier"}
+      }
+    },
+    "auditEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "sequence", "event_type", "execution_id", "task_id", "arm", "artifact_sha256", "previous_event_sha256", "event_sha256"],
+      "properties": {
+        "schema_version": {"const": "officelife-track-b-execution-audit-event-v1"},
+        "sequence": {"type": "integer", "minimum": 0},
+        "event_type": {"const": "arm_finalized"},
+        "execution_id": {"$ref": "#/$defs/identifier"},
+        "task_id": {"$ref": "#/$defs/identifier"},
+        "arm": {"enum": ["no_memory", "memory_pack"]},
+        "artifact_sha256": {"$ref": "#/$defs/sha256"},
+        "previous_event_sha256": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
+        "event_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "executionManifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "executor_contract_version",
+        "contract_version",
+        "protocol_version",
+        "execution_profile_version",
+        "generated_at",
+        "worker_manifest_sha256",
+        "run_id",
+        "iteration_id",
+        "execution_status",
+        "expected_task_count",
+        "expected_arm_count",
+        "completed_arm_count",
+        "audit_chain_head",
+        "files",
+        "qualification_eligible",
+        "nonqualification_reasons",
+        "claimable"
+      ],
+      "properties": {
+        "schema_version": {"const": "officelife-track-b-execution-manifest-v1"},
+        "executor_contract_version": {"const": "officelife-track-b-executor-v1"},
+        "contract_version": {"const": "officelife-track-b-artifact-contract-v1"},
+        "protocol_version": {"const": "1.0"},
+        "execution_profile_version": {"const": "officelife-track-b-execution-profile-v1"},
+        "generated_at": {"$ref": "#/$defs/timestamp"},
+        "worker_manifest_sha256": {"$ref": "#/$defs/sha256"},
+        "run_id": {"$ref": "#/$defs/identifier"},
+        "iteration_id": {"$ref": "#/$defs/identifier"},
+        "execution_status": {"enum": ["complete", "incomplete"]},
+        "expected_task_count": {"type": "integer", "minimum": 1},
+        "expected_arm_count": {"type": "integer", "minimum": 2},
+        "completed_arm_count": {"type": "integer", "minimum": 0},
+        "audit_chain_head": {"$ref": "#/$defs/sha256"},
+        "files": {
+          "type": "array",
+          "minItems": 5,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/inventoryEntry"}
+        },
+        "qualification_eligible": {"const": false},
+        "nonqualification_reasons": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/identifier"}
+        },
+        "claimable": {"const": false}
+      }
+    }
+  },
+  "oneOf": [
+    {"$ref": "#/$defs/executorConfig"},
+    {"$ref": "#/$defs/workerRunConfig"},
+    {"$ref": "#/$defs/workerManifest"},
+    {"$ref": "#/$defs/handlerResult"},
+    {"$ref": "#/$defs/executionBinding"},
+    {"$ref": "#/$defs/armOutput"},
+    {"$ref": "#/$defs/blindedOutput"},
+    {"$ref": "#/$defs/unblindingRecord"},
+    {"$ref": "#/$defs/auditEvent"},
+    {"$ref": "#/$defs/executionManifest"}
+  ]
+}

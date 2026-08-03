@@ -16,6 +16,11 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Offline Track B post-run diagnostic and aggregate-calculation harness. Its
   synthetic tests validate evaluator contracts and redaction/non-claimability
   guards only; they are not a Track B product result.
+- Label-free Track B worker-bundle preparation and a private paired-arm
+  executor contract with frozen ordering, retries, provider identity, crash
+  recovery, output blinding, exhaustive inventories, and result-bound audit
+  events. Its callable and opaque-snapshot adapters are explicitly test-only
+  and cannot produce a qualifying result.
 - Versioned `agent-turn-v1` prepare/complete hooks with a stable JSON-compatible
   context envelope, trusted-host turn IDs, and an installed-wheel consumer test.
 - Auditable Python API and CLI operations to pin active records against decay

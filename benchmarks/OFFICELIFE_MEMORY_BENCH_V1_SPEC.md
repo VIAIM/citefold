@@ -166,11 +166,14 @@ These gates are provisional until the first pilot establishes variance and annot
 Track A is implemented in `officelife_memory_benchmark.py`. Track B now has a
 frozen execution profile, the versioned
 `officelife-track-b-artifact-contract-v1` dataset/sealed-run schemas, a
-fail-closed private structural validator, and a legacy post-run aggregate
-calculator. The tools do not collect data, enforce the controlled executor's
-file-access boundary, execute paired agent arms, obtain blinded human ratings,
-run the controlled latency assay, verify a complete audit bundle, or establish
-product lift. No qualifying consented hidden dataset or trustworthy Track B
-product-effect score exists yet. The next step is independent custody,
-consented collection and annotation, followed by controlled execution,
-adjudication, latency measurement, public projection, and complete audit.
+fail-closed private structural validator, a label-free paired-arm executor
+draft, and a legacy post-run aggregate calculator. The draft binds frozen arm
+order, retries, provider identity, outputs, traces, blinding maps, and private
+audit events, but its implemented callable handler and opaque snapshot adapter
+are test-only. The tools do not collect data, enforce OS denial of custodian
+roots, obtain blinded human ratings, run the controlled latency assay, project a
+public result, or establish product lift. No qualifying consented hidden dataset
+or trustworthy Track B product-effect score exists yet. The next step is the
+qualifying external-process/snapshot boundary plus independent custody,
+consented collection and annotation, adjudication, latency measurement, public
+projection, and complete audit.
