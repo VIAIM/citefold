@@ -1,0 +1,250 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "children": [],
+          "node_id": "active.current_context",
+          "path": "active/current_context.md",
+          "summary": "",
+          "title": "Current Context",
+          "type": "active",
+          "updated_at": "2026-08-03T14:03:23.536810+00:00"
+        },
+        {
+          "children": [],
+          "node_id": "active.open_loops",
+          "path": "active/open_loops.md",
+          "summary": "",
+          "title": "Open Loops",
+          "type": "active",
+          "updated_at": "2026-08-03T14:03:23.537014+00:00"
+        },
+        {
+          "children": [],
+          "node_id": "active.recent_voice_buffer",
+          "path": "active/recent_voice_buffer.md",
+          "summary": "",
+          "title": "Recent Voice Buffer",
+          "type": "active",
+          "updated_at": "2026-08-03T14:03:23.620801+00:00"
+        }
+      ],
+      "node_id": "active",
+      "path": "active",
+      "summary": "active memory domain",
+      "title": "Active",
+      "type": "domain",
+      "updated_at": "2026-07-01T09:01:56+00:00"
+    },
+    {
+      "children": [
+        {
+          "children": [],
+          "node_id": "profile.boundaries",
+          "path": "profile/boundaries.md",
+          "summary": "",
+          "title": "Boundaries",
+          "type": "profile",
+          "updated_at": "2026-08-03T14:03:23.538093+00:00"
+        },
+        {
+          "children": [],
+          "node_id": "profile.identity",
+          "path": "profile/identity.md",
+          "summary": "",
+          "title": "Identity",
+          "type": "profile",
+          "updated_at": "2026-08-03T14:03:23.537456+00:00"
+        },
+        {
+          "children": [],
+          "node_id": "profile.preferences",
+          "path": "profile/preferences.md",
+          "summary": "- 我喜欢先看风险再看结论",
+          "title": "Preferences",
+          "type": "profile",
+          "updated_at": "2026-08-03T14:03:23.622864+00:00"
+        }
+      ],
+      "node_id": "profile",
+      "path": "profile",
+      "summary": "profile memory domain",
+      "title": "Profile",
+      "type": "domain",
+      "updated_at": "2026-07-01T09:01:57+00:00"
+    },
+    {
+      "children": [
+        {
+          "children": [],
+          "node_id": "people.alex",
+          "path": "people/alex.md",
+          "summary": "- Alex 偏好周五下午跟进。",
+          "title": "Alex",
+          "type": "people",
+          "updated_at": "2026-08-03T14:03:23.623854+00:00"
+        },
+        {
+          "children": [],
+          "node_id": "people.index",
+          "path": "people/index.md",
+          "summary": "- [Alex](alex.md)",
+          "title": "People Index",
+          "type": "people",
+          "updated_at": "2026-08-03T14:03:23.615088+00:00"
+        }
+      ],
+      "node_id": "people",
+      "path": "people",
+      "summary": "people memory domain",
+      "title": "People",
+      "type": "domain",
+      "updated_at": "2026-07-01T09:01:58+00:00"
+    },
+    {
+      "children": [
+        {
+          "children": [],
+          "node_id": "tasks.commitments",
+          "path": "tasks/commitments.md",
+          "summary": "- 周五上午9点检查客户方案",
+          "title": "Commitments",
+          "type": "tasks",
+          "updated_at": "2026-08-03T14:03:23.623118+00:00"
+        },
+        {
+          "children": [],
+          "node_id": "tasks.completed",
+          "path": "tasks/completed.md",
+          "summary": "",
+          "title": "Completed",
+          "type": "tasks",
+          "updated_at": "2026-08-03T14:03:23.539768+00:00"
+        },
+        {
+          "children": [],
+          "node_id": "tasks.inbox",
+          "path": "tasks/inbox.md",
+          "summary": "",
+          "title": "Task Inbox",
+          "type": "tasks",
+          "updated_at": "2026-08-03T14:03:23.539126+00:00"
+        },
+        {
+          "children": [],
+          "node_id": "tasks.waiting_on",
+          "path": "tasks/waiting_on.md",
+          "summary": "",
+          "title": "Waiting On",
+          "type": "tasks",
+          "updated_at": "2026-08-03T14:03:23.623347+00:00"
+        }
+      ],
+      "node_id": "tasks",
+      "path": "tasks",
+      "summary": "tasks memory domain",
+      "title": "Tasks",
+      "type": "domain",
+      "updated_at": "2026-07-01T09:01:59+00:00"
+    },
+    {
+      "children": [
+        {
+          "children": [],
+          "node_id": "episodes.2026-07.2026-07-01T090004-session-a-chat",
+          "path": "episodes/2026-07/2026-07-01T090004-session-a-chat.md",
+          "summary": "Recorded: 2026-07-01T09:00:04+00:00",
+          "title": "Text Chat Episode",
+          "type": "episodes",
+          "updated_at": "2026-08-03T14:03:23.543990+00:00"
+        },
+        {
+          "children": [],
+          "node_id": "episodes.2026-07.2026-07-01T090100-session-a-chat",
+          "path": "episodes/2026-07/2026-07-01T090100-session-a-chat.md",
+          "summary": "Recorded: 2026-07-01T09:01:00+00:00",
+          "title": "Text Chat Episode",
+          "type": "episodes",
+          "updated_at": "2026-08-03T14:03:23.585796+00:00"
+        },
+        {
+          "children": [],
+          "node_id": "episodes.2026-07.2026-07-01T090147-voice-session-voice",
+          "path": "episodes/2026-07/2026-07-01T090147-voice-session-voice.md",
+          "summary": "Recorded: 2026-07-01T09:01:47+00:00",
+          "title": "Voice Episode",
+          "type": "episodes",
+          "updated_at": "2026-08-03T14:03:23.619789+00:00"
+        }
+      ],
+      "node_id": "episodes",
+      "path": "episodes",
+      "summary": "episodes memory domain",
+      "title": "Episodes",
+      "type": "domain",
+      "updated_at": "2026-07-01T09:02:00+00:00"
+    },
+    {
+      "children": [],
+      "node_id": "evidence",
+      "path": "evidence",
+      "summary": "evidence memory domain",
+      "title": "Evidence",
+      "type": "domain",
+      "updated_at": "2026-07-01T09:02:01+00:00"
+    },
+    {
+      "children": [
+        {
+          "children": [],
+          "node_id": "candidates.pending_agent_updates",
+          "path": "candidates/pending_agent_updates.md",
+          "summary": "",
+          "title": "Pending Agent Updates",
+          "type": "candidates",
+          "updated_at": "2026-08-03T14:03:23.575269+00:00"
+        },
+        {
+          "children": [],
+          "node_id": "candidates.pending_people_updates",
+          "path": "candidates/pending_people_updates.md",
+          "summary": "",
+          "title": "Pending People Updates",
+          "type": "candidates",
+          "updated_at": "2026-08-03T14:03:23.540633+00:00"
+        },
+        {
+          "children": [],
+          "node_id": "candidates.pending_profile_updates",
+          "path": "candidates/pending_profile_updates.md",
+          "summary": "",
+          "title": "Pending Profile Updates",
+          "type": "candidates",
+          "updated_at": "2026-08-03T14:03:23.540231+00:00"
+        },
+        {
+          "children": [],
+          "node_id": "candidates.pending_task_updates",
+          "path": "candidates/pending_task_updates.md",
+          "summary": "",
+          "title": "Pending Task Updates",
+          "type": "candidates",
+          "updated_at": "2026-08-03T14:03:23.540433+00:00"
+        }
+      ],
+      "node_id": "candidates",
+      "path": "candidates",
+      "summary": "candidates memory domain",
+      "title": "Candidates",
+      "type": "domain",
+      "updated_at": "2026-07-01T09:02:02+00:00"
+    }
+  ],
+  "node_id": "root",
+  "path": "",
+  "summary": "Evidence-backed memory tree.",
+  "title": "Citefold",
+  "type": "root",
+  "updated_at": "2026-07-01T09:01:55+00:00"
+}

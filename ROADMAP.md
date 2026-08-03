@@ -19,11 +19,15 @@ over feature count. Items are directions, not delivery commitments.
   candidate CLI workflow.
 - Add documented hooks and adapters for common agent runtimes without coupling
   the core to one framework.
+- Harden the explicit schema, additive v0.1 migration, verified backup/restore,
+  intent-journal recovery, and displaced-root workflow against broader
+  deployment histories and crash/power-loss points.
 - Evaluate real OCR, speech-to-text, and video pipelines separately from memory
   lifecycle correctness.
 - Publish latency, storage-growth, concurrency, and long-running retention
   measurements.
-- Improve configuration, migration, backup, and recovery ergonomics.
+- Improve configuration and operator ergonomics around the existing storage
+  status, migration, backup, and recovery commands.
 
 ## Later, after evidence
 

@@ -13,6 +13,7 @@ from . import __version__
 from .core import Citefold
 from .models import MemoryScope
 from .openrouter import OpenRouterClient
+from .storage import backup_store, inspect_store, migrate_store, restore_store
 
 
 def _env(name: str) -> str | None:
@@ -67,6 +68,23 @@ def build_parser() -> argparse.ArgumentParser:
 
     doctor = commands.add_parser("doctor", help="Check local storage and optional media/model tools.")
     doctor.set_defaults(handler=_handle_doctor)
+
+    status = commands.add_parser("status", help="Inspect the storage schema without modifying it.")
+    status.set_defaults(handler=_handle_status)
+
+    migrate = commands.add_parser("migrate", help="Preflight or migrate the storage schema.")
+    migrate.add_argument("--dry-run", action="store_true", help="Validate and print the plan without writing.")
+    migrate.add_argument("--backup-to", type=Path, help="Write the required pre-migration backup here.")
+    migrate.set_defaults(handler=_handle_migrate)
+
+    backup = commands.add_parser("backup", help="Create and verify a storage backup.")
+    backup.add_argument("--output", type=Path, help="Backup archive path; defaults beside the storage root.")
+    backup.set_defaults(handler=_handle_backup)
+
+    restore = commands.add_parser("restore", help="Restore a verified storage backup.")
+    restore.add_argument("archive", type=Path, help="Backup archive to restore.")
+    restore.add_argument("--replace", action="store_true", help="Replace a non-empty storage root.")
+    restore.set_defaults(handler=_handle_restore)
 
     demo = commands.add_parser("demo", help="Run a local ingest-and-recall demonstration.")
     demo.set_defaults(handler=_handle_demo)
@@ -248,6 +266,7 @@ def _handle_init(args: argparse.Namespace) -> Any:
 
 def _handle_doctor(args: argparse.Namespace) -> Any:
     root = Path(args.root).expanduser()
+    storage = inspect_store(root)
     probe = root
     while not probe.exists() and probe != probe.parent:
         probe = probe.parent
@@ -270,6 +289,7 @@ def _handle_doctor(args: argparse.Namespace) -> Any:
         "status": "ok",
         "version": __version__,
         "root": str(root),
+        "storage": storage,
         "scope": scope.as_record(),
         "checks": {
             "root_writable": root_writable,
@@ -279,6 +299,30 @@ def _handle_doctor(args: argparse.Namespace) -> Any:
             "openrouter_configured": bool(_env("OPENROUTER_API_KEY")),
         },
     }
+
+
+def _handle_status(args: argparse.Namespace) -> Any:
+    return inspect_store(Path(args.root).expanduser())
+
+
+def _handle_migrate(args: argparse.Namespace) -> Any:
+    return migrate_store(
+        Path(args.root).expanduser(),
+        backup_path=args.backup_to,
+        dry_run=args.dry_run,
+    )
+
+
+def _handle_backup(args: argparse.Namespace) -> Any:
+    return backup_store(Path(args.root).expanduser(), destination=args.output)
+
+
+def _handle_restore(args: argparse.Namespace) -> Any:
+    return restore_store(
+        Path(args.root).expanduser(),
+        args.archive,
+        replace=args.replace,
+    )
 
 
 def _handle_demo(args: argparse.Namespace) -> Any:

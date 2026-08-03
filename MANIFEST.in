@@ -14,6 +14,7 @@ include mkdocs.yml
 recursive-include assets *.svg
 recursive-include citefold *.py py.typed
 recursive-include tests *.py
+recursive-include tests/fixtures/v0_1_store *.json *.jsonl *.lock *.md *.sqlite3 *.txt
 recursive-include benchmarks *.py *.md *.json
 recursive-include docs *.md *.svg
 recursive-include examples *.py

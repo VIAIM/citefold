@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import io
 import json
+import shutil
 import tempfile
 import unittest
 import wave
@@ -11,6 +12,17 @@ from unittest.mock import patch
 
 from citefold import Citefold, MemoryScope, __version__
 from citefold.cli import build_parser, main
+
+
+V0_1_STORE = Path(__file__).parent / "fixtures" / "v0_1_store" / "store"
+
+
+def _file_snapshot(root: Path) -> dict[str, bytes]:
+    return {
+        str(path.relative_to(root)): path.read_bytes()
+        for path in sorted(root.rglob("*"))
+        if path.is_file()
+    }
 
 
 class CitefoldCliTest(unittest.TestCase):
@@ -63,6 +75,10 @@ class CitefoldCliTest(unittest.TestCase):
                 "list",
                 "init",
                 "doctor",
+                "status",
+                "migrate",
+                "backup",
+                "restore",
                 "demo",
                 "candidates",
             },
@@ -123,6 +139,108 @@ class CitefoldCliTest(unittest.TestCase):
             self.assertEqual("supported", demo["memory_pack"]["coverage"])
             self.assertIn("ORCHID-91", demo["memory_pack"]["markdown"])
             self.assertTrue(demo["memory_pack"]["citations"])
+
+    def test_storage_status_doctor_and_migration_dry_run_are_read_only_on_legacy(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            parent = Path(tmp)
+            root = parent / "memory"
+            shutil.copytree(V0_1_STORE, root)
+            before = _file_snapshot(root)
+
+            status, output, error = self._run(str(root), "status")
+            self.assertEqual((0, ""), (status, error))
+            self.assertEqual("legacy", json.loads(output)["state"])
+
+            status, output, error = self._run(str(root), "doctor")
+            self.assertEqual((0, ""), (status, error))
+            self.assertEqual("legacy", json.loads(output)["storage"]["state"])
+
+            preview = parent / "preview.zip"
+            status, output, error = self._run(
+                str(root),
+                "migrate",
+                "--dry-run",
+                "--backup-to",
+                str(preview),
+            )
+            self.assertEqual((0, ""), (status, error))
+            plan = json.loads(output)
+            self.assertTrue(plan["ready"])
+            self.assertEqual(1, plan["source_version"])
+            self.assertEqual(2, plan["target_version"])
+            self.assertEqual(str(preview.resolve()), plan["backup_path"])
+
+            self.assertEqual(before, _file_snapshot(root))
+            self.assertFalse((root / "citefold-store.json").exists())
+            self.assertFalse(preview.exists())
+
+    def test_storage_migrate_backup_and_restore_round_trip(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            parent = Path(tmp)
+            root = parent / "memory"
+            shutil.copytree(V0_1_STORE, root)
+
+            legacy_backup = parent / "legacy.zip"
+            status, output, error = self._run(
+                str(root),
+                "migrate",
+                "--backup-to",
+                str(legacy_backup),
+            )
+            self.assertEqual((0, ""), (status, error))
+            migrated = json.loads(output)
+            self.assertEqual("migrated", migrated["status"])
+            self.assertEqual(legacy_backup.resolve(), Path(migrated["backup_path"]))
+            self.assertTrue(legacy_backup.is_file())
+
+            current_backup = parent / "current.zip"
+            status, output, error = self._run(
+                str(root),
+                "backup",
+                "--output",
+                str(current_backup),
+            )
+            self.assertEqual((0, ""), (status, error))
+            backed_up = json.loads(output)
+            self.assertTrue(backed_up["verified"])
+            self.assertEqual(current_backup.resolve(), Path(backed_up["archive"]))
+
+            status, output, error = self._run(
+                str(root),
+                "ingest-text",
+                "请记住：我喜欢恢复测试标记。",
+            )
+            self.assertEqual((0, ""), (status, error))
+            added_record_id = json.loads(output)["record_ids"][0]
+
+            status, output, error = self._run(
+                str(root),
+                "restore",
+                str(current_backup),
+                "--replace",
+            )
+            self.assertEqual((0, ""), (status, error))
+            restored = json.loads(output)
+            self.assertEqual("restored", restored["status"])
+            self.assertTrue(Path(restored["displaced_root"]).is_dir())
+
+            status, output, error = self._run(str(root), "list", "--all")
+            self.assertEqual((0, ""), (status, error))
+            self.assertNotIn(added_record_id, {item["record_id"] for item in json.loads(output)})
+
+    def test_storage_errors_are_single_line_without_traceback(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "unknown"
+            root.mkdir()
+            (root / "unrelated.txt").write_text("not a Citefold store", encoding="utf-8")
+
+            status, output, error = self._run(str(root), "migrate")
+
+            self.assertEqual(1, status)
+            self.assertEqual("", output)
+            self.assertTrue(error.startswith("citefold: error: "))
+            self.assertEqual(1, error.count("\n"))
+            self.assertNotIn("Traceback", error)
 
     def test_candidate_commands_list_approve_and_reject_pending_memory(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -251,17 +369,18 @@ class CitefoldCliTest(unittest.TestCase):
 
     def test_multimodal_commands_accept_recorded_observations(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            image = root / "whiteboard.png"
+            workspace = Path(tmp)
+            memory_root = workspace / "memory"
+            image = workspace / "whiteboard.png"
             image.write_bytes(b"\x89PNG\r\n\x1a\nfixture")
-            observations = root / "image-observations.json"
+            observations = workspace / "image-observations.json"
             observations.write_text(
                 json.dumps([{"content": "项目代号 ORCHID-7", "confidence": 0.96, "locator": {}}]),
                 encoding="utf-8",
             )
 
             status, output, error = self._run(
-                tmp,
+                str(memory_root),
                 "ingest-image",
                 str(image),
                 "--observations-json",
@@ -270,13 +389,13 @@ class CitefoldCliTest(unittest.TestCase):
             self.assertEqual((0, ""), (status, error))
             self.assertEqual(1, len(json.loads(output)["observation_ids"]))
 
-            audio = root / "meeting.wav"
+            audio = workspace / "meeting.wav"
             with wave.open(str(audio), "wb") as handle:
                 handle.setnchannels(1)
                 handle.setsampwidth(2)
                 handle.setframerate(16000)
                 handle.writeframes(b"\x00\x00" * 1600)
-            transcript = root / "transcript.json"
+            transcript = workspace / "transcript.json"
             transcript.write_text(
                 json.dumps(
                     [{"start_ms": 0, "end_ms": 100, "text": "周五提交报价", "confidence": 0.9}]
@@ -284,7 +403,7 @@ class CitefoldCliTest(unittest.TestCase):
                 encoding="utf-8",
             )
             status, output, error = self._run(
-                tmp,
+                str(memory_root),
                 "ingest-audio",
                 str(audio),
                 "--transcript-json",
@@ -295,15 +414,15 @@ class CitefoldCliTest(unittest.TestCase):
             self.assertEqual((0, ""), (status, error))
             self.assertGreaterEqual(len(json.loads(output)["asset_ids"]), 1)
 
-            video = root / "meeting.mp4"
+            video = workspace / "meeting.mp4"
             video.write_bytes(b"fixture-video")
-            frames = root / "frames.json"
+            frames = workspace / "frames.json"
             frames.write_text(
                 json.dumps([{"timestamp_ms": 50, "content": "屏幕显示负责人王明", "confidence": 0.9}]),
                 encoding="utf-8",
             )
             status, output, error = self._run(
-                tmp,
+                str(memory_root),
                 "ingest-video",
                 str(video),
                 "--transcript-json",
@@ -318,14 +437,15 @@ class CitefoldCliTest(unittest.TestCase):
 
     def test_invalid_json_shape_returns_nonzero_without_traceback(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            image = root / "whiteboard.png"
+            workspace = Path(tmp)
+            memory_root = workspace / "memory"
+            image = workspace / "whiteboard.png"
             image.write_bytes(b"\x89PNG\r\n\x1a\nfixture")
-            observations = root / "bad.json"
+            observations = workspace / "bad.json"
             observations.write_text('{"content": "not an array"}', encoding="utf-8")
 
             status, output, error = self._run(
-                tmp,
+                str(memory_root),
                 "ingest-image",
                 str(image),
                 "--observations-json",

@@ -190,7 +190,8 @@ class MemoryRetentionTest(unittest.TestCase):
 
     def test_hard_delete_asset_removes_bytes_and_invalidates_derived_observations(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            memory = Citefold(tmp)
+            memory_root = Path(tmp) / "memory"
+            memory = Citefold(memory_root)
             image = Path(tmp) / "private.png"
             image.write_bytes(b"\x89PNG\r\n\x1a\nprivate")
             ingested = memory.ingest_image(
@@ -200,7 +201,7 @@ class MemoryRetentionTest(unittest.TestCase):
                 observations=[{"content": "机密白板", "confidence": 0.9, "locator": {}}],
             )
             asset = memory.store.assets(scope())[ingested.asset_ids[0]]
-            stored_path = scope_root(tmp) / asset["storage_path"]
+            stored_path = scope_root(memory_root) / asset["storage_path"]
 
             memory.forget(scope(), f"asset:{ingested.asset_ids[0]}", hard=True, reason="用户硬删除")
 

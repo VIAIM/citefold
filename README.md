@@ -90,6 +90,8 @@ print(pack.coverage)       # supported
 print(pack.markdown)       # context plus an observation citation
 ```
 
+Use a dedicated Citefold root: do not put source media, uploads, logs, or unrelated application files inside `.citefold`.
+
 The checked-in example fixes its clock, so this is an excerpt from its actual output (the IDs are deterministic):
 
 ```text
@@ -137,9 +139,10 @@ Read the rationale in [Concepts](https://github.com/VIAIM/citefold/blob/main/doc
 | Video | Store media and align supplied transcript/frame observations | Audio, subtitles, keyframes, and conservative short-clip fallback | Not a general video-understanding system |
 | Recall | Lexical + SQLite FTS5 + reciprocal-rank fusion | Optional embedding signal | `token_budget` is a deterministic character proxy, not a provider tokenizer |
 | Lifecycle | Candidate list/approve/reject, correct, pin/unpin, archive, decay, soft/hard forget, rebuild | — | Pin exempts an active record from decay; it does not raise trust, guarantee recall, or block deletion |
+| Storage operations | Root schema status, additive v0.1 migration, verified ZIP backup, journaled restore | — | Designed for dedicated roots on local POSIX filesystems; Windows, network filesystems, multi-node operation, and exhaustive power-loss behavior are not established |
 | Safety | Evidence gate, quoted media, scope isolation, provenance ledger | OpenRouter requests require ZDR and deny data collection | This SDK is not a sandbox for malicious code in the same Python process |
 
-The [CLI reference](https://github.com/VIAIM/citefold/blob/main/docs/cli.md), [multimodal guide](https://github.com/VIAIM/citefold/blob/main/docs/multimodal.md), and runnable [examples](https://github.com/VIAIM/citefold/tree/main/examples) show the supported paths without hiding optional dependencies.
+The [CLI reference](https://github.com/VIAIM/citefold/blob/main/docs/cli.md), [storage guide](https://github.com/VIAIM/citefold/blob/main/docs/storage.md), [multimodal guide](https://github.com/VIAIM/citefold/blob/main/docs/multimodal.md), and runnable [examples](https://github.com/VIAIM/citefold/tree/main/examples) show the supported paths without hiding optional dependencies.
 
 ## Current architecture
 
@@ -149,9 +152,9 @@ Citefold has three deliberately separate planes:
 - **Memory plane:** candidates, policy decisions, active records, conflicts, and revisions.
 - **Recall plane:** rebuildable lexical/FTS/embedding indexes followed by an evidence gate and bounded renderer.
 
-Durable state is stored below an identity-scoped root as content-addressed assets, append-only JSONL ledgers, human-readable projections, and a rebuildable SQLite index. See [Architecture](https://github.com/VIAIM/citefold/blob/main/docs/architecture.md) for write, read, correction, and deletion paths.
+Durable state is stored in identity-scoped directories below a schema-versioned root as content-addressed assets, append-only JSONL ledgers, human-readable projections, and a rebuildable SQLite index. Normal v0.2 operations share a root lock; migration, backup, and restore take it exclusively. See [Architecture](https://github.com/VIAIM/citefold/blob/main/docs/architecture.md) for write, read, correction, deletion, and storage-management paths.
 
-## v0.1 readiness scorecard
+## Alpha readiness scorecard
 
 This is a conservative **maintainer self-assessment**, not a benchmark or independent review. The dimensions should not be averaged into a “memory accuracy” score.
 
@@ -160,7 +163,7 @@ This is a conservative **maintainer self-assessment**, not a benchmark or indepe
 | Evidence & auditability | **4 / 5** | Live citation closure, revision history, and deletion invalidation are tested; ledgers are not cryptographically tamper-proof |
 | Core correctness | **4 / 5** | Unit, integration, security, and deterministic contract tests cover the local core; independent reproduction is still pending |
 | Multimodal pipeline | **3 / 5** | Text/image/audio/video evidence paths exist; real OCR, ASR, vision, and codec quality is not yet measured |
-| Operations | **2 / 5** | Embedded local use, CI workflows, private POSIX modes, and scoped locking exist; migrations, distributed service operation, and a published scale envelope do not |
+| Operations | **3 / 5** | Local deterministic tests cover a v0.1.0-generated fixture, concurrent-change preservation, verified backup, and key additive-migration/journaled-restore interruptions; private POSIX modes and root/scope locking exist, but exhaustive power-loss tests, production recovery drills, Windows/network-filesystem support, distributed operation, and a published scale envelope do not |
 | Real-world validation | **1 / 5** | Public-data and synthetic evaluations exist; no longitudinal user study or field deployment has been independently evaluated |
 
 ## Measured results
@@ -183,6 +186,7 @@ The reports, dataset hashes, environments, and caveats are preserved in [Benchma
 - Storage is separated by tenant, user, and namespace; agent and session IDs remain provenance fields.
 - OpenRouter is opt-in. Requests require ZDR, deny provider data collection, and fail closed rather than weakening those constraints.
 - API keys are read from process environment variables and are not written to memory ledgers.
+- Verified backups still contain sensitive durable history, and a backup made before hard deletion may retain the removed bytes; encryption and retention remain the host's responsibility.
 
 Citefold does **not** provide user authentication, operating-system isolation, encryption at rest, a remote authorization service, or a defense against hostile code with direct filesystem access. Read the [Security model](https://github.com/VIAIM/citefold/blob/main/docs/security.md) before using sensitive data and report vulnerabilities through [SECURITY.md](https://github.com/VIAIM/citefold/blob/main/SECURITY.md).
 
@@ -226,7 +230,7 @@ Run [`examples/agent_loop.py`](https://github.com/VIAIM/citefold/blob/main/examp
 ## Roadmap
 
 - **0.1:** package/CLI stability, docs, reproducible CI, and evidence-first local workflows.
-- **0.2:** bulk candidate-review UX, pin/unpin, richer extraction adapters, and storage compatibility tests.
+- **0.2:** explicit storage schema and v0.1 migration, verified backup/restore, pin/unpin, bulk candidate-review UX, richer extraction adapters, and storage compatibility tests.
 - **0.3:** real-media quality evaluation, scale/latency/cost measurements, and framework adapters.
 - **1.0 gate:** stable schemas, migration policy, threat-model review, and independent real-user evaluation.
 

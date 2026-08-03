@@ -98,6 +98,8 @@ jobs:
               f"{root}/LICENSE",
               f"{root}/assets/citefold-wordmark.svg",
               f"{root}/tests/test_citefold.py",
+              f"{root}/tests/fixtures/v0_1_store/FIXTURE.json",
+              f"{root}/tests/fixtures/v0_1_store/store/tenants/tenant-a/users/user-1/namespaces/personal/indexes/memory.sqlite3",
               f"{root}/benchmarks/fixtures/multimodal_memory_bench_v1.json",
               f"{root}/docs/architecture.md",
               f"{root}/examples/quickstart.py",

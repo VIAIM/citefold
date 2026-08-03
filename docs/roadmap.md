@@ -20,7 +20,8 @@ The roadmap follows evidence and release gates. It is directional and may change
 
 - Bulk candidate-review UX and richer filtering/explanation metadata.
 - [x] Public pin/unpin operations.
-- Explicit storage schema version and migration command.
+- [x] Explicit root storage schema and fail-closed status inspection.
+- [x] Preflighted v0.1 → v0.2 migration with verified backup and restore commands.
 - Windows and network-filesystem locking tests.
 - Pluggable extraction interfaces with at least one non-OpenRouter example.
 - Better entity, time, topic, novelty, and contradiction grouping.
@@ -30,7 +31,7 @@ The roadmap follows evidence and release gates. It is directional and may change
 
 - Real image, audio, and video quality suites.
 - Scale, latency, storage-growth, and model-cost measurements.
-- Crash-recovery and concurrent-writer stress tests.
+- Exhaustive crash/power-loss and concurrent-writer stress tests beyond the covered additive-migration and journaled-restore breakpoints.
 - Narrow OpenAI Agents SDK, LangGraph, LlamaIndex, and MCP adapters.
 - User-facing candidate review reference application.
 - Benchmark result manifests tied to release commits and artifacts.

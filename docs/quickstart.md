@@ -16,10 +16,13 @@ Verify the installed CLI:
 
 ```bash
 citefold --help
+citefold status
 citefold init
 citefold doctor
 citefold demo
 ```
+
+The default `~/.citefold` path must be dedicated to Citefold state. Use a different `--root` for another application or test; do not put source media, uploads, logs, or unrelated files inside the memory root.
 
 ## Install from source
 
@@ -155,9 +158,32 @@ citefold \
   recall 'What is the launch codename?'
 ```
 
+## Upgrade an existing v0.1 root
+
+Normal memory operations fail closed when they detect the implicit schema 1 layout written by v0.1. Stop all v0.1 processes first, upgrade every writer together, and do not restart old code against the migrated root.
+
+Inspect and preflight without writing:
+
+```bash
+citefold --root .citefold status
+citefold --root .citefold migrate --dry-run
+```
+
+When the plan reports `ready: true`, run the explicit migration:
+
+```bash
+citefold --root .citefold migrate \
+  --backup-to "$PWD/backups/citefold-before-v0.2.zip"
+```
+
+Citefold holds the legacy scope/ledger locks, verifies the ZIP backup, confirms that v0.1 files did not change, and then adds schema 2 root metadata. A concurrent change aborts without restoring older backup data over it. Interrupted migration recovery only cleans up or completes its own additive metadata. Rehearse this on a copy of your own data before production use. The checked-in v0.1 fixture proves the deterministic compatibility path locally, not every deployment or filesystem.
+
+Read [Storage, migration, backup, and restore](storage.md) before operating on persistent data. It also documents standalone backups, restore intent-journal recovery with a retained `displaced_root`, Python APIs, and the local-POSIX locking boundary.
+
 ## Next steps
 
 - Add memory to a turn loop with [Integrations](integrations.md).
 - Register image, audio, and video evidence with [Multimodal](multimodal.md).
 - Enable optional model operations with [OpenRouter](providers/openrouter.md).
+- Rehearse upgrades and restore with [Storage](storage.md).
 - Read [Security](security.md) before storing sensitive information.
