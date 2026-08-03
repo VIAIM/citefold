@@ -2,6 +2,8 @@ __version__ = "0.1.0"
 
 from .core import Citefold
 from .models import (
+    AGENT_TURN_CONTRACT,
+    AgentTurnContext,
     Asset,
     CandidateResult,
     Episode,
@@ -43,6 +45,8 @@ from .storage import (
 )
 
 __all__ = [
+    "AGENT_TURN_CONTRACT",
+    "AgentTurnContext",
     "Asset",
     "BackupResult",
     "BackupValidationError",

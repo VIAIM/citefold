@@ -7,6 +7,7 @@ import os
 import re
 import stat
 import tempfile
+import uuid
 from collections import Counter
 from contextlib import nullcontext
 from datetime import date, datetime, timedelta, timezone
@@ -17,6 +18,8 @@ from typing import Any, Callable, Iterable
 from .consolidation import ConsolidationService
 from .ingest import FFmpegProcessor, MultiModalIngestor
 from .models import (
+    AGENT_TURN_CONTRACT,
+    AgentTurnContext,
     CandidateResult,
     EvidenceResult,
     EvidenceValidationError,
@@ -25,6 +28,7 @@ from .models import (
     MemoryScope,
     ScopeError,
     SelectedNode,
+    _validate_agent_turn_request,
 )
 from .openrouter import ModelResponseError, OpenRouterClient, OpenRouterRequestError
 from .policy import PolicyGate
@@ -43,6 +47,17 @@ ENGLISH_STOPWORDS = {
 }
 MIN_MEMORY_PACK_TOKEN_BUDGET = 256
 MEMORY_PACK_CHARS_PER_TOKEN = 4
+
+
+def _validate_json_object_keys(value: Any) -> None:
+    if isinstance(value, dict):
+        if any(not isinstance(key, str) for key in value):
+            raise ValueError("metadata object keys must be strings")
+        for item in value.values():
+            _validate_json_object_keys(item)
+    elif isinstance(value, (list, tuple)):
+        for item in value:
+            _validate_json_object_keys(item)
 
 
 def _scope_write(method: Callable[..., Any]) -> Callable[..., Any]:
@@ -85,6 +100,115 @@ class Citefold:
         self.multimodal = MultiModalIngestor(self.store, openrouter, media_processor)
         if openrouter is not None and hasattr(openrouter, "add_audit_callback"):
             openrouter.add_audit_callback(self._record_model_call)
+
+    def prepare_agent_turn(
+        self,
+        scope: MemoryScope,
+        user_message: str,
+        *,
+        turn_id: str | None = None,
+        mode: str = "text",
+        token_budget: int = 1_200,
+        include_archived: bool = False,
+    ) -> AgentTurnContext:
+        resolved_turn_id = uuid.uuid4().hex if turn_id is None else turn_id
+        _validate_agent_turn_request(user_message, resolved_turn_id, mode)
+        if not isinstance(scope, MemoryScope):
+            raise TypeError("scope must be a MemoryScope")
+        if isinstance(token_budget, bool) or not isinstance(token_budget, int):
+            raise ValueError("token_budget must be an integer")
+        if token_budget < MIN_MEMORY_PACK_TOKEN_BUDGET:
+            raise ValueError(
+                f"token_budget must be at least {MIN_MEMORY_PACK_TOKEN_BUDGET} "
+                "to fit the MemoryPack contract"
+            )
+        memory_pack = self.recall(
+            scope,
+            user_message,
+            mode=mode,
+            token_budget=token_budget,
+            include_archived=include_archived,
+        )
+        return AgentTurnContext(
+            turn_id=resolved_turn_id,
+            scope=scope,
+            user_message=user_message,
+            mode=mode,
+            memory_pack=memory_pack,
+        )
+
+    def complete_agent_turn(
+        self,
+        turn: AgentTurnContext,
+        assistant_message: str,
+        *,
+        source: str = "agent_loop",
+        metadata: dict[str, Any] | None = None,
+    ) -> IngestResult:
+        if not isinstance(turn, AgentTurnContext):
+            raise TypeError("turn must be an AgentTurnContext")
+        _validate_agent_turn_request(turn.user_message, turn.turn_id, turn.mode)
+        if turn.contract_version != AGENT_TURN_CONTRACT:
+            raise ValueError(f"unsupported agent turn contract: {turn.contract_version}")
+        if not isinstance(turn.scope, MemoryScope):
+            raise TypeError("turn scope must be a MemoryScope")
+        if not isinstance(turn.memory_pack, MemoryPack):
+            raise TypeError("turn memory_pack must be a MemoryPack")
+        if turn.memory_pack.identity_scope != turn.scope.as_record():
+            raise ScopeError("memory_pack identity scope does not match the agent turn scope")
+        if not isinstance(assistant_message, str) or not assistant_message.strip():
+            raise ValueError("assistant_message must be a non-empty string")
+        if not isinstance(source, str) or not source.strip():
+            raise ValueError("source must be a non-empty string")
+        if metadata is not None and not isinstance(metadata, dict):
+            raise TypeError("metadata must be a dictionary")
+        host_metadata = dict(metadata or {})
+        _validate_json_object_keys(host_metadata)
+        try:
+            json.dumps(host_metadata, ensure_ascii=False, sort_keys=True, allow_nan=False)
+        except (TypeError, ValueError) as exc:
+            raise ValueError("metadata must be JSON serializable") from exc
+        messages = [
+            {"role": "user", "content": turn.user_message},
+            {"role": "assistant", "content": assistant_message},
+        ]
+        completion_digest = hashlib.sha256(
+            json.dumps(
+                {
+                    "contract": AGENT_TURN_CONTRACT,
+                    "scope": turn.scope.as_record(),
+                    "turn_id": turn.turn_id,
+                    "mode": turn.mode,
+                    "source": source,
+                    "messages": messages,
+                    "metadata": host_metadata,
+                    "memory_coverage": turn.memory_pack.coverage,
+                },
+                ensure_ascii=False,
+                sort_keys=True,
+                separators=(",", ":"),
+                allow_nan=False,
+            ).encode("utf-8")
+        ).hexdigest()
+        turn_metadata = {
+            **host_metadata,
+            "agent_turn_contract": AGENT_TURN_CONTRACT,
+            "agent_turn_id": turn.turn_id,
+            "agent_turn_digest": completion_digest,
+            "memory_coverage": turn.memory_pack.coverage,
+        }
+        _validate_json_object_keys(turn_metadata)
+        try:
+            json.dumps(turn_metadata, ensure_ascii=False, sort_keys=True, allow_nan=False)
+        except (TypeError, ValueError) as exc:
+            raise ValueError("metadata must be JSON serializable") from exc
+        return self.ingest_chat(
+            turn.scope,
+            messages,
+            source=source,
+            mode=turn.mode,
+            metadata=turn_metadata,
+        )
 
     @_scope_write
     def ingest_image(
@@ -169,6 +293,35 @@ class Citefold:
         refresh_indexes: bool = True,
     ) -> IngestResult:
         message_list = list(messages)
+        turn_id = str((metadata or {}).get("agent_turn_id") or "")
+        turn_contract = str((metadata or {}).get("agent_turn_contract") or "")
+        turn_digest = str((metadata or {}).get("agent_turn_digest") or "")
+        if turn_id:
+            for existing in self.store.read_ledger(scope, "episodes"):
+                existing_metadata = existing.get("metadata")
+                if not isinstance(existing_metadata, dict):
+                    continue
+                if (
+                    existing.get("scope") != scope.as_record()
+                    or existing_metadata.get("agent_turn_id") != turn_id
+                ):
+                    continue
+                episode_id = str(existing.get("episode_id") or "")
+                if not episode_id or not self.store.validate_evidence(
+                    scope,
+                    f"episode:{episode_id}",
+                ):
+                    raise EvidenceValidationError(
+                        "turn_id belongs to a deleted or invalid Episode and cannot be reused"
+                    )
+                if (
+                    existing_metadata.get("agent_turn_contract") != turn_contract
+                    or existing_metadata.get("agent_turn_digest") != turn_digest
+                ):
+                    raise ValueError(
+                        "turn_id already completed with different content, source, mode, or metadata"
+                    )
+                return self._agent_turn_result(existing)
         result = IngestResult()
         observation_ids: list[str] = []
         for message in message_list:
@@ -203,8 +356,28 @@ class Citefold:
                     result=result,
                     source_origin=observation.source_origin,
                 )
-        episode_path = self._write_text_episode(scope, message_list, result.evidence_refs)
+        episode_path = self._write_text_episode(
+            scope,
+            message_list,
+            result.evidence_refs,
+            turn_id=turn_id or None,
+        )
         result.memory_paths.append(episode_path)
+        if turn_id:
+            idempotency_key = f"{turn_contract}:{scope.session_id}:{turn_id}"
+        else:
+            idempotency_key = f"chat:{scope.session_id}:{'|'.join(observation_ids)}"
+        episode_metadata = {**(metadata or {}), "markdown_path": episode_path}
+        if turn_id:
+            expected_episode_id = self.store.stable_id(
+                "episode",
+                *scope.as_record().values(),
+                idempotency_key,
+            )
+            episode_metadata["agent_turn_receipt"] = self._agent_turn_receipt(
+                result,
+                expected_episode_id,
+            )
         episode, _created = self.store.append_episode(
             scope=scope,
             observation_ids=observation_ids,
@@ -213,13 +386,56 @@ class Citefold:
             participants=list(dict.fromkeys(message.get("role", "unknown") for message in message_list)),
             scene="chat",
             topics=[],
-            metadata={"markdown_path": episode_path, **(metadata or {})},
-            idempotency_key=f"chat:{scope.session_id}:{'|'.join(observation_ids)}",
+            metadata=episode_metadata,
+            idempotency_key=idempotency_key,
         )
         result.episode_ids.append(episode.episode_id)
         if refresh_indexes:
             self._refresh_indexes(scope)
         return result
+
+    @staticmethod
+    def _agent_turn_receipt(result: IngestResult, episode_id: str) -> dict[str, list[str]]:
+        return {
+            "evidence_refs": list(result.evidence_refs),
+            "committed": list(result.committed),
+            "candidates": list(result.candidates),
+            "memory_paths": list(result.memory_paths),
+            "asset_ids": list(result.asset_ids),
+            "observation_ids": list(result.observation_ids),
+            "episode_ids": [episode_id],
+            "record_ids": list(result.record_ids),
+            "pending": list(result.pending),
+            "errors": list(result.errors),
+        }
+
+    @staticmethod
+    def _agent_turn_result(episode: dict[str, Any]) -> IngestResult:
+        metadata = episode.get("metadata")
+        if not isinstance(metadata, dict):
+            raise StorageError("agent turn Episode metadata is missing or corrupt")
+        receipt = metadata.get("agent_turn_receipt")
+        field_names = (
+            "evidence_refs",
+            "committed",
+            "candidates",
+            "memory_paths",
+            "asset_ids",
+            "observation_ids",
+            "episode_ids",
+            "record_ids",
+            "pending",
+            "errors",
+        )
+        if not isinstance(receipt, dict) or any(
+            not isinstance(receipt.get(name), list)
+            or any(not isinstance(item, str) for item in receipt[name])
+            for name in field_names
+        ):
+            raise StorageError("agent turn completion receipt is missing or corrupt")
+        if receipt["episode_ids"] != [episode.get("episode_id")]:
+            raise StorageError("agent turn completion receipt does not match its Episode")
+        return IngestResult(**{name: list(receipt[name]) for name in field_names})
 
     @_scope_write
     def ingest_text(
@@ -307,8 +523,7 @@ class Citefold:
     ) -> EvidenceResult:
         user_root = self._ensure_scope(scope)
         now = self._now()
-        evidence_id = self._id(
-            "ev",
+        evidence_id_parts = [
             scope.tenant_id,
             scope.user_id,
             scope.namespace,
@@ -316,8 +531,11 @@ class Citefold:
             scope.session_id,
             source,
             json.dumps(payload, ensure_ascii=False),
-            now.isoformat(),
-        )
+        ]
+        if (metadata or {}).get("agent_turn_id"):
+            evidence_id_parts.append(str(metadata["agent_turn_id"]))
+        evidence_id_parts.append(now.isoformat())
+        evidence_id = self._id("ev", *evidence_id_parts)
         rel = Path("evidence") / now.strftime("%Y-%m") / f"{now.strftime('%Y-%m-%d')}.jsonl"
         path = user_root / rel
         record = {
@@ -329,11 +547,20 @@ class Citefold:
             "metadata": metadata or {},
         }
         self._append_jsonl(path, record)
-        self._audit(
-            user_root,
-            "append_event",
-            {"evidence_id": evidence_id, "source": source, "path": str(rel), **scope.as_record()},
-        )
+        audit_data = {
+            "evidence_id": evidence_id,
+            "source": source,
+            "path": str(rel),
+            **scope.as_record(),
+        }
+        if (metadata or {}).get("agent_turn_id"):
+            audit_data.update(
+                {
+                    "agent_turn_id": str(metadata["agent_turn_id"]),
+                    "agent_turn_contract": str(metadata.get("agent_turn_contract") or ""),
+                }
+            )
+        self._audit(user_root, "append_event", audit_data)
         if refresh_indexes:
             self._refresh_indexes(scope)
         return EvidenceResult(
@@ -2027,11 +2254,14 @@ class Citefold:
             original_name=(metadata or {}).get("original_name"),
             metadata={"role": role, "mode": mode, **(metadata or {})},
         )
+        locator: dict[str, Any] = {"char_start": 0, "char_end": len(text)}
+        if (metadata or {}).get("agent_turn_id"):
+            locator["agent_turn_id"] = str(metadata["agent_turn_id"])
         observation, _created = self.store.append_observation(
             scope=scope,
             asset_id=asset.asset_id,
             modality="audio_transcript" if mode == "voice" else "text",
-            locator={"char_start": 0, "char_end": len(text)},
+            locator=locator,
             content=text,
             producer_type="direct" if source_origin == "user_reported" else "agent",
             producer_model=(metadata or {}).get("producer_model"),
@@ -2682,16 +2912,31 @@ class Citefold:
             )
         return root
 
-    def _write_text_episode(self, scope: MemoryScope, messages: Iterable[dict[str, str]], evidence_refs: list[str]) -> str:
+    def _write_text_episode(
+        self,
+        scope: MemoryScope,
+        messages: Iterable[dict[str, str]],
+        evidence_refs: list[str],
+        turn_id: str | None = None,
+    ) -> str:
         user_root = self._ensure_scope(scope)
         now = self._now()
-        episode_name = f"{now.strftime('%Y-%m-%dT%H%M%S')}-{self._slug(scope.session_id)}-chat.md"
-        rel = Path("episodes") / now.strftime("%Y-%m") / episode_name
+        if turn_id:
+            turn_hash = hashlib.sha256(
+                "\0".join([*scope.as_record().values(), turn_id]).encode("utf-8")
+            ).hexdigest()[:24]
+            episode_name = f"{turn_hash}-chat.md"
+            rel = Path("episodes") / "agent-turns" / episode_name
+        else:
+            episode_name = f"{now.strftime('%Y-%m-%dT%H%M%S')}-{self._slug(scope.session_id)}-chat.md"
+            rel = Path("episodes") / now.strftime("%Y-%m") / episode_name
         lines = ["# Text Chat Episode", "", f"Recorded: {now.isoformat()}", "", "## Messages"]
         for message in messages:
             lines.append(f"- {message.get('role', 'unknown')}: {message.get('content', '')}")
         lines.extend(["", "## Sources", *[f"- {ref}" for ref in evidence_refs]])
-        self._atomic_write(user_root / rel, "\n".join(lines).strip() + "\n")
+        path = user_root / rel
+        if not turn_id or not path.exists():
+            self._atomic_write(path, "\n".join(lines).strip() + "\n")
         return str(rel)
 
     def _write_voice_episode(self, scope: MemoryScope, text: str, evidence_ref: str) -> str:

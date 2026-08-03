@@ -186,22 +186,15 @@ Citefold **不提供**用户认证、操作系统隔离、静态数据加密、�
 
 ## Agent 集成
 
-框架无关的集成只需要两个 hook：
+框架无关的 `agent-turn-v1` 集成只需要两个 hook：
 
 ```python
-context = memory.recall(scope, user_message).markdown   # 模型调用前
-assistant_message = model(user_message, context)
-memory.ingest_chat(                                     # 完整回合后
-    scope,
-    [
-        {"role": "user", "content": user_message},
-        {"role": "assistant", "content": assistant_message},
-    ],
-    source="agent_loop",
-)
+turn = memory.prepare_agent_turn(scope, user_message)  # 模型调用前
+assistant_message = model(user_message, turn.memory_pack.markdown)
+memory.complete_agent_turn(turn, assistant_message)   # 仅在成功完成后调用
 ```
 
-运行 [`examples/agent_loop.py`](examples/agent_loop.py) 或阅读[集成指南](docs/integrations.md)。Citefold 不绑定特定 Agent 框架或模型供应商。
+`turn.as_dict()` 是稳定、可 JSON 序列化的机器契约。运行 [`examples/agent_loop.py`](examples/agent_loop.py) 或阅读[集成指南](docs/integrations.md)，了解 coverage、失败传播、信任边界、重试与持久目录语义。Citefold 不绑定特定 Agent 框架或模型供应商。
 
 ## Roadmap
 

@@ -7,6 +7,7 @@ Citefold is an evidence-backed multimodal memory library for agents. It stores r
 ## Start here
 
 - [Quickstart](quickstart.md) — install Citefold and run local ingest → recall.
+- [Integrations](integrations.md) — add the versioned memory contract to an agent turn.
 - [Concepts](concepts.md) — understand evidence, candidates, records, and coverage.
 - [Architecture](architecture.md) — trace write, read, correction, and deletion paths.
 - [CLI](cli.md) — use the current command surface.
@@ -15,7 +16,6 @@ Citefold is an evidence-backed multimodal memory library for agents. It stores r
 - [Security](security.md) — know the trust boundaries before using private data.
 - [Benchmarks](benchmarks.md) — read the measurements and their caveats.
 - [Limitations](limitations.md) — decide whether Citefold fits your deployment.
-- [Integrations](integrations.md) — add memory hooks to an agent loop.
 - [Roadmap](roadmap.md) — see the path to a stable 1.0.
 
 ## What Citefold is

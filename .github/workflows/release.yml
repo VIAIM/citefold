@@ -65,6 +65,63 @@ jobs:
       - name: Check package metadata
         run: python -m twine check --strict dist/*
 
+      - name: Smoke-test exact release wheel
+        run: |
+          python -m venv "${RUNNER_TEMP}/citefold-release-smoke"
+          "${RUNNER_TEMP}/citefold-release-smoke/bin/python" -m pip install --no-deps dist/*.whl
+          "${RUNNER_TEMP}/citefold-release-smoke/bin/python" -m pip check
+          "${RUNNER_TEMP}/citefold-release-smoke/bin/citefold" --version
+          cd "${RUNNER_TEMP}"
+          "${RUNNER_TEMP}/citefold-release-smoke/bin/python" -I - <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+          from tempfile import TemporaryDirectory
+
+          import citefold
+          from citefold import AGENT_TURN_CONTRACT, AgentTurnContext, Citefold, MemoryScope
+
+          assert Path(citefold.__file__).resolve().is_relative_to(Path(sys.prefix).resolve())
+
+          with TemporaryDirectory() as root:
+              memory = Citefold(Path(root))
+              prior = MemoryScope("smoke", "user", "work", "release", "session-prior")
+              current = MemoryScope("smoke", "user", "work", "release", "session-current")
+              memory.ingest_text(
+                  prior,
+                  "The launch codename is ORCHID-77.",
+                  source="release_smoke",
+              )
+              turn = memory.prepare_agent_turn(
+                  current,
+                  "What is the launch codename?",
+                  turn_id="release-turn-1",
+              )
+              assert isinstance(turn, AgentTurnContext)
+              assert turn.contract_version == AGENT_TURN_CONTRACT
+              assert turn.memory_pack.coverage == "supported"
+              assert turn.memory_pack.citations
+              assert "ORCHID-77" in turn.memory_pack.markdown
+              json.dumps(turn.as_dict(), ensure_ascii=False, allow_nan=False)
+
+              completed = memory.complete_agent_turn(
+                  turn,
+                  "The launch codename is ORCHID-77.",
+                  source="release_agent",
+              )
+              assert len(completed.observation_ids) == 2
+              assert len(completed.episode_ids) == 1
+
+              isolated = MemoryScope("other", "user", "work", "release", "session-current")
+              empty = memory.prepare_agent_turn(
+                  isolated,
+                  "What is the launch codename?",
+                  turn_id="release-turn-isolated",
+              )
+              assert empty.memory_pack.coverage == "none"
+              assert "ORCHID-77" not in empty.memory_pack.markdown
+          PY
+
       - name: Generate SHA-256 checksums
         working-directory: dist
         run: sha256sum * > ../SHA256SUMS

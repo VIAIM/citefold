@@ -16,14 +16,11 @@ def run_turn(
     respond: Responder,
 ) -> str:
     """Recall before the model call, then record the completed turn."""
-    memory_pack = memory.recall(scope, user_message, token_budget=1_200)
-    assistant_message = respond(user_message, memory_pack.markdown)
-    memory.ingest_chat(
-        scope,
-        [
-            {"role": "user", "content": user_message},
-            {"role": "assistant", "content": assistant_message},
-        ],
+    turn = memory.prepare_agent_turn(scope, user_message, token_budget=1_200)
+    assistant_message = respond(user_message, turn.memory_pack.markdown)
+    memory.complete_agent_turn(
+        turn,
+        assistant_message,
         source="agent_loop",
     )
     return assistant_message
