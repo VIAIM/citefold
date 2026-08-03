@@ -17,8 +17,8 @@ over feature count. Items are directions, not delivery commitments.
 
 - Add higher-level human-review hooks and interfaces around the existing
   candidate CLI workflow.
-- Add documented hooks and adapters for common agent runtimes without coupling
-  the core to one framework.
+- Add narrow runtime adapters around the versioned `agent-turn-v1` contract
+  without coupling the core to one framework.
 - Harden the explicit schema, additive v0.1 migration, verified backup/restore,
   intent-journal recovery, and displaced-root workflow against broader
   deployment histories and crash/power-loss points.

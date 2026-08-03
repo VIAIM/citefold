@@ -182,7 +182,7 @@ Read [Storage, migration, backup, and restore](storage.md) before operating on p
 
 ## Next steps
 
-- Add memory to a turn loop with [Integrations](integrations.md).
+- Add the versioned `agent-turn-v1` hooks to a persistent agent with [Integrations](integrations.md).
 - Register image, audio, and video evidence with [Multimodal](multimodal.md).
 - Enable optional model operations with [OpenRouter](providers/openrouter.md).
 - Rehearse upgrades and restore with [Storage](storage.md).

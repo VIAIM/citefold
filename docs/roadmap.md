@@ -22,10 +22,11 @@ The roadmap follows evidence and release gates. It is directional and may change
 - [x] Public pin/unpin operations.
 - [x] Explicit root storage schema and fail-closed status inspection.
 - [x] Preflighted v0.1 → v0.2 migration with verified backup and restore commands.
+- [x] Versioned `agent-turn-v1` prepare/complete hooks and wheel-consumer smoke test.
 - Windows and network-filesystem locking tests.
 - Pluggable extraction interfaces with at least one non-OpenRouter example.
 - Better entity, time, topic, novelty, and contradiction grouping.
-- Stable machine-readable MemoryPack contract.
+- [x] Stable machine-readable MemoryPack contract through `AgentTurnContext.as_dict()`.
 
 ## 0.3 — measured integrations
 

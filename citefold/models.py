@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 import math
+from copy import deepcopy
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -9,6 +10,9 @@ from typing import Any
 
 SCOPE_ID_PATTERN = re.compile(r"^[A-Za-z0-9_.-]+$")
 MAX_SCOPE_ID_LENGTH = 128
+AGENT_TURN_CONTRACT = "agent-turn-v1"
+AGENT_TURN_ID_PATTERN = re.compile(r"^[A-Za-z0-9_.-]+$")
+MAX_AGENT_TURN_ID_LENGTH = 128
 
 
 class ScopeError(ValueError):
@@ -244,3 +248,62 @@ class MemoryPack:
     unknowns: list[str] = field(default_factory=list)
     citations: list[dict[str, Any]] = field(default_factory=list)
     coverage: str = "none"
+
+
+def _validate_agent_turn_request(user_message: Any, turn_id: Any, mode: Any) -> None:
+    if not isinstance(user_message, str) or not user_message.strip():
+        raise ValueError("user_message must be a non-empty string")
+    if not isinstance(turn_id, str) or not turn_id:
+        raise ValueError("turn_id must be a non-empty string")
+    if len(turn_id) > MAX_AGENT_TURN_ID_LENGTH:
+        raise ValueError(f"turn_id must be at most {MAX_AGENT_TURN_ID_LENGTH} characters")
+    if not AGENT_TURN_ID_PATTERN.fullmatch(turn_id):
+        raise ValueError("turn_id must match [A-Za-z0-9_.-]+")
+    if mode not in {"text", "voice"}:
+        raise ValueError("mode must be 'text' or 'voice'")
+
+
+@dataclass(frozen=True)
+class AgentTurnContext:
+    turn_id: str
+    scope: MemoryScope
+    user_message: str
+    mode: str
+    memory_pack: MemoryPack
+    contract_version: str = AGENT_TURN_CONTRACT
+
+    def __post_init__(self) -> None:
+        _validate_agent_turn_request(self.user_message, self.turn_id, self.mode)
+        if self.contract_version != AGENT_TURN_CONTRACT:
+            raise ValueError(f"unsupported agent turn contract: {self.contract_version}")
+        if not isinstance(self.scope, MemoryScope):
+            raise TypeError("scope must be a MemoryScope")
+        if not isinstance(self.memory_pack, MemoryPack):
+            raise TypeError("memory_pack must be a MemoryPack")
+        if self.memory_pack.identity_scope != self.scope.as_record():
+            raise ScopeError("memory_pack identity scope does not match the agent turn scope")
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "contract_version": self.contract_version,
+            "turn_id": self.turn_id,
+            "scope": self.scope.as_record(),
+            "user_message": self.user_message,
+            "mode": self.mode,
+            "memory_pack": {
+                "identity_scope": dict(self.memory_pack.identity_scope),
+                "coverage": self.memory_pack.coverage,
+                "context_markdown": self.memory_pack.markdown,
+                "selected_nodes": [
+                    {
+                        "node_id": node.node_id,
+                        "path": node.path,
+                        "reason": node.reason,
+                    }
+                    for node in self.memory_pack.selected_nodes
+                ],
+                "citations": deepcopy(self.memory_pack.citations),
+                "conflicts": deepcopy(self.memory_pack.conflicts),
+                "unknowns": list(self.memory_pack.unknowns),
+            },
+        }

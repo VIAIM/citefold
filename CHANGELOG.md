@@ -9,6 +9,8 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Added
 
+- Versioned `agent-turn-v1` prepare/complete hooks with a stable JSON-compatible
+  context envelope, trusted-host turn IDs, and an installed-wheel consumer test.
 - Auditable Python API and CLI operations to pin active records against decay
   and unpin them without changing trust, evidence, or deletion semantics.
 - Root-level schema 2 manifests and read-only storage status inspection.
@@ -23,6 +25,9 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Changed
 
+- Agent turns now use turn-aware observation, Episode, and Markdown identities,
+  preventing same-session turns completed in the same second from overwriting
+  each other's projection.
 - Storage roots must be dedicated to Citefold. Unrecognized non-empty roots,
   legacy roots awaiting migration, corrupt manifests, and newer schemas now fail
   closed instead of being initialized or used by normal memory operations.

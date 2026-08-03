@@ -210,22 +210,15 @@ Do not use it yet when you need:
 
 ## Agent integration
 
-The framework-neutral loop is two hooks:
+The framework-neutral `agent-turn-v1` loop is two hooks:
 
 ```python
-context = memory.recall(scope, user_message).markdown   # before the model call
-assistant_message = model(user_message, context)
-memory.ingest_chat(                                     # after the completed turn
-    scope,
-    [
-        {"role": "user", "content": user_message},
-        {"role": "assistant", "content": assistant_message},
-    ],
-    source="agent_loop",
-)
+turn = memory.prepare_agent_turn(scope, user_message)  # before the model call
+assistant_message = model(user_message, turn.memory_pack.markdown)
+memory.complete_agent_turn(turn, assistant_message)   # only after success
 ```
 
-Run [`examples/agent_loop.py`](https://github.com/VIAIM/citefold/blob/main/examples/agent_loop.py) or see [Integrations](https://github.com/VIAIM/citefold/blob/main/docs/integrations.md). Citefold does not force a particular agent framework or model provider.
+`turn.as_dict()` is the stable JSON-compatible contract for non-native consumers. Run [`examples/agent_loop.py`](https://github.com/VIAIM/citefold/blob/main/examples/agent_loop.py) or see [Integrations](https://github.com/VIAIM/citefold/blob/main/docs/integrations.md) for coverage, failure, trust, retry, and persistent-root semantics. Citefold does not force a particular agent framework or model provider.
 
 ## Roadmap
 

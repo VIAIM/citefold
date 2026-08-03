@@ -97,6 +97,7 @@ jobs:
               f"{root}/README.zh-CN.md",
               f"{root}/LICENSE",
               f"{root}/assets/citefold-wordmark.svg",
+              f"{root}/tests/test_agent_turn.py",
               f"{root}/tests/test_citefold.py",
               f"{root}/tests/fixtures/v0_1_store/FIXTURE.json",
               f"{root}/tests/fixtures/v0_1_store/store/tenants/tenant-a/users/user-1/namespaces/personal/indexes/memory.sqlite3",
@@ -112,25 +113,57 @@ jobs:
         run: |
           python -m venv "${RUNNER_TEMP}/citefold-smoke"
           "${RUNNER_TEMP}/citefold-smoke/bin/python" -m pip install --no-deps dist/*.whl
-          "${RUNNER_TEMP}/citefold-smoke/bin/citefold" --help
+          "${RUNNER_TEMP}/citefold-smoke/bin/python" -m pip check
+          "${RUNNER_TEMP}/citefold-smoke/bin/citefold" --version
           cd "${RUNNER_TEMP}"
-          "${RUNNER_TEMP}/citefold-smoke/bin/python" - <<'PY'
+          "${RUNNER_TEMP}/citefold-smoke/bin/python" -I - <<'PY'
+          import json
+          import sys
           from pathlib import Path
           from tempfile import TemporaryDirectory
 
-          from citefold import Citefold, MemoryScope
+          import citefold
+          from citefold import AGENT_TURN_CONTRACT, AgentTurnContext, Citefold, MemoryScope
+
+          assert Path(citefold.__file__).resolve().is_relative_to(Path(sys.prefix).resolve())
 
           with TemporaryDirectory() as root:
               memory = Citefold(Path(root))
-              scope = MemoryScope("smoke", "user", "personal", "ci", "session")
+              prior = MemoryScope("smoke", "user", "work", "ci", "session-prior")
+              current = MemoryScope("smoke", "user", "work", "ci", "session-current")
               memory.ingest_text(
-                  scope,
-                  "Please remember: I prefer green tea.",
+                  prior,
+                  "The launch codename is ORCHID-77.",
                   source="ci_smoke",
               )
-              pack = memory.recall(scope, "What drink do I prefer?")
-              assert pack.selected_nodes
-              assert pack.citations
+              turn = memory.prepare_agent_turn(
+                  current,
+                  "What is the launch codename?",
+                  turn_id="ci-turn-1",
+              )
+              assert isinstance(turn, AgentTurnContext)
+              assert turn.contract_version == AGENT_TURN_CONTRACT
+              assert turn.memory_pack.coverage == "supported"
+              assert turn.memory_pack.citations
+              assert "ORCHID-77" in turn.memory_pack.markdown
+              json.dumps(turn.as_dict(), ensure_ascii=False, allow_nan=False)
+
+              completed = memory.complete_agent_turn(
+                  turn,
+                  "The launch codename is ORCHID-77.",
+                  source="ci_agent",
+              )
+              assert len(completed.observation_ids) == 2
+              assert len(completed.episode_ids) == 1
+
+              isolated = MemoryScope("other", "user", "work", "ci", "session-current")
+              empty = memory.prepare_agent_turn(
+                  isolated,
+                  "What is the launch codename?",
+                  turn_id="ci-turn-isolated",
+              )
+              assert empty.memory_pack.coverage == "none"
+              assert "ORCHID-77" not in empty.memory_pack.markdown
           PY
 
       - name: Upload distributions
