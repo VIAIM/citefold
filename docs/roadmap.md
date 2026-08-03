@@ -19,7 +19,7 @@ The roadmap follows evidence and release gates. It is directional and may change
 ## 0.2 — review and compatibility
 
 - Bulk candidate-review UX and richer filtering/explanation metadata.
-- Public pin/unpin operations.
+- [x] Public pin/unpin operations.
 - Explicit storage schema version and migration command.
 - Windows and network-filesystem locking tests.
 - Pluggable extraction interfaces with at least one non-OpenRouter example.

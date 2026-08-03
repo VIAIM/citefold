@@ -109,6 +109,85 @@ class MemoryRetentionTest(unittest.TestCase):
             )
             self.assertEqual(confidence, after_next_period["confidence"])
 
+    def test_pin_prevents_decay_and_unpin_restores_it(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            clock = MutableClock()
+            memory = Citefold(tmp, clock=clock)
+            ingested = memory.ingest_text(scope(), "请记住：我喜欢简短回答。", source="text_chat")
+            record_id = ingested.record_ids[0]
+
+            pinned = memory.pin(scope(), record_id, reason="用户要求保留")
+            clock.value = clock.value + timedelta(days=180)
+
+            self.assertTrue(pinned.pinned)
+            self.assertEqual([], memory.decay(scope()))
+            self.assertEqual(1.0, memory.list_records(scope())[0]["access_strength"])
+
+            unpinned = memory.unpin(scope(), record_id, reason="用户恢复正常衰减")
+
+            self.assertFalse(unpinned.pinned)
+            self.assertEqual([], memory.decay(scope()))
+            self.assertEqual(1.0, memory.list_records(scope())[0]["access_strength"])
+
+            clock.value = clock.value + timedelta(days=90)
+            changed = memory.decay(scope())
+
+            self.assertEqual([record_id], changed)
+            self.assertAlmostEqual(0.5, memory.list_records(scope())[0]["access_strength"])
+
+    def test_pin_transitions_are_idempotent_auditable_and_inherited_by_correction(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            memory = Citefold(tmp)
+            ingested = memory.ingest_text(scope(), "请记住：我喜欢先看结论。", source="text_chat")
+            record_id = ingested.record_ids[0]
+
+            memory.pin(scope(), record_id, reason="  explicit pin  ")
+            memory.pin(scope(), record_id)
+            memory.unpin(scope(), record_id)
+            memory.unpin(scope(), record_id)
+            repinned = memory.pin(scope(), record_id)
+
+            revisions = jsonl(scope_root(tmp) / "ledgers" / "revisions.jsonl")
+            self.assertEqual(["ADD", "PIN", "UNPIN", "PIN"], [item["operation"] for item in revisions])
+            self.assertEqual("explicit pin", revisions[1]["reason"])
+            self.assertFalse(revisions[1]["previous_record"]["pinned"])
+            self.assertTrue(revisions[1]["record"]["pinned"])
+            self.assertTrue(repinned.pinned)
+
+            audit = [
+                item
+                for item in jsonl(scope_root(tmp) / "audit" / "memory_events.jsonl")
+                if item["action"] in {"pin", "unpin"}
+            ]
+            self.assertEqual([True, False, True, False, True], [item["data"]["changed"] for item in audit])
+            self.assertEqual("explicit pin", audit[0]["data"]["reason"])
+
+            corrected = memory.correct(scope(), record_id, "我改为喜欢先看风险。")
+            self.assertTrue(corrected.pinned)
+            with self.assertRaises(KeyError):
+                memory.pin(scope(), record_id)
+
+            memory.archive(scope(), corrected.record_id)
+            with self.assertRaises(KeyError):
+                memory.unpin(scope(), corrected.record_id)
+
+            other_scope = MemoryScope(
+                "tenant-b", "user-1", "personal", "retention-agent", "session-1"
+            )
+            with self.assertRaises(KeyError):
+                memory.pin(other_scope, corrected.record_id)
+
+    def test_pin_does_not_prevent_evidence_deletion(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            memory = Citefold(tmp)
+            ingested = memory.ingest_text(scope(), "请记住：我喜欢先看风险。", source="text_chat")
+            memory.pin(scope(), ingested.record_ids[0])
+
+            memory.forget(scope(), f"observation:{ingested.observation_ids[0]}")
+
+            self.assertEqual([], memory.list_records(scope()))
+            self.assertEqual("deleted", memory.list_records(scope(), include_inactive=True)[0]["status"])
+
     def test_hard_delete_asset_removes_bytes_and_invalidates_derived_observations(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             memory = Citefold(tmp)

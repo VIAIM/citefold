@@ -100,6 +100,16 @@ assert proposal.status == "pending"
 memory.approve_candidate(scope, proposal.candidate_id)
 ```
 
+Pin an active record when it should be exempt from normal decay, then unpin it to resume decay:
+
+```python
+record_id = memory.list_records(scope)[0]["record_id"]
+memory.pin(scope, record_id, reason="keep this preference stable")
+memory.unpin(scope, record_id, reason="resume normal decay")
+```
+
+Pinning freezes the current access strength. After unpinning, decay resumes from that point rather than catching up over the pinned interval. Pinning does not make a record more trustworthy or prevent correction, archival, or deletion.
+
 The same review is available from the CLI:
 
 ```bash

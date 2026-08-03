@@ -23,7 +23,7 @@ Citefold is an evidence-backed multimodal memory library for agents. It stores r
 - An embeddable Python library with local, identity-scoped persistence.
 - A provenance model that separates assets, observations, episodes, candidates, and records.
 - Hybrid local retrieval followed by an evidence gate.
-- A lifecycle for candidate approval, correction, archival, decay, and deletion.
+- A lifecycle for candidate approval, correction, pin/unpin, archival, decay, and deletion.
 - A provider-optional system: local text and supplied media observations work without a model call.
 
 ## What Citefold is not

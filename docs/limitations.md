@@ -7,7 +7,7 @@ The current release is an evidence-first alpha, not a production memory service.
 - API and on-disk schemas may change before 1.0.
 - There is no general migration tool yet.
 - Candidate list/approve/reject exists in both Python and CLI paths; a bulk or graphical review workflow is not included.
-- Pin/unpin behavior is represented internally but has no public operation.
+- Pin/unpin is available for active records; pinning only exempts decay and does not guarantee recall or prevent correction, archival, or deletion.
 
 ## Language and extraction
 

@@ -135,6 +135,16 @@ def build_parser() -> argparse.ArgumentParser:
     correct.add_argument("--reason", default="explicit user correction")
     correct.set_defaults(handler=_handle_correct)
 
+    pin = commands.add_parser("pin", help="Exempt an active memory record from decay.")
+    pin.add_argument("record_id")
+    pin.add_argument("--reason", default="explicit pin")
+    pin.set_defaults(handler=_handle_pin)
+
+    unpin = commands.add_parser("unpin", help="Allow an active memory record to decay normally.")
+    unpin.add_argument("record_id")
+    unpin.add_argument("--reason", default="explicit unpin")
+    unpin.set_defaults(handler=_handle_unpin)
+
     archive = commands.add_parser("archive", help="Archive a memory record without deleting evidence.")
     archive.add_argument("record_id")
     archive.add_argument("--reason", default="explicit archive")
@@ -354,6 +364,14 @@ def _handle_correct(args: argparse.Namespace) -> Any:
         _read_text(args.content, args.file),
         reason=args.reason,
     )
+
+
+def _handle_pin(args: argparse.Namespace) -> Any:
+    return _memory(args).pin(_scope(args), args.record_id, reason=args.reason)
+
+
+def _handle_unpin(args: argparse.Namespace) -> Any:
+    return _memory(args).unpin(_scope(args), args.record_id, reason=args.reason)
 
 
 def _handle_archive(args: argparse.Namespace) -> Any:
