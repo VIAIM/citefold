@@ -4,11 +4,11 @@ import os
 import tempfile
 import threading
 import unittest
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutureTimeoutError
 from pathlib import Path
 from unittest.mock import patch
 
-from citefold import MemoryScope, Citefold
+from citefold import Citefold, MemoryScope, StorageError, inspect_store
 from citefold.openrouter import OpenRouterClient
 
 
@@ -21,6 +21,113 @@ def scope_root(tmp: str) -> Path:
 
 
 class SecurityHardeningTest(unittest.TestCase):
+    @unittest.skipUnless(hasattr(os, "symlink"), "symlink contract")
+    def test_scope_symlink_cannot_escape_the_storage_root(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            parent = Path(tmp)
+            root = parent / "memory"
+            memory = Citefold(root)
+            memory.ingest_text(scope(), "initialize the real store", source="test")
+
+            outside = parent / "outside"
+            outside.mkdir()
+            escaped = root / "tenants" / "tenant-a" / "users" / "user-1" / "namespaces" / "escaped"
+            escaped.symlink_to(outside, target_is_directory=True)
+            escaped_scope = MemoryScope(
+                "tenant-a",
+                "user-1",
+                "escaped",
+                "security-agent",
+                "session-1",
+            )
+
+            with self.assertRaises(StorageError):
+                memory.ingest_text(escaped_scope, "must stay inside the store", source="test")
+
+            self.assertEqual([], list(outside.iterdir()))
+
+    @unittest.skipUnless(hasattr(os, "symlink"), "symlink contract")
+    def test_cached_scope_rejects_audit_symlink_before_append(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            parent = Path(tmp)
+            root = parent / "memory"
+            memory = Citefold(root)
+            memory.ingest_text(scope(), "initialize the cached scope", source="test")
+
+            outside = parent / "outside.jsonl"
+            outside.write_text("", encoding="utf-8")
+            audit = scope_root(str(root)) / "audit" / "memory_events.jsonl"
+            audit.unlink()
+            audit.symlink_to(outside)
+
+            with self.assertRaises(StorageError):
+                memory.ingest_text(scope(), "must not append through the symlink", source="test")
+            with self.assertRaises(StorageError):
+                memory._append_jsonl(audit, {"event": "simulated post-scan race"})
+
+            self.assertEqual("", outside.read_text(encoding="utf-8"))
+
+    @unittest.skipUnless(hasattr(os, "symlink"), "symlink contract")
+    def test_ledger_append_rejects_a_post_scan_symlink(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            parent = Path(tmp)
+            root = parent / "memory"
+            memory = Citefold(root)
+            memory.ingest_text(scope(), "initialize the store", source="test")
+            ledger = memory.store.ledger_path(scope(), "model_calls")
+            outside = parent / "outside.jsonl"
+            outside.write_text("", encoding="utf-8")
+            ledger.unlink()
+            ledger.symlink_to(outside)
+
+            with self.assertRaises(StorageError):
+                memory.store._append_jsonl_unlocked(ledger, {"event": "simulated post-scan race"})
+
+            self.assertEqual("", outside.read_text(encoding="utf-8"))
+
+    def test_scope_lock_open_failure_does_not_poison_the_next_write(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "memory"
+            memory = Citefold(root)
+            real_open = os.open
+            failed = False
+
+            def fail_first_scope_lock(path, *args, **kwargs):
+                nonlocal failed
+                if Path(path).name == ".writer.lock" and not failed:
+                    failed = True
+                    raise OSError("injected scope lock failure")
+                return real_open(path, *args, **kwargs)
+
+            with patch("citefold.store.os.open", new=fail_first_scope_lock):
+                with self.assertRaisesRegex(OSError, "injected scope lock failure"):
+                    memory.ingest_text(scope(), "first write must fail", source="test")
+
+            self.assertEqual("current", inspect_store(root).state)
+            self.assertEqual(10, len(list((scope_root(str(root)) / "ledgers").glob("*.jsonl"))))
+            memory.ingest_text(scope(), "second write must use the scope lock", source="test")
+
+            self.assertTrue((scope_root(str(root)) / "ledgers" / ".writer.lock").is_file())
+
+    def test_relative_root_is_bound_when_the_memory_instance_is_created(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            parent = Path(tmp)
+            original_cwd = Path.cwd()
+            first = parent / "first"
+            second = parent / "second"
+            first.mkdir()
+            second.mkdir()
+            try:
+                os.chdir(first)
+                memory = Citefold("memory")
+                os.chdir(second)
+                memory.ingest_text(scope(), "stay with the original root", source="test")
+            finally:
+                os.chdir(original_cwd)
+
+            self.assertTrue((first / "memory" / "citefold-store.json").is_file())
+            self.assertFalse((second / "memory").exists())
+
     def test_external_agent_source_cannot_spoof_a_user_role(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             memory = Citefold(tmp)
@@ -181,6 +288,84 @@ class SecurityHardeningTest(unittest.TestCase):
             memory = memories[0]
             self.assertEqual(1, len(memory.store.episodes(scope())))
             self.assertEqual(1, len(memory.list_records(scope())))
+
+    def test_new_scope_is_not_visible_before_canonical_ledgers_exist(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            first = Citefold(tmp)
+            second = Citefold(tmp)
+            scaffold_ready = threading.Event()
+            release_scaffold = threading.Event()
+            second_started = threading.Event()
+            real_prepare = first.store._prepare_scope_lock
+
+            def pause_after_scaffold(target_scope: MemoryScope) -> Path:
+                root = real_prepare(target_scope)
+                scaffold_ready.set()
+                if not release_scaffold.wait(5):
+                    raise RuntimeError("test did not release scope initialization")
+                return root
+
+            def second_ingest():
+                second_started.set()
+                return second.ingest_text(
+                    scope(),
+                    "请记住：新作用域初始化必须原子可见。",
+                    source="text_chat",
+                )
+
+            with patch.object(first.store, "_prepare_scope_lock", side_effect=pause_after_scaffold):
+                with ThreadPoolExecutor(max_workers=2) as pool:
+                    first_future = pool.submit(
+                        first.ingest_text,
+                        scope(),
+                        "请记住：新作用域初始化必须原子可见。",
+                        "text_chat",
+                    )
+                    self.assertTrue(scaffold_ready.wait(5), "first writer did not create its scaffold")
+                    second_future = pool.submit(second_ingest)
+                    self.assertTrue(second_started.wait(5), "second writer did not start")
+                    try:
+                        with self.assertRaises(FutureTimeoutError):
+                            second_future.result(timeout=0.25)
+                    finally:
+                        release_scaffold.set()
+                    first_result = first_future.result(timeout=5)
+                    second_result = second_future.result(timeout=5)
+
+            self.assertEqual(first_result.record_ids, second_result.record_ids)
+
+    def test_concurrent_first_writes_to_different_scopes_do_not_deadlock(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            first = Citefold(tmp)
+            second = Citefold(tmp)
+            first_scope = MemoryScope("tenant-a", "user-1", "alpha", "agent", "session")
+            second_scope = MemoryScope("tenant-a", "user-1", "beta", "agent", "session")
+            start = threading.Barrier(2)
+
+            def ingest(memory: Citefold, target_scope: MemoryScope, text: str):
+                start.wait(timeout=5)
+                return memory.ingest_text(target_scope, text, source="text_chat")
+
+            with ThreadPoolExecutor(max_workers=2) as pool:
+                first_future = pool.submit(
+                    ingest,
+                    first,
+                    first_scope,
+                    "请记住：alpha 作用域偏好先看风险。",
+                )
+                second_future = pool.submit(
+                    ingest,
+                    second,
+                    second_scope,
+                    "请记住：beta 作用域偏好先看结论。",
+                )
+                first_result = first_future.result(timeout=5)
+                second_result = second_future.result(timeout=5)
+
+            self.assertTrue(first_result.record_ids)
+            self.assertTrue(second_result.record_ids)
+            self.assertEqual(1, len(first.list_records(first_scope)))
+            self.assertEqual(1, len(second.list_records(second_scope)))
 
     def test_public_reader_waits_for_a_partial_ledger_write(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

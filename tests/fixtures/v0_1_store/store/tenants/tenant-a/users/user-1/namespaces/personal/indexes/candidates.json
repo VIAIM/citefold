@@ -1,0 +1,20 @@
+[
+  {
+    "agent_id": "fixture-agent",
+    "approved_at": "2026-07-01T09:00:45+00:00",
+    "candidate_id": "cand_ed2fdb25f7cdc3f222c1ae51",
+    "confidence": 0.82,
+    "content": "Alex 偏好周五下午跟进。",
+    "evidence_refs": [
+      "evidence/2026-07/2026-07-01.jsonl#ev_569e55b32403"
+    ],
+    "memory_type": "people",
+    "namespace": "personal",
+    "session_id": "session-a",
+    "source_agent": "crm_agent",
+    "status": "approved",
+    "tenant_id": "tenant-a",
+    "timestamp": "2026-07-01T09:00:31+00:00",
+    "user_id": "user-1"
+  }
+]

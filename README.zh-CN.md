@@ -90,6 +90,8 @@ print(pack.coverage)       # supported
 print(pack.markdown)       # 上下文和 Observation 引用
 ```
 
+请给 Citefold 使用专用根目录；不要把源媒体、上传文件、日志或其他应用文件放入 `.citefold`。
+
 完整流程见[快速开始](docs/quickstart.md)。
 
 ## 设计原则
@@ -113,9 +115,10 @@ print(pack.markdown)       # 上下文和 Observation 引用
 | 视频 | 保存媒体并对齐外部转写和帧观察 | 音轨、字幕、关键帧和保守短 clip 回退 | 不是通用视频理解系统 |
 | 召回 | 词法 + SQLite FTS5 + RRF | 可选 embedding 信号 | `token_budget` 是确定性字符代理，不是供应商 tokenizer |
 | 生命周期 | 候选 list/approve/reject、纠正、pin/unpin、归档、衰减、软/硬删除、重建 | — | Pin 仅使活跃记录免于衰减；不会提高可信度、保证召回或阻止删除 |
+| 存储运维 | 根级 schema 状态、只追加管理元数据的 v0.1 迁移、带校验的 ZIP 备份、带 journal 的恢复 | — | 面向专用根目录和本地 POSIX 文件系统；尚未证明 Windows、网络文件系统、多节点语义和穷尽掉电行为 |
 | 安全 | Evidence Gate、媒体引用、作用域隔离、来源台账 | OpenRouter 强制 ZDR 且禁止数据收集 | 不能防御同一 Python 进程中的恶意代码 |
 
-详见 [CLI](docs/cli.md)、[多模态](docs/multimodal.md)与可运行的 [examples](examples/)。
+详见 [CLI](docs/cli.md)、[存储与迁移](docs/storage.md)、[多模态](docs/multimodal.md)与可运行的 [examples](examples/)。
 
 ## 技术架构
 
@@ -125,9 +128,9 @@ Citefold 刻意拆成三个平面：
 - **记忆平面：** Candidate、策略决策、活跃 Record、冲突和 Revision；
 - **召回平面：** 可重建的词法/FTS/embedding 索引，之后执行证据门和有界渲染。
 
-持久状态位于身份作用域目录下，由内容寻址资产、追加式 JSONL 台账、人可读投影和可重建 SQLite 索引组成。写入、读取、纠正与删除流程见[架构说明](docs/architecture.md)。
+持久状态位于带 schema 版本的根目录下的身份作用域目录中，由内容寻址资产、追加式 JSONL 台账、人可读投影和可重建 SQLite 索引组成。v0.2 普通操作共享根锁，迁移、备份和恢复独占根锁。写入、读取、纠正、删除与存储运维流程见[架构说明](docs/architecture.md)。
 
-## v0.1 成熟度评分
+## Alpha 成熟度评分
 
 这是保守的**维护者自评**，不是 Benchmark，也没有经过独立评审。各维度不能求平均后当成“记忆准确率”。
 
@@ -136,7 +139,7 @@ Citefold 刻意拆成三个平面：
 | 证据与可审计性 | **4 / 5** | 已测试有效引用闭包、Revision 历史与删除失效；台账不是密码学防篡改日志 |
 | 核心正确性 | **4 / 5** | 单元、集成、安全和确定性契约测试覆盖本地核心；仍待第三方独立复现 |
 | 多模态管线 | **3 / 5** | 已有文本/图片/音频/视频证据路径；尚未测量真实 OCR、ASR、视觉模型与 codec 质量 |
-| 工程运维 | **2 / 5** | 已有本地嵌入、CI workflow、POSIX 私有权限和作用域锁；暂无迁移工具、分布式服务能力与公开规模边界 |
+| 工程运维 | **3 / 5** | 本地确定性测试覆盖由 v0.1.0 代码生成的 fixture、并发变化保留、校验备份，以及只追加元数据迁移/带 journal 恢复的关键中断点；已有 POSIX 私有权限和根/作用域锁，但尚无穷尽掉电测试、生产恢复演练、Windows/网络文件系统支持、分布式能力与公开规模边界 |
 | 真实场景验证 | **1 / 5** | 已有公开数据与合成评测；尚无独立评估的长期用户研究或线上部署 |
 
 ## 当前实测效果
@@ -159,6 +162,7 @@ Citefold 刻意拆成三个平面：
 - tenant、user、namespace 形成存储边界；agent 和 session 保留为来源字段；
 - OpenRouter 仅在显式启用时使用，请求强制 ZDR、禁止供应商收集数据，不能满足时失败关闭；
 - API Key 只从进程环境变量读取，不写入记忆台账。
+- 校验通过的备份仍包含敏感持久历史；硬删除前生成的备份也可能保留已删除字节，加密与保留策略仍由宿主负责。
 
 Citefold **不提供**用户认证、操作系统隔离、静态数据加密、远程授权服务，也不能防御直接拥有文件系统权限的恶意代码。处理敏感数据前请阅读[安全模型](docs/security.md)，漏洞请按 [SECURITY.md](SECURITY.md) 报告。
 
@@ -202,7 +206,7 @@ memory.ingest_chat(                                     # 完整回合后
 ## Roadmap
 
 - **0.1：** 打磨 package/CLI、文档、可复现 CI 和本地 evidence-first 工作流；
-- **0.2：** 批量候选审核 UX、pin/unpin、更丰富的提取适配器和存储兼容性测试；
+- **0.2：** 显式存储 schema 与 v0.1 迁移、校验备份/恢复、pin/unpin、批量候选审核 UX、更丰富的提取适配器和存储兼容性测试；
 - **0.3：** 真实媒体质量评测、规模/延迟/成本测量和框架适配器；
 - **1.0 门槛：** 稳定 schema、迁移策略、威胁模型评审和独立真实用户评估。
 

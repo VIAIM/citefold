@@ -1,0 +1,131 @@
+{
+  "files": [
+    {
+      "path": "active/current_context.md",
+      "summary": "",
+      "title": "Current Context",
+      "updated_at": "2026-08-03T14:03:23.536810+00:00"
+    },
+    {
+      "path": "active/open_loops.md",
+      "summary": "",
+      "title": "Open Loops",
+      "updated_at": "2026-08-03T14:03:23.537014+00:00"
+    },
+    {
+      "path": "active/recent_voice_buffer.md",
+      "summary": "",
+      "title": "Recent Voice Buffer",
+      "updated_at": "2026-08-03T14:03:23.620801+00:00"
+    },
+    {
+      "path": "candidates/pending_agent_updates.md",
+      "summary": "",
+      "title": "Pending Agent Updates",
+      "updated_at": "2026-08-03T14:03:23.575269+00:00"
+    },
+    {
+      "path": "candidates/pending_people_updates.md",
+      "summary": "",
+      "title": "Pending People Updates",
+      "updated_at": "2026-08-03T14:03:23.540633+00:00"
+    },
+    {
+      "path": "candidates/pending_profile_updates.md",
+      "summary": "",
+      "title": "Pending Profile Updates",
+      "updated_at": "2026-08-03T14:03:23.540231+00:00"
+    },
+    {
+      "path": "candidates/pending_task_updates.md",
+      "summary": "",
+      "title": "Pending Task Updates",
+      "updated_at": "2026-08-03T14:03:23.540433+00:00"
+    },
+    {
+      "path": "episodes/2026-07/2026-07-01T090004-session-a-chat.md",
+      "summary": "Recorded: 2026-07-01T09:00:04+00:00",
+      "title": "Text Chat Episode",
+      "updated_at": "2026-08-03T14:03:23.543990+00:00"
+    },
+    {
+      "path": "episodes/2026-07/2026-07-01T090100-session-a-chat.md",
+      "summary": "Recorded: 2026-07-01T09:01:00+00:00",
+      "title": "Text Chat Episode",
+      "updated_at": "2026-08-03T14:03:23.585796+00:00"
+    },
+    {
+      "path": "episodes/2026-07/2026-07-01T090147-voice-session-voice.md",
+      "summary": "Recorded: 2026-07-01T09:01:47+00:00",
+      "title": "Voice Episode",
+      "updated_at": "2026-08-03T14:03:23.619789+00:00"
+    },
+    {
+      "path": "memory_summary.md",
+      "summary": "No consolidated summary yet.",
+      "title": "Memory Summary",
+      "updated_at": "2026-08-03T14:03:23.536547+00:00"
+    },
+    {
+      "path": "people/alex.md",
+      "summary": "- Alex 偏好周五下午跟进。",
+      "title": "Alex",
+      "updated_at": "2026-08-03T14:03:23.623854+00:00"
+    },
+    {
+      "path": "people/index.md",
+      "summary": "- [Alex](alex.md)",
+      "title": "People Index",
+      "updated_at": "2026-08-03T14:03:23.615088+00:00"
+    },
+    {
+      "path": "procedures/verified.md",
+      "summary": "",
+      "title": "Verified Procedures",
+      "updated_at": "2026-08-03T14:03:23.623574+00:00"
+    },
+    {
+      "path": "profile/boundaries.md",
+      "summary": "",
+      "title": "Boundaries",
+      "updated_at": "2026-08-03T14:03:23.538093+00:00"
+    },
+    {
+      "path": "profile/identity.md",
+      "summary": "",
+      "title": "Identity",
+      "updated_at": "2026-08-03T14:03:23.537456+00:00"
+    },
+    {
+      "path": "profile/preferences.md",
+      "summary": "- 我喜欢先看风险再看结论",
+      "title": "Preferences",
+      "updated_at": "2026-08-03T14:03:23.622864+00:00"
+    },
+    {
+      "path": "tasks/commitments.md",
+      "summary": "- 周五上午9点检查客户方案",
+      "title": "Commitments",
+      "updated_at": "2026-08-03T14:03:23.623118+00:00"
+    },
+    {
+      "path": "tasks/completed.md",
+      "summary": "",
+      "title": "Completed",
+      "updated_at": "2026-08-03T14:03:23.539768+00:00"
+    },
+    {
+      "path": "tasks/inbox.md",
+      "summary": "",
+      "title": "Task Inbox",
+      "updated_at": "2026-08-03T14:03:23.539126+00:00"
+    },
+    {
+      "path": "tasks/waiting_on.md",
+      "summary": "",
+      "title": "Waiting On",
+      "updated_at": "2026-08-03T14:03:23.623347+00:00"
+    }
+  ],
+  "updated_at": "2026-07-01T09:01:54+00:00"
+}

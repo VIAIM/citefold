@@ -11,6 +11,21 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 - Auditable Python API and CLI operations to pin active records against decay
   and unpin them without changing trust, evidence, or deletion semantics.
+- Root-level schema 2 manifests and read-only storage status inspection.
+- Explicit v0.1 → v0.2 additive-metadata migration with semantic preflight, a
+  mandatory verified backup, v0.1 scope/ledger locking, concurrent-change
+  detection, and interruption recovery that never rolls canonical data back.
+- Verified ZIP backup and restore APIs/commands with archive path and hash
+  validation; a sibling restore-intent journal closes directory-swap recovery,
+  and replacing a non-empty root retains and reports the displaced root.
+- Shared root coordination for normal operations and exclusive coordination for
+  migration, backup, and restore on supported local POSIX filesystems.
+
+### Changed
+
+- Storage roots must be dedicated to Citefold. Unrecognized non-empty roots,
+  legacy roots awaiting migration, corrupt manifests, and newer schemas now fail
+  closed instead of being initialized or used by normal memory operations.
 
 ## 0.1.0 — 2026-08-03
 

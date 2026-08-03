@@ -1,0 +1,25 @@
+{
+  "commit": "330f244c1051e105a2563657428f4a30d4580f47",
+  "deleted_observation_id": "obs_4e8d13fa48ee80c1eda833f6",
+  "final_observation_id": "obs_c829c6001f928d681034e756",
+  "legacy_candidate_id": "cand_ed2fdb25f7cdc3f222c1ae51",
+  "legacy_evidence_anchor": "evidence/2026-07/2026-07-01.jsonl#ev_569e55b32403",
+  "partial_observation_id": "obs_eae251b9f4946835a96d1263",
+  "preference_observation_id": "obs_13e88dbb9a6d022753af1129",
+  "preference_record_id": "mem_289eadc2542be8e40aa0ee34",
+  "scope": {
+    "agent_id": "fixture-agent",
+    "namespace": "personal",
+    "session_id": "session-a",
+    "tenant_id": "tenant-a",
+    "user_id": "user-1"
+  },
+  "tag": "v0.1.0",
+  "voice_scope": {
+    "agent_id": "fixture-agent",
+    "namespace": "personal",
+    "session_id": "voice-session",
+    "tenant_id": "tenant-a",
+    "user_id": "user-1"
+  }
+}

@@ -78,7 +78,7 @@ class RecallEvidenceGateTest(unittest.TestCase):
 
     def test_media_content_cannot_inject_memory_pack_sections(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            memory = Citefold(tmp, clock=fixed_clock)
+            memory = Citefold(Path(tmp) / "memory", clock=fixed_clock)
             image = Path(tmp) / "injection.png"
             image.write_bytes(b"\x89PNG\r\n\x1a\nfixture")
             memory.ingest_image(

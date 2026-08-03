@@ -4,6 +4,7 @@ import hashlib
 import json
 import mimetypes
 import os
+import stat
 import tempfile
 import threading
 from contextlib import contextmanager
@@ -23,6 +24,7 @@ from .models import (
     finite_number,
     unit_interval,
 )
+from .storage import StorageError, current_store
 
 try:
     import fcntl
@@ -57,6 +59,32 @@ def _ensure_private_directory(path: Path) -> None:
     _chmod_private(path, 0o700)
 
 
+@contextmanager
+def _open_regular_lock(path: Path) -> Iterator[Any]:
+    flags = os.O_CREAT | os.O_RDWR
+    if hasattr(os, "O_CLOEXEC"):
+        flags |= os.O_CLOEXEC
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+    try:
+        descriptor = os.open(path, flags, 0o600)
+    except OSError as exc:
+        if path.is_symlink():
+            raise StorageError(f"lock path must not be a symlink: {path}") from exc
+        raise
+    try:
+        if not stat.S_ISREG(os.fstat(descriptor).st_mode):
+            raise StorageError(f"lock path must be a regular file: {path}")
+        if os.name == "posix":
+            os.fchmod(descriptor, 0o600)
+        with os.fdopen(descriptor, "r+", encoding="utf-8") as handle:
+            descriptor = -1
+            yield handle
+    finally:
+        if descriptor >= 0:
+            os.close(descriptor)
+
+
 class LedgerStore:
     """Append-only canonical store plus content-addressed raw assets.
 
@@ -65,7 +93,7 @@ class LedgerStore:
     """
 
     def __init__(self, root: str | Path, clock: Clock | None = None) -> None:
-        self.root = Path(root)
+        self.root = Path(root).expanduser().resolve(strict=False)
         self.clock = clock or (lambda: datetime.now(timezone.utc))
         self._asset_validation_cache: dict[tuple[str, int, int, int, int], bool] = {}
         self._ledger_cache: dict[str, tuple[int, int, tuple[dict[str, Any], ...]]] = {}
@@ -73,6 +101,11 @@ class LedgerStore:
         self._unique_key_cache: dict[tuple[str, str], tuple[int, int, set[Any]]] = {}
         self._ensured_scopes: set[str] = set()
         self._writer_local = threading.local()
+        self._schema_generation: str | None = None
+
+    @property
+    def schema_generation(self) -> str | None:
+        return self._schema_generation
 
     def scope_root(self, scope: MemoryScope) -> Path:
         if not isinstance(scope, MemoryScope):
@@ -88,8 +121,39 @@ class LedgerStore:
         )
 
     def ensure_scope(self, scope: MemoryScope) -> Path:
+        while True:
+            self._initialize_scope_if_missing(scope)
+            with current_store(self.root) as status:
+                self._sync_generation(status.generation_id)
+                if not self.scope_root(scope).exists():
+                    continue
+                return self._ensure_scope_unlocked(scope)
+
+    def _initialize_scope_if_missing(self, scope: MemoryScope) -> None:
         root = self.scope_root(scope)
+        if root.exists():
+            return
+        with current_store(self.root, exclusive=True) as status:
+            self._sync_generation(status.generation_id)
+            if not root.exists():
+                self._ensure_scope_unlocked(scope)
+
+    def _ensure_scope_unlocked(self, scope: MemoryScope) -> Path:
+        root = self._prepare_scope_lock(scope)
         root_key = str(root)
+
+        def raise_walk_error(error: OSError) -> None:
+            raise error
+
+        for directory, directories, files in os.walk(
+            root,
+            onerror=raise_walk_error,
+            followlinks=False,
+        ):
+            for name in [*directories, *files]:
+                path = Path(directory) / name
+                if path.is_symlink():
+                    raise StorageError(f"symlink is not allowed in a storage scope: {path}")
         if root_key in self._ensured_scopes:
             return root
         root_existed = self.root.exists()
@@ -97,6 +161,20 @@ class LedgerStore:
         self.root.mkdir(mode=0o700, parents=True, exist_ok=True)
         if not root_existed or root_was_empty or (self.root / "tenants").exists():
             _chmod_private(self.root, 0o700)
+        for rel in ("assets/sha256", "ledgers", "indexes"):
+            self._ensure_scope_directory(root, rel)
+        for name in LEDGER_NAMES:
+            path = self.ledger_path(scope, name)
+            if not path.exists():
+                self._atomic_write(path, "")
+        self._ensured_scopes.add(root_key)
+        return root
+
+    def ensure_scope_directory(self, scope: MemoryScope, relative: str) -> Path:
+        return self._ensure_scope_directory(self.scope_root(scope), relative)
+
+    def _prepare_scope_lock(self, scope: MemoryScope) -> Path:
+        root_boundary = self.root.expanduser().resolve(strict=False)
         current = self.root
         for part in (
             "tenants",
@@ -107,15 +185,32 @@ class LedgerStore:
             scope.namespace,
         ):
             current /= part
+            if current.is_symlink():
+                raise StorageError(f"symlink is not allowed in a storage scope: {current}")
             _ensure_private_directory(current)
-        for rel in ("assets/sha256", "ledgers", "indexes"):
-            _ensure_private_directory(root / rel)
-        for name in LEDGER_NAMES:
-            path = self.ledger_path(scope, name)
-            if not path.exists():
-                self._atomic_write(path, "")
-        self._ensured_scopes.add(root_key)
-        return root
+            try:
+                current.resolve(strict=False).relative_to(root_boundary)
+            except ValueError as exc:
+                raise StorageError(f"storage scope escapes its root: {current}") from exc
+        self._ensure_scope_directory(current, "ledgers")
+        return current
+
+    def _ensure_scope_directory(self, scope_root: Path, relative: str) -> Path:
+        value = Path(relative)
+        if value.is_absolute() or not value.parts or ".." in value.parts:
+            raise StorageError(f"unsafe storage directory: {relative}")
+        boundary = scope_root.resolve(strict=False)
+        current = scope_root
+        for part in value.parts:
+            current /= part
+            if current.is_symlink():
+                raise StorageError(f"symlink is not allowed in a storage scope: {current}")
+            _ensure_private_directory(current)
+            try:
+                current.resolve(strict=False).relative_to(boundary)
+            except ValueError as exc:
+                raise StorageError(f"storage directory escapes its scope: {current}") from exc
+        return current
 
     def ledger_path(self, scope: MemoryScope, name: str) -> Path:
         if name not in LEDGER_NAMES:
@@ -125,32 +220,40 @@ class LedgerStore:
     @contextmanager
     def scope_writer(self, scope: MemoryScope) -> Iterator[None]:
         """Serialize a complete high-level mutation for one storage scope."""
-        root = self.ensure_scope(scope)
-        key = str(root.resolve())
-        with _THREAD_LOCKS_GUARD:
-            thread_lock = _THREAD_LOCKS.setdefault(key, threading.RLock())
-        with thread_lock:
-            depths = getattr(self._writer_local, "depths", {})
-            depth = int(depths.get(key, 0))
-            depths[key] = depth + 1
-            self._writer_local.depths = depths
-            if depth:
-                try:
-                    yield
-                finally:
-                    depths[key] -= 1
-                return
-            lock_path = root / "ledgers" / ".writer.lock"
-            with lock_path.open("a+", encoding="utf-8") as lock:
-                _chmod_private(lock_path, 0o600)
-                if fcntl is not None:
-                    fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
-                try:
-                    yield
-                finally:
-                    depths[key] -= 1
-                    if fcntl is not None:
-                        fcntl.flock(lock.fileno(), fcntl.LOCK_UN)
+        while True:
+            self._initialize_scope_if_missing(scope)
+            with current_store(self.root) as status:
+                self._sync_generation(status.generation_id)
+                if not self.scope_root(scope).exists():
+                    continue
+                root = self._prepare_scope_lock(scope)
+                key = str(root.resolve())
+                with _THREAD_LOCKS_GUARD:
+                    thread_lock = _THREAD_LOCKS.setdefault(key, threading.RLock())
+                with thread_lock:
+                    depths = getattr(self._writer_local, "depths", {})
+                    depth = int(depths.get(key, 0))
+                    self._writer_local.depths = depths
+                    if depth:
+                        depths[key] = depth + 1
+                        try:
+                            yield
+                        finally:
+                            depths[key] -= 1
+                        return
+                    lock_path = root / "ledgers" / ".writer.lock"
+                    with _open_regular_lock(lock_path) as lock:
+                        if fcntl is not None:
+                            fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
+                        depths[key] = 1
+                        try:
+                            self._ensure_scope_unlocked(scope)
+                            yield
+                        finally:
+                            depths.pop(key, None)
+                            if fcntl is not None:
+                                fcntl.flock(lock.fileno(), fcntl.LOCK_UN)
+                    return
 
     def register_asset(
         self,
@@ -673,6 +776,16 @@ class LedgerStore:
         for cache_key in [item for item in self._ledger_index_cache if item[0] == path_value]:
             self._ledger_index_cache.pop(cache_key, None)
 
+    def _sync_generation(self, generation_id: str | None) -> None:
+        if generation_id == self._schema_generation:
+            return
+        self._asset_validation_cache.clear()
+        self._ledger_cache.clear()
+        self._ledger_index_cache.clear()
+        self._unique_key_cache.clear()
+        self._ensured_scopes.clear()
+        self._schema_generation = generation_id
+
     def _safe_scope_path(self, scope: MemoryScope, relative: str) -> Path | None:
         if not relative or Path(relative).is_absolute():
             return None
@@ -730,8 +843,7 @@ class LedgerStore:
     def _ledger_lock(self, path: Path) -> Iterator[None]:
         lock_path = path.with_suffix(path.suffix + ".lock")
         _ensure_private_directory(lock_path.parent)
-        with lock_path.open("a+", encoding="utf-8") as lock:
-            _chmod_private(lock_path, 0o600)
+        with _open_regular_lock(lock_path) as lock:
             if fcntl is not None:
                 fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
             try:
@@ -760,8 +872,20 @@ class LedgerStore:
             separators=(",", ":"),
             allow_nan=False,
         ) + "\n"
-        descriptor = os.open(path, os.O_APPEND | os.O_CREAT | os.O_WRONLY, 0o600)
+        flags = os.O_APPEND | os.O_CREAT | os.O_WRONLY
+        if hasattr(os, "O_CLOEXEC"):
+            flags |= os.O_CLOEXEC
+        if hasattr(os, "O_NOFOLLOW"):
+            flags |= os.O_NOFOLLOW
         try:
+            descriptor = os.open(path, flags, 0o600)
+        except OSError as exc:
+            if path.is_symlink():
+                raise StorageError(f"ledger path must not be a symlink: {path}") from exc
+            raise
+        try:
+            if not stat.S_ISREG(os.fstat(descriptor).st_mode):
+                raise StorageError(f"ledger path must be a regular file: {path}")
             if os.name == "posix":
                 os.fchmod(descriptor, 0o600)
             remaining = memoryview(line.encode("utf-8"))

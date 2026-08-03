@@ -106,21 +106,39 @@ Deletion is explicit governance, not a claim that every copy outside Citefold ha
 ## Storage layout
 
 ```text
-{root}/tenants/{tenant}/users/{user}/namespaces/{namespace}/
-  assets/sha256/                 # original and derived assets
-  ledgers/
-    assets.jsonl
-    observations.jsonl
-    episodes.jsonl
-    candidates.jsonl
-    revisions.jsonl
-    deletions.jsonl
-    model_calls.jsonl
-  indexes/memory.sqlite3         # rebuildable FTS / embedding index
-  episodes/ profile/ tasks/ ... # human-readable projections
+{root}/
+  citefold-store.json            # root format, schema, store, and generation IDs
+  migration-events.jsonl         # completed schema transitions, when present
+  tenants/{tenant}/users/{user}/namespaces/{namespace}/
+    assets/sha256/                # original and derived assets
+    ledgers/
+      assets.jsonl
+      observations.jsonl
+      episodes.jsonl
+      candidates.jsonl
+      records.jsonl
+      revisions.jsonl
+      deletions.jsonl
+      consolidations.jsonl
+      access.jsonl
+      model_calls.jsonl
+    indexes/memory.sqlite3        # rebuildable FTS / embedding index
+    episodes/ profile/ tasks/ ... # human-readable projections
 ```
 
-Writes are serialized per scope with process/thread locking and atomic replacement for projections. Network filesystem locking and atomicity semantics are not yet validated. See [Limitations](limitations.md).
+The root must be dedicated to Citefold state. A missing or empty root is initialized on the first normal operation. A non-empty root without a recognized schema 2 manifest or legacy v0.1 scope layout fails closed, as does a manifest newer than the running library.
+
+## Storage coordination and maintenance
+
+Normal v0.2 operations enter a shared root guard before scope and ledger access. Migration, backup, and restore enter the same guard exclusively. Within a normal write, lock order is root → scope → ledger; projections use atomic replacement. Schema generation changes invalidate live in-process store caches after restore.
+
+The root guard combines in-process reader/writer coordination with POSIX advisory file locking. Its lock file is a sibling of the root, so a directory swap during restore does not replace the lock being held. This is designed for local POSIX filesystems. Windows cross-process parity, network/distributed filesystem locking, multi-node coordination, and atomic rename semantics outside this boundary are not established.
+
+Schema 1 is the implicit layout written by v0.1. Schema 2 adds the explicit root manifest and migration history. Migration is an additive metadata transaction: while the v0.2 root lock is held, it also acquires every existing v0.1 scope-writer and known ledger lock, performs semantic preflight, creates and verifies a backup of durable files, checks that canonical files did not change, and commits only its state/event/manifest metadata. A concurrent legacy change aborts the transaction and is preserved; Citefold never automatically replaces v0.1 canonical data from the older backup. Interrupted recovery removes or completes only metadata whose transaction identity and hashes match.
+
+Backups carry a per-file manifest, SHA-256 hashes, and a whole-store fingerprint. Restore verifies path safety, file integrity, and the extracted Citefold schema before it writes a root-sibling intent journal. The journal binds the archive, original directory, validated temporary replacement, and displaced path across the two directory moves. While it exists, store inspection and normal APIs fail closed with `recovery_required`. Rerunning the same restore transaction rolls the validated replacement forward; replacing a non-empty root preserves the original under the reported sibling `displaced_root` path.
+
+v0.1 processes do not know about the root guard, so every old writer must be stopped before migration and must not be restarted against a migrated root. See [Storage, migration, backup, and restore](storage.md) for the operator and Python contracts and [Limitations](limitations.md) for validation boundaries.
 
 ## Dependencies
 

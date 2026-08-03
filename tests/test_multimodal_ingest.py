@@ -20,7 +20,7 @@ def scope() -> MemoryScope:
 
 
 def root_for(tmp: str) -> Path:
-    return Path(tmp) / "tenants" / "tenant-a" / "users" / "user-1" / "namespaces" / "personal"
+    return Path(tmp) / "memory" / "tenants" / "tenant-a" / "users" / "user-1" / "namespaces" / "personal"
 
 
 def read_jsonl(path: Path) -> list[dict]:
@@ -75,7 +75,7 @@ class MultimodalIngestTest(unittest.TestCase):
             path = Path(tmp) / "long.wav"
             path.write_bytes(b"fixture")
             model = FakeModel()
-            memory = Citefold(tmp, clock=fixed_clock, openrouter=model, media_processor=FakeMedia())
+            memory = Citefold(Path(tmp) / "memory", clock=fixed_clock, openrouter=model, media_processor=FakeMedia())
 
             result = memory.ingest_audio(scope(), path, "meeting")
             observations = [
@@ -137,7 +137,7 @@ class MultimodalIngestTest(unittest.TestCase):
                 ],
                 check=True,
             )
-            memory = Citefold(tmp, clock=fixed_clock, openrouter=FakeMediaModel())
+            memory = Citefold(Path(tmp) / "memory", clock=fixed_clock, openrouter=FakeMediaModel())
 
             result = memory.ingest_video(scope(), video_path, source="meeting_upload")
 
@@ -148,7 +148,7 @@ class MultimodalIngestTest(unittest.TestCase):
 
     def test_image_observation_keeps_original_asset_and_is_recallable(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            memory = Citefold(tmp, clock=fixed_clock)
+            memory = Citefold(Path(tmp) / "memory", clock=fixed_clock)
             image_path = Path(tmp) / "whiteboard.png"
             image_bytes = b"\x89PNG\r\n\x1a\nfixture-image"
             image_path.write_bytes(image_bytes)
@@ -182,7 +182,7 @@ class MultimodalIngestTest(unittest.TestCase):
                 target.write_bytes(data)
 
         with tempfile.TemporaryDirectory() as tmp:
-            memory = Citefold(tmp, clock=fixed_clock, media_processor=FakeMedia())
+            memory = Citefold(Path(tmp) / "memory", clock=fixed_clock, media_processor=FakeMedia())
             audio_path = Path(tmp) / "commitment.wav"
             make_silent_wav(audio_path)
 
@@ -213,7 +213,7 @@ class MultimodalIngestTest(unittest.TestCase):
 
     def test_low_confidence_asr_and_media_prompt_injection_cannot_update_profile(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            memory = Citefold(tmp, clock=fixed_clock)
+            memory = Citefold(Path(tmp) / "memory", clock=fixed_clock)
             audio_path = Path(tmp) / "uncertain.wav"
             make_silent_wav(audio_path)
 
@@ -239,7 +239,7 @@ class MultimodalIngestTest(unittest.TestCase):
 
     def test_video_aligns_audio_and_frame_observations_on_one_timeline(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            memory = Citefold(tmp, clock=fixed_clock)
+            memory = Citefold(Path(tmp) / "memory", clock=fixed_clock)
             video_path = Path(tmp) / "meeting.mp4"
             video_path.write_bytes(b"fixture-mp4")
 
@@ -279,7 +279,7 @@ class MultimodalIngestTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             video_path = Path(tmp) / "subtitled.mp4"
             video_path.write_bytes(b"fixture")
-            memory = Citefold(tmp, clock=fixed_clock, media_processor=FakeSubtitleMedia())
+            memory = Citefold(Path(tmp) / "memory", clock=fixed_clock, media_processor=FakeSubtitleMedia())
 
             memory.ingest_video(
                 scope(),
@@ -331,7 +331,12 @@ class MultimodalIngestTest(unittest.TestCase):
             path = Path(tmp) / "dynamic.mp4"
             path.write_bytes(b"fixture")
             media = FakeDynamicMedia()
-            memory = Citefold(tmp, clock=fixed_clock, openrouter=FakeDynamicModel(), media_processor=media)
+            memory = Citefold(
+                Path(tmp) / "memory",
+                clock=fixed_clock,
+                openrouter=FakeDynamicModel(),
+                media_processor=media,
+            )
 
             memory.ingest_video(
                 scope(), path, "meeting", transcript_segments=[], duration_ms=10_000
@@ -344,7 +349,7 @@ class MultimodalIngestTest(unittest.TestCase):
 
     def test_same_media_file_is_idempotent(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            memory = Citefold(tmp, clock=fixed_clock)
+            memory = Citefold(Path(tmp) / "memory", clock=fixed_clock)
             image_path = Path(tmp) / "same.png"
             image_path.write_bytes(b"\x89PNG\r\n\x1a\nfixture")
             observation = [{"content": "版本号 V12", "confidence": 0.99, "locator": {}}]

@@ -26,7 +26,7 @@ def memory_scope() -> MemoryScope:
 
 def scope_root(tmp: str) -> Path:
     return (
-        Path(tmp)
+        Path(tmp).resolve()
         / "tenants"
         / "tenant-a"
         / "users"

@@ -5,6 +5,7 @@ import json
 import math
 import os
 import re
+import stat
 import tempfile
 from collections import Counter
 from contextlib import nullcontext
@@ -28,6 +29,7 @@ from .models import (
 from .openrouter import ModelResponseError, OpenRouterClient, OpenRouterRequestError
 from .policy import PolicyGate
 from .recall import HybridRecallIndex
+from .storage import StorageError
 from .store import LedgerStore, _chmod_private, _ensure_private_directory
 
 
@@ -47,6 +49,9 @@ def _scope_write(method: Callable[..., Any]) -> Callable[..., Any]:
     @wraps(method)
     def serialized(self: "Citefold", scope: MemoryScope, *args: Any, **kwargs: Any) -> Any:
         with self.store.scope_writer(scope):
+            if self._store_generation != self.store.schema_generation:
+                self._ensured_scope_paths.clear()
+                self._store_generation = self.store.schema_generation
             return method(self, scope, *args, **kwargs)
 
     return serialized
@@ -68,9 +73,10 @@ class Citefold:
         openrouter: OpenRouterClient | None = None,
         media_processor: FFmpegProcessor | None = None,
     ) -> None:
-        self.root = Path(root)
+        self.root = Path(root).expanduser().resolve(strict=False)
         self.clock = clock or (lambda: datetime.now(timezone.utc))
         self._ensured_scope_paths: set[str] = set()
+        self._store_generation: str | None = None
         self.store = LedgerStore(self.root, self.clock)
         self.hybrid = HybridRecallIndex(self.store)
         self.policy = PolicyGate()
@@ -2525,7 +2531,7 @@ class Citefold:
             "assets",
             "ledgers",
         ]:
-            _ensure_private_directory(user_root / rel)
+            self.store.ensure_scope_directory(scope, rel)
 
         defaults = {
             "memory_summary.md": "# Memory Summary\n\nNo consolidated summary yet.\n",
@@ -2851,7 +2857,8 @@ class Citefold:
             "outcome": str(event.get("outcome") or "unknown"),
             "error_type": event.get("error_type"),
         }
-        self.store.append(scope, "model_calls", record)
+        with self.store.scope_writer(scope):
+            self.store.append(scope, "model_calls", record)
 
     def _now(self) -> datetime:
         now = self.clock()
@@ -2936,8 +2943,20 @@ class Citefold:
     def _append_jsonl(path: Path, data: dict[str, Any]) -> None:
         _ensure_private_directory(path.parent)
         line = json.dumps(data, ensure_ascii=False, sort_keys=True, allow_nan=False) + "\n"
-        descriptor = os.open(path, os.O_APPEND | os.O_CREAT | os.O_WRONLY, 0o600)
+        flags = os.O_APPEND | os.O_CREAT | os.O_WRONLY
+        if hasattr(os, "O_CLOEXEC"):
+            flags |= os.O_CLOEXEC
+        if hasattr(os, "O_NOFOLLOW"):
+            flags |= os.O_NOFOLLOW
         try:
+            descriptor = os.open(path, flags, 0o600)
+        except OSError as exc:
+            if path.is_symlink():
+                raise StorageError(f"audit path must not be a symlink: {path}") from exc
+            raise
+        try:
+            if not stat.S_ISREG(os.fstat(descriptor).st_mode):
+                raise StorageError(f"audit path must be a regular file: {path}")
             if os.name == "posix":
                 os.fchmod(descriptor, 0o600)
             remaining = memoryview(line.encode("utf-8"))
