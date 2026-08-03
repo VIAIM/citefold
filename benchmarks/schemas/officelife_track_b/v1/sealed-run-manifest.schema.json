@@ -1,0 +1,883 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:viaim:officelife-track-b:artifact-contract-v1:sealed-run-manifest",
+  "title": "OfficeLifeMemoryBench Track B sealed run manifest",
+  "$defs": {
+    "datasetReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dataset_release_id",
+        "manifest_path",
+        "manifest_sha256",
+        "split"
+      ],
+      "properties": {
+        "dataset_release_id": {
+          "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/identifier"
+        },
+        "manifest_path": {
+          "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/relativePath"
+        },
+        "manifest_sha256": {
+          "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/sha256"
+        },
+        "split": {
+          "const": "hidden_test"
+        }
+      }
+    },
+    "citefold": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "code_commit",
+        "distribution",
+        "on_disk_schema_version",
+        "migration_state",
+        "migration_report"
+      ],
+      "properties": {
+        "version": {
+          "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/identifier"
+        },
+        "code_commit": {
+          "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/identifier"
+        },
+        "distribution": {
+          "allOf": [
+            {
+              "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/inventoryLink"
+            },
+            {
+              "properties": {
+                "file_role": {
+                  "const": "citefold-distribution"
+                }
+              }
+            }
+          ]
+        },
+        "on_disk_schema_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "migration_state": {
+          "enum": [
+            "not_required",
+            "migrated",
+            "verified_current"
+          ]
+        },
+        "migration_report": {
+          "allOf": [
+            {
+              "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/inventoryLink"
+            },
+            {
+              "properties": {
+                "file_role": {
+                  "const": "migration-report"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "agent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "implementation_commit",
+        "dependency_lock",
+        "agent_turn_contract"
+      ],
+      "properties": {
+        "implementation_commit": {
+          "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/identifier"
+        },
+        "dependency_lock": {
+          "allOf": [
+            {
+              "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/inventoryLink"
+            },
+            {
+              "properties": {
+                "file_role": {
+                  "const": "agent-dependency-lock"
+                }
+              }
+            }
+          ]
+        },
+        "agent_turn_contract": {
+          "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/identifier"
+        }
+      }
+    },
+    "modelRole": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "enabled",
+        "model_id",
+        "immutable_model_version",
+        "actual_upstream_provider",
+        "immutable_route"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "model_id": {
+          "oneOf": [
+            {
+              "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/safeDisplayString"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "immutable_model_version": {
+          "oneOf": [
+            {
+              "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/safeDisplayString"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "actual_upstream_provider": {
+          "oneOf": [
+            {
+              "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/identifier"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "immutable_route": {
+          "oneOf": [
+            {
+              "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/safeDisplayString"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "enabled": {
+                "const": true
+              }
+            },
+            "required": [
+              "enabled"
+            ]
+          },
+          "then": {
+            "properties": {
+              "model_id": {
+                "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/safeDisplayString"
+              },
+              "immutable_model_version": {
+                "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/safeDisplayString"
+              },
+              "actual_upstream_provider": {
+                "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/identifier"
+              },
+              "immutable_route": {
+                "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/safeDisplayString"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "model_id": {
+                "type": "null"
+              },
+              "immutable_model_version": {
+                "type": "null"
+              },
+              "actual_upstream_provider": {
+                "type": "null"
+              },
+              "immutable_route": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "models": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reader",
+        "observation",
+        "asr",
+        "vision",
+        "consolidation",
+        "embedding",
+        "secondary_judge"
+      ],
+      "properties": {
+        "reader": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/modelRole"
+            },
+            {
+              "properties": {
+                "enabled": {
+                  "const": true
+                }
+              }
+            }
+          ]
+        },
+        "observation": {
+          "$ref": "#/$defs/modelRole"
+        },
+        "asr": {
+          "$ref": "#/$defs/modelRole"
+        },
+        "vision": {
+          "$ref": "#/$defs/modelRole"
+        },
+        "consolidation": {
+          "$ref": "#/$defs/modelRole"
+        },
+        "embedding": {
+          "$ref": "#/$defs/modelRole"
+        },
+        "secondary_judge": {
+          "$ref": "#/$defs/modelRole"
+        }
+      }
+    },
+    "systemArtifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "system_prompt",
+        "task_template",
+        "memory_pack_placement_template",
+        "evaluator_prompt",
+        "tool_definitions",
+        "tool_schemas",
+        "recent_context_builder"
+      ],
+      "properties": {
+        "system_prompt": {
+          "allOf": [
+            {
+              "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/inventoryLink"
+            },
+            {
+              "properties": {
+                "file_role": {
+                  "const": "system-prompt"
+                }
+              }
+            }
+          ]
+        },
+        "task_template": {
+          "allOf": [
+            {
+              "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/inventoryLink"
+            },
+            {
+              "properties": {
+                "file_role": {
+                  "const": "task-template"
+                }
+              }
+            }
+          ]
+        },
+        "memory_pack_placement_template": {
+          "allOf": [
+            {
+              "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/inventoryLink"
+            },
+            {
+              "properties": {
+                "file_role": {
+                  "const": "memory-pack-placement-template"
+                }
+              }
+            }
+          ]
+        },
+        "evaluator_prompt": {
+          "allOf": [
+            {
+              "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/inventoryLink"
+            },
+            {
+              "properties": {
+                "file_role": {
+                  "const": "evaluator-prompt"
+                }
+              }
+            }
+          ]
+        },
+        "tool_definitions": {
+          "allOf": [
+            {
+              "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/inventoryLink"
+            },
+            {
+              "properties": {
+                "file_role": {
+                  "const": "tool-definitions"
+                }
+              }
+            }
+          ]
+        },
+        "tool_schemas": {
+          "allOf": [
+            {
+              "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/inventoryLink"
+            },
+            {
+              "properties": {
+                "file_role": {
+                  "const": "tool-schemas"
+                }
+              }
+            }
+          ]
+        },
+        "recent_context_builder": {
+          "allOf": [
+            {
+              "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/inventoryLink"
+            },
+            {
+              "properties": {
+                "file_role": {
+                  "const": "recent-context-builder"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "featureFlag": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "enabled"
+      ],
+      "properties": {
+        "name": {
+          "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/identifier"
+        },
+        "enabled": {
+          "type": "boolean"
+        }
+      }
+    },
+    "memory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "memory_pack_mode",
+        "logical_token_budget",
+        "retrieval_backend",
+        "index_backend",
+        "retrieval_config",
+        "feature_flags"
+      ],
+      "properties": {
+        "memory_pack_mode": {
+          "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/identifier"
+        },
+        "logical_token_budget": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "retrieval_backend": {
+          "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/identifier"
+        },
+        "index_backend": {
+          "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/identifier"
+        },
+        "retrieval_config": {
+          "type": "array",
+          "items": {
+            "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/namedScalar"
+          },
+          "uniqueItems": true
+        },
+        "feature_flags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/featureFlag"
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "generation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "temperature",
+        "top_p",
+        "max_output_tokens",
+        "seed_supported",
+        "seed",
+        "timeout_seconds",
+        "retry_count",
+        "backoff_seconds",
+        "fallback_policy",
+        "fallback_routes",
+        "product_failure_categories",
+        "request_parameters"
+      ],
+      "properties": {
+        "temperature": {
+          "type": "number",
+          "minimum": 0
+        },
+        "top_p": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        },
+        "max_output_tokens": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "seed_supported": {
+          "type": "boolean"
+        },
+        "seed": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "timeout_seconds": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "retry_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "backoff_seconds": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "fallback_policy": {
+          "const": "none"
+        },
+        "fallback_routes": {
+          "type": "array",
+          "maxItems": 0,
+          "items": {
+            "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/safeDisplayString"
+          },
+          "uniqueItems": true
+        },
+        "product_failure_categories": {
+          "type": "array",
+          "items": {
+            "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/identifier"
+          },
+          "uniqueItems": true
+        },
+        "request_parameters": {
+          "type": "array",
+          "items": {
+            "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/namedScalar"
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "providerPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "routing_mode",
+        "upstream_provider",
+        "privacy_mode",
+        "retention_policy",
+        "data_collection_policy",
+        "allow_provider_training",
+        "transmission_regions"
+      ],
+      "properties": {
+        "routing_mode": {
+          "enum": [
+            "fixed_provider",
+            "fixed_route"
+          ]
+        },
+        "upstream_provider": {
+          "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/identifier"
+        },
+        "privacy_mode": {
+          "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/identifier"
+        },
+        "retention_policy": {
+          "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/identifier"
+        },
+        "data_collection_policy": {
+          "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/identifier"
+        },
+        "allow_provider_training": {
+          "const": false
+        },
+        "transmission_regions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/identifier"
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "randomization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "algorithm",
+        "seed",
+        "arm_labels",
+        "task_order_policy",
+        "output_blinding_algorithm"
+      ],
+      "properties": {
+        "algorithm": {
+          "const": "hmac-sha256-v1"
+        },
+        "seed": {
+          "type": "integer"
+        },
+        "arm_labels": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "const": "no_memory"
+            },
+            {
+              "const": "memory_pack"
+            }
+          ],
+          "items": false,
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "task_order_policy": {
+          "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/identifier"
+        },
+        "output_blinding_algorithm": {
+          "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/identifier"
+        }
+      }
+    },
+    "referenceEnvironment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operating_system",
+        "operating_system_version",
+        "architecture",
+        "python_implementation",
+        "python_version",
+        "cpu",
+        "memory_bytes",
+        "storage_type",
+        "storage_description",
+        "locale",
+        "timezone"
+      ],
+      "properties": {
+        "operating_system": {
+          "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/identifier"
+        },
+        "operating_system_version": {
+          "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/safeDisplayString"
+        },
+        "architecture": {
+          "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/identifier"
+        },
+        "python_implementation": {
+          "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/identifier"
+        },
+        "python_version": {
+          "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/identifier"
+        },
+        "cpu": {
+          "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/safeDisplayString"
+        },
+        "memory_bytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "storage_type": {
+          "const": "local_filesystem"
+        },
+        "storage_description": {
+          "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/safeDisplayString"
+        },
+        "locale": {
+          "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/safeDisplayString"
+        },
+        "timezone": {
+          "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/safeDisplayString"
+        }
+      }
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "contract_version",
+    "protocol_version",
+    "execution_profile_version",
+    "run_id",
+    "iteration_id",
+    "sealed_at",
+    "dataset",
+    "files",
+    "citefold",
+    "agent",
+    "models",
+    "system_artifacts",
+    "memory",
+    "generation",
+    "provider_policy",
+    "randomization",
+    "reference_environment"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "officelife-track-b-sealed-run-manifest-v1"
+    },
+    "contract_version": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/contractVersion"
+    },
+    "protocol_version": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/protocolVersion"
+    },
+    "execution_profile_version": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/executionProfileVersion"
+    },
+    "run_id": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/identifier"
+    },
+    "iteration_id": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/identifier"
+    },
+    "sealed_at": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/utcTimestamp"
+    },
+    "dataset": {
+      "$ref": "#/$defs/datasetReference"
+    },
+    "files": {
+      "type": "array",
+      "minItems": 10,
+      "items": {
+        "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/inventoryEntry"
+      },
+      "uniqueItems": true,
+      "allOf": [
+        {
+          "contains": {
+            "required": [
+              "role"
+            ],
+            "properties": {
+              "role": {
+                "const": "citefold-distribution"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "required": [
+              "role"
+            ],
+            "properties": {
+              "role": {
+                "const": "migration-report"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "required": [
+              "role"
+            ],
+            "properties": {
+              "role": {
+                "const": "agent-dependency-lock"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "required": [
+              "role"
+            ],
+            "properties": {
+              "role": {
+                "const": "system-prompt"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "required": [
+              "role"
+            ],
+            "properties": {
+              "role": {
+                "const": "task-template"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "required": [
+              "role"
+            ],
+            "properties": {
+              "role": {
+                "const": "memory-pack-placement-template"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "required": [
+              "role"
+            ],
+            "properties": {
+              "role": {
+                "const": "evaluator-prompt"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "required": [
+              "role"
+            ],
+            "properties": {
+              "role": {
+                "const": "tool-definitions"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "required": [
+              "role"
+            ],
+            "properties": {
+              "role": {
+                "const": "tool-schemas"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "required": [
+              "role"
+            ],
+            "properties": {
+              "role": {
+                "const": "recent-context-builder"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        }
+      ]
+    },
+    "citefold": {
+      "$ref": "#/$defs/citefold"
+    },
+    "agent": {
+      "$ref": "#/$defs/agent"
+    },
+    "models": {
+      "$ref": "#/$defs/models"
+    },
+    "system_artifacts": {
+      "$ref": "#/$defs/systemArtifacts"
+    },
+    "memory": {
+      "$ref": "#/$defs/memory"
+    },
+    "generation": {
+      "$ref": "#/$defs/generation"
+    },
+    "provider_policy": {
+      "$ref": "#/$defs/providerPolicy"
+    },
+    "randomization": {
+      "$ref": "#/$defs/randomization"
+    },
+    "reference_environment": {
+      "$ref": "#/$defs/referenceEnvironment"
+    }
+  }
+}

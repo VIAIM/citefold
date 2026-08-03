@@ -1,0 +1,325 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:viaim:officelife-track-b:artifact-contract-v1:event",
+  "title": "OfficeLifeMemoryBench Track B event record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "contract_version",
+    "protocol_version",
+    "execution_profile_version",
+    "event_id",
+    "source_record_id",
+    "user_id",
+    "conversation_id",
+    "scope",
+    "occurred_at",
+    "available_at",
+    "source_surface",
+    "modality",
+    "memory_bearing",
+    "lifecycle_state",
+    "asr_state",
+    "recallable",
+    "payload_refs"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "officelife-track-b-event-v1"
+    },
+    "contract_version": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/contractVersion"
+    },
+    "protocol_version": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/protocolVersion"
+    },
+    "execution_profile_version": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/executionProfileVersion"
+    },
+    "event_id": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/identifier"
+    },
+    "source_record_id": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/identifier"
+    },
+    "user_id": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/identifier"
+    },
+    "conversation_id": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/identifier"
+    },
+    "scope": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/scope"
+    },
+    "occurred_at": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/utcTimestamp"
+    },
+    "available_at": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/utcTimestamp"
+    },
+    "source_surface": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/sourceSurface"
+    },
+    "modality": {
+      "enum": [
+        "text",
+        "audio",
+        "video",
+        "image",
+        "structured",
+        "mixed"
+      ]
+    },
+    "memory_bearing": {
+      "type": "boolean"
+    },
+    "lifecycle_state": {
+      "enum": [
+        "partial",
+        "finalized",
+        "tombstoned"
+      ]
+    },
+    "asr_state": {
+      "enum": [
+        "not_applicable",
+        "partial",
+        "final"
+      ]
+    },
+    "recallable": {
+      "type": "boolean"
+    },
+    "payload_refs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/artifactReference"
+      },
+      "uniqueItems": true
+    },
+    "invalidated_at": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/utcTimestamp"
+    },
+    "invalidation_reason": {
+      "enum": [
+        "superseded",
+        "corrected",
+        "deleted"
+      ]
+    },
+    "invalidated_by_event_id": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/identifier"
+    }
+  },
+  "dependentRequired": {
+    "invalidated_at": [
+      "invalidation_reason",
+      "invalidated_by_event_id"
+    ],
+    "invalidation_reason": [
+      "invalidated_at",
+      "invalidated_by_event_id"
+    ],
+    "invalidated_by_event_id": [
+      "invalidated_at",
+      "invalidation_reason"
+    ]
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "source_surface": {
+            "const": "realtime_voice"
+          }
+        },
+        "required": [
+          "source_surface"
+        ]
+      },
+      "then": {
+        "properties": {
+          "asr_state": {
+            "enum": [
+              "partial",
+              "final"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "not": {
+          "properties": {
+            "source_surface": {
+              "const": "realtime_voice"
+            }
+          },
+          "required": [
+            "source_surface"
+          ]
+        }
+      },
+      "then": {
+        "properties": {
+          "asr_state": {
+            "const": "not_applicable"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "asr_state": {
+            "const": "partial"
+          }
+        },
+        "required": [
+          "asr_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "memory_bearing": {
+            "const": false
+          },
+          "lifecycle_state": {
+            "enum": [
+              "partial",
+              "tombstoned"
+            ]
+          },
+          "recallable": {
+            "const": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "source_surface": {
+            "const": "realtime_voice"
+          },
+          "asr_state": {
+            "const": "final"
+          }
+        },
+        "required": [
+          "source_surface",
+          "asr_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "enum": [
+              "finalized",
+              "tombstoned"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "recallable": {
+            "const": true
+          }
+        },
+        "required": [
+          "recallable"
+        ]
+      },
+      "then": {
+        "properties": {
+          "memory_bearing": {
+            "const": true
+          },
+          "lifecycle_state": {
+            "const": "finalized"
+          },
+          "asr_state": {
+            "enum": [
+              "not_applicable",
+              "final"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "memory_bearing": {
+            "const": true
+          },
+          "lifecycle_state": {
+            "const": "finalized"
+          }
+        },
+        "required": [
+          "memory_bearing",
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "recallable": {
+            "const": true
+          },
+          "asr_state": {
+            "enum": [
+              "not_applicable",
+              "final"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "enum": [
+              "partial",
+              "tombstoned"
+            ]
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "recallable": {
+            "const": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "invalidated_by_event_id"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "tombstoned"
+          },
+          "recallable": {
+            "const": false
+          }
+        }
+      }
+    }
+  ]
+}

@@ -19,8 +19,8 @@ The roadmap follows evidence and release gates. It is directional and may change
 ## 0.2 — review and compatibility
 
 - Bulk candidate-review UX and richer filtering/explanation metadata.
-- [x] Freeze the Track B execution profile and add private-artifact preflight
-  and aggregate gate calculation.
+- [x] Freeze the Track B execution profile; add a versioned, fail-closed private
+  dataset/sealed-run artifact contract and non-claimable aggregate diagnostics.
 - [ ] Complete an independently custodied qualifying Track B run on consented,
   de-identified longitudinal data.
 - [x] Public pin/unpin operations.

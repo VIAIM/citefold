@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:viaim:officelife-track-b:artifact-contract-v1:user",
+  "title": "OfficeLifeMemoryBench Track B user record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "contract_version",
+    "protocol_version",
+    "execution_profile_version",
+    "user_id",
+    "split",
+    "allowed_scopes",
+    "consent_record_id",
+    "deidentification_record_id"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "officelife-track-b-user-v1"
+    },
+    "contract_version": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/contractVersion"
+    },
+    "protocol_version": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/protocolVersion"
+    },
+    "execution_profile_version": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/executionProfileVersion"
+    },
+    "user_id": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/identifier"
+    },
+    "split": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/split"
+    },
+    "allowed_scopes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/scope"
+      },
+      "uniqueItems": true
+    },
+    "consent_record_id": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/identifier"
+    },
+    "deidentification_record_id": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/identifier"
+    }
+  }
+}

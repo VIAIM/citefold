@@ -18,6 +18,13 @@ required by the protocol. Any change to this execution profile after hidden
 results are inspected requires a new profile version and a recorded evaluation
 iteration.
 
+The frozen machine-readable dataset and sealed-run format is
+`officelife-track-b-artifact-contract-v1`, documented in
+`OFFICELIFE_TRACK_B_ARTIFACT_CONTRACT_V1.md`. Generator-visible task inputs and
+custodian-only hidden labels MUST be separate inventoried files. Passing that
+contract's structural validator does not prove executor isolation, execution,
+adjudication, qualification, or product effect.
+
 ## 1. Units and qualifying hidden-test cohort
 
 The experimental hierarchy is fixed as follows:
@@ -50,6 +57,14 @@ deletion instruction, or approval state that could affect a later task. It MUST
 precede at least one evaluation task for that user. Duplicate transport records,
 empty events, raw telemetry, and partial ASR hypotheses do not count toward the
 50-event minimum. They MAY remain in the history when needed for safety tests.
+
+The v1 artifact preflight computes a conservative normalized structural lower
+bound for these minimums. Tasks under the same user and allowed scope count once
+when they share the same pre-task snapshot content, even if task IDs, timestamps,
+paths, prompts, attachments, or surface labels differ. Eligible events sharing
+any normalized payload fingerprint form one component; empty normalized text
+does not count, and adding an attachment cannot increase the count. This
+mechanical deduplication does not replace custodian review of semantic diversity.
 
 Users, conversations, events, and derived tasks MUST appear in exactly one of
 `development`, `validation`, or `hidden_test`. Related identities that would
@@ -123,6 +138,9 @@ A rolling model alias without an immutable version is not a fixed model
 version. A provider route that can silently change upstream provider between
 arms is not qualifying. If an API returns actual model or provider identity, it
 MUST match the frozen configuration; a mismatch is an infrastructure error.
+The v1 sealed-run artifact contract requires `model_id` and `immutable_route`
+to use the declared upstream-provider namespace, fixes
+`fallback_policy = none`, and permits no fallback routes.
 
 The two arms MUST use the same model version and provider route, prompts, tools,
 tool outputs, recent conversation, generation settings, timeout, and retry

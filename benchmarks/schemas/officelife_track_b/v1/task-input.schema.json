@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:viaim:officelife-track-b:artifact-contract-v1:task-input",
+  "title": "OfficeLifeMemoryBench Track B task input record",
+  "description": "Generator-visible task input. Ground truth, scenario labels, memory requirements, evaluator notes, treatment labels, and ratings are deliberately not part of this schema.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "contract_version",
+    "protocol_version",
+    "execution_profile_version",
+    "task_id",
+    "user_id",
+    "conversation_id",
+    "split",
+    "allowed_scope",
+    "task_timestamp",
+    "history_cutoff",
+    "execution_surface",
+    "availability_rule",
+    "input_artifact",
+    "recent_context_artifact",
+    "tool_fixture_artifact",
+    "snapshot_id",
+    "snapshot_artifact"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "officelife-track-b-task-input-v1"
+    },
+    "contract_version": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/contractVersion"
+    },
+    "protocol_version": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/protocolVersion"
+    },
+    "execution_profile_version": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/executionProfileVersion"
+    },
+    "task_id": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/identifier"
+    },
+    "user_id": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/identifier"
+    },
+    "conversation_id": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/identifier"
+    },
+    "split": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/split"
+    },
+    "allowed_scope": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/scope"
+    },
+    "task_timestamp": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/utcTimestamp"
+    },
+    "history_cutoff": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/utcTimestamp"
+    },
+    "execution_surface": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/sourceSurface"
+    },
+    "availability_rule": {
+      "const": "available-at-strictly-before-cutoff-v1"
+    },
+    "input_artifact": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/artifactReference"
+    },
+    "recent_context_artifact": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/artifactReference"
+    },
+    "tool_fixture_artifact": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/artifactReference"
+    },
+    "snapshot_id": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/identifier"
+    },
+    "snapshot_artifact": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/artifactReference"
+    }
+  }
+}

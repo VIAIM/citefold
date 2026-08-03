@@ -1,0 +1,680 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:viaim:officelife-track-b:artifact-contract-v1:dataset-manifest",
+  "title": "OfficeLifeMemoryBench Track B sealed dataset manifest",
+  "$defs": {
+    "splitCounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "development",
+        "validation",
+        "hidden_test"
+      ],
+      "properties": {
+        "development": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "validation": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "hidden_test": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "surfaceCounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "text_chat",
+        "realtime_voice",
+        "third_party_agents",
+        "cross_channel"
+      ],
+      "properties": {
+        "text_chat": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "realtime_voice": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "third_party_agents": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "cross_channel": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "surfaceCountsBySplit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "development",
+        "validation",
+        "hidden_test"
+      ],
+      "properties": {
+        "development": {
+          "$ref": "#/$defs/surfaceCounts"
+        },
+        "validation": {
+          "$ref": "#/$defs/surfaceCounts"
+        },
+        "hidden_test": {
+          "$ref": "#/$defs/surfaceCounts"
+        }
+      }
+    },
+    "scenarioFamilyCounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stable_preferences",
+        "open_loops",
+        "people_followup",
+        "meeting_decisions",
+        "stale_or_superseded",
+        "correction",
+        "no_evidence",
+        "scope_isolation",
+        "deletion",
+        "cross_channel"
+      ],
+      "properties": {
+        "stable_preferences": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "open_loops": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "people_followup": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "meeting_decisions": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "stale_or_superseded": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "correction": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "no_evidence": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "scope_isolation": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "deletion": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "cross_channel": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "scenarioFamilyCountsBySplit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "development",
+        "validation",
+        "hidden_test"
+      ],
+      "properties": {
+        "development": {
+          "$ref": "#/$defs/scenarioFamilyCounts"
+        },
+        "validation": {
+          "$ref": "#/$defs/scenarioFamilyCounts"
+        },
+        "hidden_test": {
+          "$ref": "#/$defs/scenarioFamilyCounts"
+        }
+      }
+    },
+    "memoryRequirementCounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "required",
+        "optional",
+        "absent"
+      ],
+      "properties": {
+        "required": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "optional": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "absent": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "memoryRequirementCountsBySplit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "development",
+        "validation",
+        "hidden_test"
+      ],
+      "properties": {
+        "development": {
+          "$ref": "#/$defs/memoryRequirementCounts"
+        },
+        "validation": {
+          "$ref": "#/$defs/memoryRequirementCounts"
+        },
+        "hidden_test": {
+          "$ref": "#/$defs/memoryRequirementCounts"
+        }
+      }
+    },
+    "nullableTimestamp": {
+      "oneOf": [
+        {
+          "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/utcTimestamp"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "timelineRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "event_occurred_at_min",
+        "event_occurred_at_max",
+        "event_available_at_min",
+        "event_available_at_max",
+        "task_timestamp_min",
+        "task_timestamp_max"
+      ],
+      "properties": {
+        "event_occurred_at_min": {
+          "$ref": "#/$defs/nullableTimestamp"
+        },
+        "event_occurred_at_max": {
+          "$ref": "#/$defs/nullableTimestamp"
+        },
+        "event_available_at_min": {
+          "$ref": "#/$defs/nullableTimestamp"
+        },
+        "event_available_at_max": {
+          "$ref": "#/$defs/nullableTimestamp"
+        },
+        "task_timestamp_min": {
+          "$ref": "#/$defs/nullableTimestamp"
+        },
+        "task_timestamp_max": {
+          "$ref": "#/$defs/nullableTimestamp"
+        }
+      }
+    },
+    "timelineBySplit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "development",
+        "validation",
+        "hidden_test"
+      ],
+      "properties": {
+        "development": {
+          "$ref": "#/$defs/timelineRange"
+        },
+        "validation": {
+          "$ref": "#/$defs/timelineRange"
+        },
+        "hidden_test": {
+          "$ref": "#/$defs/timelineRange"
+        }
+      }
+    },
+    "hiddenTestPerUserMinimums": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "history_span_days",
+        "memory_bearing_events",
+        "tasks"
+      ],
+      "properties": {
+        "history_span_days": {
+          "type": "number",
+          "minimum": 0
+        },
+        "memory_bearing_events": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "tasks": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "declaredCounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "users_by_split",
+        "unique_tasks_by_split",
+        "surface_memberships_by_split",
+        "scenario_families_by_split",
+        "memory_requirements_by_split",
+        "harm_unique_tasks_by_split",
+        "timeline_by_split",
+        "hidden_test_per_user_minimums"
+      ],
+      "properties": {
+        "users_by_split": {
+          "$ref": "#/$defs/splitCounts"
+        },
+        "unique_tasks_by_split": {
+          "$ref": "#/$defs/splitCounts"
+        },
+        "surface_memberships_by_split": {
+          "$ref": "#/$defs/surfaceCountsBySplit"
+        },
+        "scenario_families_by_split": {
+          "$ref": "#/$defs/scenarioFamilyCountsBySplit"
+        },
+        "memory_requirements_by_split": {
+          "$ref": "#/$defs/memoryRequirementCountsBySplit"
+        },
+        "harm_unique_tasks_by_split": {
+          "$ref": "#/$defs/splitCounts"
+        },
+        "timeline_by_split": {
+          "$ref": "#/$defs/timelineBySplit"
+        },
+        "hidden_test_per_user_minimums": {
+          "$ref": "#/$defs/hiddenTestPerUserMinimums"
+        }
+      }
+    },
+    "governance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "custodian_organization_id",
+        "consent_policy",
+        "deidentification_policy",
+        "annotation_codebook",
+        "prohibited_identifier_scan",
+        "access_control_policy",
+        "retention_policy",
+        "withdrawal_policy",
+        "identity_mapping_commitment"
+      ],
+      "properties": {
+        "custodian_organization_id": {
+          "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/identifier"
+        },
+        "consent_policy": {
+          "allOf": [
+            {
+              "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/versionedInventoryLink"
+            },
+            {
+              "properties": {
+                "file_role": {
+                  "const": "consent-policy"
+                }
+              }
+            }
+          ]
+        },
+        "deidentification_policy": {
+          "allOf": [
+            {
+              "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/versionedInventoryLink"
+            },
+            {
+              "properties": {
+                "file_role": {
+                  "const": "deidentification-policy"
+                }
+              }
+            }
+          ]
+        },
+        "annotation_codebook": {
+          "allOf": [
+            {
+              "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/versionedInventoryLink"
+            },
+            {
+              "properties": {
+                "file_role": {
+                  "const": "annotation-codebook"
+                }
+              }
+            }
+          ]
+        },
+        "prohibited_identifier_scan": {
+          "allOf": [
+            {
+              "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/versionedInventoryLink"
+            },
+            {
+              "properties": {
+                "file_role": {
+                  "const": "prohibited-identifiers-scan"
+                }
+              }
+            }
+          ]
+        },
+        "access_control_policy": {
+          "allOf": [
+            {
+              "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/versionedInventoryLink"
+            },
+            {
+              "properties": {
+                "file_role": {
+                  "const": "access-control-policy"
+                }
+              }
+            }
+          ]
+        },
+        "retention_policy": {
+          "allOf": [
+            {
+              "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/versionedInventoryLink"
+            },
+            {
+              "properties": {
+                "file_role": {
+                  "const": "retention-policy"
+                }
+              }
+            }
+          ]
+        },
+        "withdrawal_policy": {
+          "allOf": [
+            {
+              "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/versionedInventoryLink"
+            },
+            {
+              "properties": {
+                "file_role": {
+                  "const": "withdrawal-policy"
+                }
+              }
+            }
+          ]
+        },
+        "identity_mapping_commitment": {
+          "allOf": [
+            {
+              "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/versionedInventoryLink"
+            },
+            {
+              "properties": {
+                "file_role": {
+                  "const": "identity-mapping-commitment"
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "contract_version",
+    "protocol_version",
+    "execution_profile_version",
+    "dataset_release_id",
+    "frozen_at",
+    "release_status",
+    "files",
+    "declared_counts",
+    "governance"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "officelife-track-b-dataset-manifest-v1"
+    },
+    "contract_version": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/contractVersion"
+    },
+    "protocol_version": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/protocolVersion"
+    },
+    "execution_profile_version": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/executionProfileVersion"
+    },
+    "dataset_release_id": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/identifier"
+    },
+    "frozen_at": {
+      "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/utcTimestamp"
+    },
+    "release_status": {
+      "enum": [
+        "sealed",
+        "invalidated"
+      ]
+    },
+    "files": {
+      "type": "array",
+      "minItems": 12,
+      "items": {
+        "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/inventoryEntry"
+      },
+      "uniqueItems": true,
+      "allOf": [
+        {
+          "contains": {
+            "required": [
+              "role"
+            ],
+            "properties": {
+              "role": {
+                "const": "users"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "required": [
+              "role"
+            ],
+            "properties": {
+              "role": {
+                "const": "events"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "required": [
+              "role"
+            ],
+            "properties": {
+              "role": {
+                "const": "task-inputs"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "required": [
+              "role"
+            ],
+            "properties": {
+              "role": {
+                "const": "task-labels"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "required": [
+              "role"
+            ],
+            "properties": {
+              "role": {
+                "const": "consent-policy"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "required": [
+              "role"
+            ],
+            "properties": {
+              "role": {
+                "const": "deidentification-policy"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "required": [
+              "role"
+            ],
+            "properties": {
+              "role": {
+                "const": "annotation-codebook"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "required": [
+              "role"
+            ],
+            "properties": {
+              "role": {
+                "const": "prohibited-identifiers-scan"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "required": [
+              "role"
+            ],
+            "properties": {
+              "role": {
+                "const": "access-control-policy"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "required": [
+              "role"
+            ],
+            "properties": {
+              "role": {
+                "const": "retention-policy"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "required": [
+              "role"
+            ],
+            "properties": {
+              "role": {
+                "const": "withdrawal-policy"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "required": [
+              "role"
+            ],
+            "properties": {
+              "role": {
+                "const": "identity-mapping-commitment"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        }
+      ]
+    },
+    "declared_counts": {
+      "$ref": "#/$defs/declaredCounts"
+    },
+    "governance": {
+      "$ref": "#/$defs/governance"
+    }
+  }
+}
