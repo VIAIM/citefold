@@ -21,6 +21,8 @@ The roadmap follows evidence and release gates. It is directional and may change
 - Bulk candidate-review UX and richer filtering/explanation metadata.
 - [x] Freeze the Track B execution profile; add a versioned, fail-closed private
   dataset/sealed-run artifact contract and non-claimable aggregate diagnostics.
+- [x] Add the label-free Track B worker handoff and non-qualifying controlled
+  executor draft with paired-arm recovery, blinding, and private audit closure.
 - [ ] Complete an independently custodied qualifying Track B run on consented,
   de-identified longitudinal data.
 - [x] Public pin/unpin operations.

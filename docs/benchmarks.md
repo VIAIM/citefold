@@ -11,7 +11,7 @@ The numbers below are **checked-in measurements generated on 2026-07-16**. Retri
 | LongMemEval-S retrieval diagnostic (`0.1.0` source snapshot) | 470 answerable questions | Recall-any@5 `0.9723`; Recall-all@5 `0.8447`; MRR `0.9139` | Whether at least one/all gold sessions were returned |
 | LongMemEval-S end-to-end QA (historical pre-release) | 500 questions | Overall `0.6180`; answerable `0.6043`; abstention `0.8333` | Reader answer judged by another model |
 | OfficeLifeMemoryBench Track A | 24 synthetic probes | MemoryPack `1.0000`; no-memory `0.3333`; lift `+0.6667` | Whether scoped memory exposes expected markers without forbidden context |
-| OfficeLifeMemoryBench Track B | Qualifying dataset/run pending | No result | Frozen profile, strict private artifact contract, and offline diagnostics only |
+| OfficeLifeMemoryBench Track B | Qualifying dataset/run pending | No result | Frozen profile, strict private artifacts, and a test-only controlled-execution draft |
 | Multimodal lifecycle | 10 deterministic fixtures | MemoryPack `1.0000`; no-memory `0.3000`; lift `+0.7000` | Whether evidence, conflicts, deletion, and safety contracts survive multiple modalities |
 
 ## LongMemEval-S retrieval
@@ -55,8 +55,9 @@ This establishes deterministic behavior on synthetic probes, not field productiv
 ## OfficeLifeMemoryBench Track B
 
 Track B now has a frozen execution profile, a versioned private dataset and
-sealed-run artifact contract, a fail-closed structural validator, and a legacy
-post-run aggregate calculator. The strict contract physically separates
+sealed-run artifact contract, a fail-closed structural validator, a label-free
+paired-arm executor draft, and a legacy post-run aggregate calculator. The
+strict contract physically separates
 generator-visible task inputs from custodian-only labels and binds an exhaustive
 inventory, hashes, record schemas, event lifecycle, minimum dataset gates, and
 the frozen system/provider configuration. Exact clones and common Unicode,
@@ -65,11 +66,14 @@ inflate its conservative structural task/event counts. Passing it proves only
 the supplied artifact structure and identity at validation time; it does not
 prove semantic dataset diversity.
 
-These tools do not collect participant data, enforce the future executor's file
-mounts, run the paired agent arms, conduct blinded judging, execute the
-controlled latency assay, or verify the complete private audit bundle. Their
-generated synthetic unit fixtures test contracts, failure semantics, and
-redaction guards only.
+The executor draft prepares an exhaustive label-free handoff, runs randomized
+paired arms, enforces frozen retry and provider identity, and binds private
+outputs, traces, blinding maps, and audit events. Its implemented handler is an
+in-process callable and its snapshot adapter treats state as opaque bytes. It
+therefore does not enforce OS file denial, establish eligible Citefold snapshot
+state, conduct blinded judging, execute the controlled latency assay, or produce
+a qualifying/public artifact. Generated synthetic fixtures test contracts,
+failure semantics, recovery, and redaction guards only.
 
 No qualifying consented hidden dataset has been run, so Citefold has no
 trustworthy Track B product-effect score. A result remains non-claimable until
@@ -77,6 +81,7 @@ independent custody, consented collection and annotation, a sealed paired run,
 human adjudication, privacy review, and the full audit chain are complete. See
 the [frozen execution profile](https://github.com/VIAIM/citefold/blob/main/benchmarks/OFFICELIFE_TRACK_B_EXECUTION_PROFILE_V1.md),
 [artifact contract](https://github.com/VIAIM/citefold/blob/main/benchmarks/OFFICELIFE_TRACK_B_ARTIFACT_CONTRACT_V1.md),
+[executor contract](https://github.com/VIAIM/citefold/blob/main/benchmarks/OFFICELIFE_TRACK_B_EXECUTOR_V1.md),
 and [benchmark operator guide](https://github.com/VIAIM/citefold/blob/main/benchmarks/README.md).
 
 ## Multimodal lifecycle
