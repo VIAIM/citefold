@@ -136,7 +136,7 @@ Read the rationale in [Concepts](https://github.com/VIAIM/citefold/blob/main/doc
 | Audio | Store media and accept timestamped transcripts | FFmpeg normalization/chunking + OpenRouter ASR | FFmpeg is optional system software; ASR availability depends on private routing |
 | Video | Store media and align supplied transcript/frame observations | Audio, subtitles, keyframes, and conservative short-clip fallback | Not a general video-understanding system |
 | Recall | Lexical + SQLite FTS5 + reciprocal-rank fusion | Optional embedding signal | `token_budget` is a deterministic character proxy, not a provider tokenizer |
-| Lifecycle | Candidate list/approve/reject, correct, archive, decay, soft/hard forget, rebuild | — | Public pin/unpin API is not implemented |
+| Lifecycle | Candidate list/approve/reject, correct, pin/unpin, archive, decay, soft/hard forget, rebuild | — | Pin exempts an active record from decay; it does not raise trust, guarantee recall, or block deletion |
 | Safety | Evidence gate, quoted media, scope isolation, provenance ledger | OpenRouter requests require ZDR and deny data collection | This SDK is not a sandbox for malicious code in the same Python process |
 
 The [CLI reference](https://github.com/VIAIM/citefold/blob/main/docs/cli.md), [multimodal guide](https://github.com/VIAIM/citefold/blob/main/docs/multimodal.md), and runnable [examples](https://github.com/VIAIM/citefold/tree/main/examples) show the supported paths without hiding optional dependencies.

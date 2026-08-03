@@ -191,6 +191,44 @@ class ConsolidationService:
         self._project(scope)
         return changed
 
+    def change_pinned(
+        self,
+        scope: MemoryScope,
+        record_id: str,
+        pinned: bool,
+        actor: str,
+        reason: str,
+    ) -> tuple[MemoryRecord, bool]:
+        normalized_reason = reason.strip()
+        if not normalized_reason:
+            raise ValueError("reason must not be empty")
+        current = self._record(scope, record_id)
+        if current is None or current.status != "active":
+            raise KeyError(f"Unknown active record_id: {record_id}")
+        if current.pinned == pinned:
+            return current, False
+
+        operation = "PIN" if pinned else "UNPIN"
+        transition = 1 + sum(
+            1
+            for revision in self.store.read_ledger(scope, "revisions")
+            if revision.get("operation") in {"PIN", "UNPIN"}
+            and isinstance(revision.get("record"), dict)
+            and revision["record"].get("record_id") == record_id
+        )
+        changed = replace(current, pinned=pinned)
+        self._revision(
+            scope,
+            operation,
+            changed,
+            actor,
+            normalized_reason,
+            f"pinned:{record_id}:{transition}:{operation}",
+            previous_record=current,
+        )
+        self._project(scope)
+        return changed, True
+
     def _add(
         self,
         scope: MemoryScope,

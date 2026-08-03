@@ -112,7 +112,7 @@ print(pack.markdown)       # 上下文和 Observation 引用
 | 音频 | 保存媒体并接收带时间码转写 | FFmpeg 标准化/切块 + OpenRouter ASR | FFmpeg 是可选系统软件；ASR 可用性受隐私路由影响 |
 | 视频 | 保存媒体并对齐外部转写和帧观察 | 音轨、字幕、关键帧和保守短 clip 回退 | 不是通用视频理解系统 |
 | 召回 | 词法 + SQLite FTS5 + RRF | 可选 embedding 信号 | `token_budget` 是确定性字符代理，不是供应商 tokenizer |
-| 生命周期 | 候选 list/approve/reject、纠正、归档、衰减、软/硬删除、重建 | — | 暂无公开 pin/unpin API |
+| 生命周期 | 候选 list/approve/reject、纠正、pin/unpin、归档、衰减、软/硬删除、重建 | — | Pin 仅使活跃记录免于衰减；不会提高可信度、保证召回或阻止删除 |
 | 安全 | Evidence Gate、媒体引用、作用域隔离、来源台账 | OpenRouter 强制 ZDR 且禁止数据收集 | 不能防御同一 Python 进程中的恶意代码 |
 
 详见 [CLI](docs/cli.md)、[多模态](docs/multimodal.md)与可运行的 [examples](examples/)。

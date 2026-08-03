@@ -11,7 +11,7 @@ Citefold borrows useful ideas from human memory—episodes, consolidation, cues,
 | `Episode` | Related observations placed in time and context | Append-only status history | one chat turn, meeting, voice final, or image capture |
 | `MemoryCandidate` | A proposed durable claim plus evidence, confidence, risk, and operation | Status changes are appended | “Alex prefers Friday follow-ups” |
 | `MemoryRecord` | A versioned, active or inactive durable claim | New version, never silent overwrite | semantic preference or prospective task |
-| `Revision` | The operation that produced a record state | Append-only | add, reinforce, supersede, conflict, archive, delete |
+| `Revision` | The operation that produced a record state | Append-only | add, reinforce, supersede, conflict, pin, unpin, archive, delete |
 | `MemoryPack` | Query-specific, bounded context returned to an agent | Rebuilt per recall | selected facts, episodes, conflicts, unknowns, citations |
 
 The hierarchy prevents a common collapse: model-generated text is not automatically promoted from “observation” to “known fact.”

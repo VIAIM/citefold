@@ -55,6 +55,8 @@ class CitefoldCliTest(unittest.TestCase):
                 "recall",
                 "consolidate",
                 "correct",
+                "pin",
+                "unpin",
                 "archive",
                 "forget",
                 "rebuild",
@@ -198,9 +200,22 @@ class CitefoldCliTest(unittest.TestCase):
             corrected = json.loads(output)
             self.assertEqual(2, corrected["version"])
 
+            status, output, error = self._run(tmp, "pin", corrected["record_id"])
+            self.assertEqual((0, ""), (status, error))
+            self.assertTrue(json.loads(output)["pinned"])
+
+            status, output, error = self._run(tmp, "unpin", corrected["record_id"])
+            self.assertEqual((0, ""), (status, error))
+            self.assertFalse(json.loads(output)["pinned"])
+
             status, output, error = self._run(tmp, "archive", corrected["record_id"])
             self.assertEqual((0, ""), (status, error))
             self.assertEqual("archived", json.loads(output)["status"])
+
+            status, output, error = self._run(tmp, "pin", corrected["record_id"])
+            self.assertEqual(1, status)
+            self.assertEqual("", output)
+            self.assertIn("Unknown active record_id", error)
 
             status, output, error = self._run(tmp, "list", "--all")
             self.assertEqual((0, ""), (status, error))

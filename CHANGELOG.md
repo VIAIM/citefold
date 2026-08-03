@@ -7,6 +7,11 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## Unreleased
 
+### Added
+
+- Auditable Python API and CLI operations to pin active records against decay
+  and unpin them without changing trust, evidence, or deletion semantics.
+
 ## 0.1.0 — 2026-08-03
 
 ### Added

@@ -737,6 +737,54 @@ class Citefold:
         return record
 
     @_scope_write
+    def pin(self, scope: MemoryScope, record_id: str, reason: str = "explicit pin") -> Any:
+        normalized_reason = reason.strip()
+        record, changed = self.consolidator.change_pinned(
+            scope,
+            record_id,
+            pinned=True,
+            actor=scope.agent_id,
+            reason=normalized_reason,
+        )
+        self._audit(
+            self._ensure_scope(scope),
+            "pin",
+            {
+                "record_id": record_id,
+                "reason": normalized_reason,
+                "changed": changed,
+                **scope.as_record(),
+            },
+        )
+        if changed:
+            self._refresh_indexes(scope)
+        return record
+
+    @_scope_write
+    def unpin(self, scope: MemoryScope, record_id: str, reason: str = "explicit unpin") -> Any:
+        normalized_reason = reason.strip()
+        record, changed = self.consolidator.change_pinned(
+            scope,
+            record_id,
+            pinned=False,
+            actor=scope.agent_id,
+            reason=normalized_reason,
+        )
+        self._audit(
+            self._ensure_scope(scope),
+            "unpin",
+            {
+                "record_id": record_id,
+                "reason": normalized_reason,
+                "changed": changed,
+                **scope.as_record(),
+            },
+        )
+        if changed:
+            self._refresh_indexes(scope)
+        return record
+
+    @_scope_write
     def decay(
         self,
         scope: MemoryScope,
@@ -753,6 +801,16 @@ class Citefold:
             record_id = str(event["record_id"])
             if record_id not in last_decay_at or created_at > last_decay_at[record_id]:
                 last_decay_at[record_id] = created_at
+        last_unpin_at: dict[str, datetime] = {}
+        for revision in self.store.read_ledger(scope, "revisions"):
+            if revision.get("operation") != "UNPIN" or not isinstance(revision.get("record"), dict):
+                continue
+            record_id = revision["record"].get("record_id")
+            if not record_id:
+                continue
+            created_at = datetime.fromisoformat(revision["created_at"])
+            if record_id not in last_unpin_at or created_at > last_unpin_at[record_id]:
+                last_unpin_at[record_id] = created_at
         changed: list[str] = []
         for record in self.store.effective_records(scope, include_inactive=False):
             category = record.get("metadata", {}).get("category")
@@ -762,7 +820,11 @@ class Citefold:
             age_days = max(0.0, (now - valid_from).total_seconds() / 86400)
             if age_days <= 7.0:
                 continue
-            decay_from = max(valid_from, last_decay_at.get(record["record_id"], valid_from))
+            decay_from = max(
+                valid_from,
+                last_decay_at.get(record["record_id"], valid_from),
+                last_unpin_at.get(record["record_id"], valid_from),
+            )
             elapsed_days = max(0.0, (now - decay_from).total_seconds() / 86400)
             if elapsed_days <= 0:
                 continue

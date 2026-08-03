@@ -127,6 +127,15 @@ citefold correct mem_example \
 
 Correction appends a revision and creates a new version.
 
+### `pin` and `unpin`
+
+```bash
+citefold pin mem_example --reason 'keep this preference stable'
+citefold unpin mem_example --reason 'resume normal decay'
+```
+
+Each real state change appends an auditable revision; repeating the same command does not append a duplicate revision, while its audit event is marked `changed: false`. Only active records can be pinned or unpinned. Pinning freezes the current access strength against decay; after unpinning, decay resumes from the unpin time without retroactively charging the pinned interval. Pinning does not increase confidence, guarantee recall, or prevent correction, archival, evidence invalidation, or deletion.
+
 ### `archive`
 
 ```bash

@@ -57,7 +57,7 @@ flowchart TB
 3. **Create an episode.** Related observations share a time range, participants, scene, and source metadata.
 4. **Propose durable memory.** A candidate includes explicit evidence references, sensitivity, risk, salience, and an intended operation.
 5. **Apply policy.** Trusted explicit input can activate only within supported rules. Model, tool, media, and third-party proposals remain pending by default.
-6. **Append a revision.** Activation or correction creates a versioned record plus an auditable operation event.
+6. **Append a revision.** Activation, correction, pin/unpin, archival, and deletion append auditable record-state operations.
 7. **Refresh projections and indexes.** Human-readable Markdown and SQLite are derived views, not the authoritative ledger.
 
 ## Read path
