@@ -7,7 +7,7 @@ import os
 import stat
 import tempfile
 import threading
-from contextlib import ExitStack, contextmanager
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Iterable, Iterator
@@ -121,9 +121,22 @@ class LedgerStore:
         )
 
     def ensure_scope(self, scope: MemoryScope) -> Path:
-        with current_store(self.root) as status:
+        while True:
+            self._initialize_scope_if_missing(scope)
+            with current_store(self.root) as status:
+                self._sync_generation(status.generation_id)
+                if not self.scope_root(scope).exists():
+                    continue
+                return self._ensure_scope_unlocked(scope)
+
+    def _initialize_scope_if_missing(self, scope: MemoryScope) -> None:
+        root = self.scope_root(scope)
+        if root.exists():
+            return
+        with current_store(self.root, exclusive=True) as status:
             self._sync_generation(status.generation_id)
-            return self._ensure_scope_unlocked(scope)
+            if not root.exists():
+                self._ensure_scope_unlocked(scope)
 
     def _ensure_scope_unlocked(self, scope: MemoryScope) -> Path:
         root = self._prepare_scope_lock(scope)
@@ -207,64 +220,40 @@ class LedgerStore:
     @contextmanager
     def scope_writer(self, scope: MemoryScope) -> Iterator[None]:
         """Serialize a complete high-level mutation for one storage scope."""
-        with current_store(self.root) as status:
-            self._sync_generation(status.generation_id)
-            scope_root = self.scope_root(scope)
-            scope_existed = scope_root.exists()
-            try:
+        while True:
+            self._initialize_scope_if_missing(scope)
+            with current_store(self.root) as status:
+                self._sync_generation(status.generation_id)
+                if not self.scope_root(scope).exists():
+                    continue
                 root = self._prepare_scope_lock(scope)
-            except Exception:
-                if not scope_existed:
-                    self._remove_empty_scope_scaffold(scope_root)
-                raise
-            key = str(root.resolve())
-            with _THREAD_LOCKS_GUARD:
-                thread_lock = _THREAD_LOCKS.setdefault(key, threading.RLock())
-            with thread_lock:
-                depths = getattr(self._writer_local, "depths", {})
-                depth = int(depths.get(key, 0))
-                self._writer_local.depths = depths
-                if depth:
-                    depths[key] = depth + 1
-                    try:
-                        yield
-                    finally:
-                        depths[key] -= 1
-                    return
-                lock_path = root / "ledgers" / ".writer.lock"
-                with ExitStack() as stack:
-                    try:
-                        lock = stack.enter_context(_open_regular_lock(lock_path))
-                    except Exception:
-                        if not scope_existed:
-                            self._remove_empty_scope_scaffold(scope_root)
-                        raise
-                    if fcntl is not None:
-                        fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
-                    depths[key] = 1
-                    try:
-                        self._ensure_scope_unlocked(scope)
-                        yield
-                    finally:
-                        depths.pop(key, None)
+                key = str(root.resolve())
+                with _THREAD_LOCKS_GUARD:
+                    thread_lock = _THREAD_LOCKS.setdefault(key, threading.RLock())
+                with thread_lock:
+                    depths = getattr(self._writer_local, "depths", {})
+                    depth = int(depths.get(key, 0))
+                    self._writer_local.depths = depths
+                    if depth:
+                        depths[key] = depth + 1
+                        try:
+                            yield
+                        finally:
+                            depths[key] -= 1
+                        return
+                    lock_path = root / "ledgers" / ".writer.lock"
+                    with _open_regular_lock(lock_path) as lock:
                         if fcntl is not None:
-                            fcntl.flock(lock.fileno(), fcntl.LOCK_UN)
-
-    def _remove_empty_scope_scaffold(self, scope_root: Path) -> None:
-        ledgers = scope_root / "ledgers"
-        try:
-            if os.path.lexists(ledgers):
-                if not ledgers.is_dir() or ledgers.is_symlink() or any(ledgers.iterdir()):
+                            fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
+                        depths[key] = 1
+                        try:
+                            self._ensure_scope_unlocked(scope)
+                            yield
+                        finally:
+                            depths.pop(key, None)
+                            if fcntl is not None:
+                                fcntl.flock(lock.fileno(), fcntl.LOCK_UN)
                     return
-                ledgers.rmdir()
-            if not scope_root.is_dir() or scope_root.is_symlink():
-                return
-            current = scope_root
-            while current != self.root:
-                current.rmdir()
-                current = current.parent
-        except OSError:
-            return
 
     def register_asset(
         self,

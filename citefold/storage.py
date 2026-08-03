@@ -373,20 +373,31 @@ def _status(
 
 
 @contextmanager
-def current_store(root: str | Path) -> Iterator[StoreStatus]:
+def current_store(root: str | Path, *, exclusive: bool = False) -> Iterator[StoreStatus]:
     path = _normalized_root(root)
-    status = inspect_store(path)
-    if status.state == "uninitialized":
+    if exclusive:
         with root_lock(path, exclusive=True):
             status = inspect_store(path)
             if status.state == "uninitialized":
                 _initialize_store(path)
-            elif status.state != "current":
+                status = inspect_store(path)
+            _raise_for_status(status)
+            yield status
+        return
+
+    while True:
+        with root_lock(path, exclusive=False):
+            status = inspect_store(path)
+            if status.state != "uninitialized":
                 _raise_for_status(status)
-    with root_lock(path, exclusive=False):
-        status = inspect_store(path)
-        _raise_for_status(status)
-        yield status
+                yield status
+                return
+        with root_lock(path, exclusive=True):
+            status = inspect_store(path)
+            if status.state == "uninitialized":
+                _initialize_store(path)
+            else:
+                _raise_for_status(status)
 
 
 def _raise_for_status(status: StoreStatus) -> None:

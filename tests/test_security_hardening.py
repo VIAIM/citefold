@@ -4,11 +4,11 @@ import os
 import tempfile
 import threading
 import unittest
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutureTimeoutError
 from pathlib import Path
 from unittest.mock import patch
 
-from citefold import Citefold, MemoryScope, StorageError
+from citefold import Citefold, MemoryScope, StorageError, inspect_store
 from citefold.openrouter import OpenRouterClient
 
 
@@ -103,7 +103,8 @@ class SecurityHardeningTest(unittest.TestCase):
                 with self.assertRaisesRegex(OSError, "injected scope lock failure"):
                     memory.ingest_text(scope(), "first write must fail", source="test")
 
-            self.assertFalse(scope_root(str(root)).exists())
+            self.assertEqual("current", inspect_store(root).state)
+            self.assertEqual(10, len(list((scope_root(str(root)) / "ledgers").glob("*.jsonl"))))
             memory.ingest_text(scope(), "second write must use the scope lock", source="test")
 
             self.assertTrue((scope_root(str(root)) / "ledgers" / ".writer.lock").is_file())
@@ -287,6 +288,84 @@ class SecurityHardeningTest(unittest.TestCase):
             memory = memories[0]
             self.assertEqual(1, len(memory.store.episodes(scope())))
             self.assertEqual(1, len(memory.list_records(scope())))
+
+    def test_new_scope_is_not_visible_before_canonical_ledgers_exist(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            first = Citefold(tmp)
+            second = Citefold(tmp)
+            scaffold_ready = threading.Event()
+            release_scaffold = threading.Event()
+            second_started = threading.Event()
+            real_prepare = first.store._prepare_scope_lock
+
+            def pause_after_scaffold(target_scope: MemoryScope) -> Path:
+                root = real_prepare(target_scope)
+                scaffold_ready.set()
+                if not release_scaffold.wait(5):
+                    raise RuntimeError("test did not release scope initialization")
+                return root
+
+            def second_ingest():
+                second_started.set()
+                return second.ingest_text(
+                    scope(),
+                    "请记住：新作用域初始化必须原子可见。",
+                    source="text_chat",
+                )
+
+            with patch.object(first.store, "_prepare_scope_lock", side_effect=pause_after_scaffold):
+                with ThreadPoolExecutor(max_workers=2) as pool:
+                    first_future = pool.submit(
+                        first.ingest_text,
+                        scope(),
+                        "请记住：新作用域初始化必须原子可见。",
+                        "text_chat",
+                    )
+                    self.assertTrue(scaffold_ready.wait(5), "first writer did not create its scaffold")
+                    second_future = pool.submit(second_ingest)
+                    self.assertTrue(second_started.wait(5), "second writer did not start")
+                    try:
+                        with self.assertRaises(FutureTimeoutError):
+                            second_future.result(timeout=0.25)
+                    finally:
+                        release_scaffold.set()
+                    first_result = first_future.result(timeout=5)
+                    second_result = second_future.result(timeout=5)
+
+            self.assertEqual(first_result.record_ids, second_result.record_ids)
+
+    def test_concurrent_first_writes_to_different_scopes_do_not_deadlock(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            first = Citefold(tmp)
+            second = Citefold(tmp)
+            first_scope = MemoryScope("tenant-a", "user-1", "alpha", "agent", "session")
+            second_scope = MemoryScope("tenant-a", "user-1", "beta", "agent", "session")
+            start = threading.Barrier(2)
+
+            def ingest(memory: Citefold, target_scope: MemoryScope, text: str):
+                start.wait(timeout=5)
+                return memory.ingest_text(target_scope, text, source="text_chat")
+
+            with ThreadPoolExecutor(max_workers=2) as pool:
+                first_future = pool.submit(
+                    ingest,
+                    first,
+                    first_scope,
+                    "请记住：alpha 作用域偏好先看风险。",
+                )
+                second_future = pool.submit(
+                    ingest,
+                    second,
+                    second_scope,
+                    "请记住：beta 作用域偏好先看结论。",
+                )
+                first_result = first_future.result(timeout=5)
+                second_result = second_future.result(timeout=5)
+
+            self.assertTrue(first_result.record_ids)
+            self.assertTrue(second_result.record_ids)
+            self.assertEqual(1, len(first.list_records(first_scope)))
+            self.assertEqual(1, len(second.list_records(second_scope)))
 
     def test_public_reader_waits_for_a_partial_ledger_write(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

@@ -275,6 +275,39 @@ class StorageMigrationTest(unittest.TestCase):
             self.assertIn(first.record_ids[0], record_ids)
             self.assertNotIn(second.record_ids[0], record_ids)
 
+    def test_scope_initialization_retries_if_restore_removes_it_before_shared_guard(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "memory"
+            memory = Citefold(root)
+            baseline_scope = MemoryScope("tenant", "user", "baseline", "agent", "session")
+            target_scope = MemoryScope("tenant", "user", "target", "agent", "session")
+            memory.ingest_text(baseline_scope, "baseline memory", source="test")
+            backup = backup_store(root)
+            real_initialize = memory.store._initialize_scope_if_missing
+            restored = False
+
+            def initialize_then_restore(candidate: MemoryScope) -> None:
+                nonlocal restored
+                real_initialize(candidate)
+                if candidate == target_scope and not restored:
+                    restored = True
+                    restore_store(root, backup.archive, replace=True)
+
+            with mock.patch.object(
+                memory.store,
+                "_initialize_scope_if_missing",
+                side_effect=initialize_then_restore,
+            ):
+                result = memory.ingest_text(
+                    target_scope,
+                    "请记住：我喜欢恢复后先看风险。",
+                    source="test",
+                )
+
+            self.assertTrue(restored)
+            self.assertIn(result.record_ids[0], {item["record_id"] for item in memory.list_records(target_scope)})
+            self.assertEqual(10, len(list((memory.store.scope_root(target_scope) / "ledgers").glob("*.jsonl"))))
+
     @unittest.skipUnless(os.name == "posix", "POSIX advisory locking is required")
     def test_backup_waits_for_normal_operation_in_another_process(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
