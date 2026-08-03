@@ -1,8 +1,8 @@
 site_name: Citefold
 site_description: Evidence-backed multimodal memory for agents.
-site_url: https://jappre.github.io/citefold/
-repo_url: https://github.com/jappre/citefold
-repo_name: jappre/citefold
+site_url: https://viaim.github.io/citefold/
+repo_url: https://github.com/VIAIM/citefold
+repo_name: VIAIM/citefold
 edit_uri: edit/main/docs/
 
 theme:
@@ -61,6 +61,6 @@ markdown_extensions:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/jappre/citefold
+      link: https://github.com/VIAIM/citefold
 
 copyright: Copyright &copy; Citefold contributors · Apache-2.0

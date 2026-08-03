@@ -29,7 +29,7 @@ def run_turn(
     return assistant_message
 ```
 
-[`examples/agent_loop.py`](https://github.com/jappre/citefold/blob/main/examples/agent_loop.py) is runnable without an LLM; it uses a small stand-in responder to make the hooks visible.
+[`examples/agent_loop.py`](https://github.com/VIAIM/citefold/blob/main/examples/agent_loop.py) is runnable without an LLM; it uses a small stand-in responder to make the hooks visible.
 
 ## Put MemoryPack below trusted instructions
 

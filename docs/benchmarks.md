@@ -18,8 +18,8 @@ The numbers below are **checked-in measurements generated on 2026-07-16**. Retri
 The retrieval diagnostic uses the public cleaned dataset, excludes 30 abstention questions in the official retrieval style, and scores session IDs represented by returned MemoryPack nodes. The `0.1.0` value identifies the tested source snapshot; the artifact does not contain a commit SHA and is not a tagged-release result.
 
 - Dataset SHA-256: `d6f21ea9d60a0d56f34a05b609c79c88a451d2ae03597821ea3d5a9678c3a442`
-- [Markdown report](https://github.com/jappre/citefold/blob/main/benchmarks/results/current/longmemeval-s-cleaned-citefold-retrieval-v0.1.0.md)
-- [Machine-readable result](https://github.com/jappre/citefold/blob/main/benchmarks/results/current/longmemeval-s-cleaned-citefold-retrieval-v0.1.0.json)
+- [Markdown report](https://github.com/VIAIM/citefold/blob/main/benchmarks/results/current/longmemeval-s-cleaned-citefold-retrieval-v0.1.0.md)
+- [Machine-readable result](https://github.com/VIAIM/citefold/blob/main/benchmarks/results/current/longmemeval-s-cleaned-citefold-retrieval-v0.1.0.json)
 
 It is a retrieval diagnostic, not an end-to-end answer score.
 
@@ -33,8 +33,8 @@ The complete run generated 500 hypotheses and judged them with:
 
 The actual upstream provider was not pinned, and the judge was not the official `gpt-4o-2024-08-06`. The result must not be presented as an official LongMemEval leaderboard score.
 
-- [Markdown report](https://github.com/jappre/citefold/blob/main/benchmarks/results/current/longmemeval-s-cleaned-pmos-evidence-multimodal-v5-openrouter-deepseek-v3.1-2026-07-16.md)
-- [Machine-readable result](https://github.com/jappre/citefold/blob/main/benchmarks/results/current/longmemeval-s-cleaned-pmos-evidence-multimodal-v5-openrouter-deepseek-v3.1-2026-07-16.json)
+- [Markdown report](https://github.com/VIAIM/citefold/blob/main/benchmarks/results/current/longmemeval-s-cleaned-pmos-evidence-multimodal-v5-openrouter-deepseek-v3.1-2026-07-16.md)
+- [Machine-readable result](https://github.com/VIAIM/citefold/blob/main/benchmarks/results/current/longmemeval-s-cleaned-pmos-evidence-multimodal-v5-openrouter-deepseek-v3.1-2026-07-16.json)
 
 Question-type accuracy varied substantially: single-session-user `0.9000`, knowledge-update `0.8205`, temporal-reasoning `0.6617`, and multi-session `0.3835`. The aggregate should not hide those weaknesses.
 
@@ -46,8 +46,8 @@ This deterministic benchmark compares the same task contract with and without a 
 - Missing expected markers: 0.
 - Unsupported-context hits: 0.
 - Scope leakage: 0.
-- [Markdown report](https://github.com/jappre/citefold/blob/main/benchmarks/results/current/officelife-memory-bench-evidence-multimodal-v5-2026-07-16.md)
-- [Machine-readable result](https://github.com/jappre/citefold/blob/main/benchmarks/results/current/officelife-memory-bench-evidence-multimodal-v5-2026-07-16.json)
+- [Markdown report](https://github.com/VIAIM/citefold/blob/main/benchmarks/results/current/officelife-memory-bench-evidence-multimodal-v5-2026-07-16.md)
+- [Machine-readable result](https://github.com/VIAIM/citefold/blob/main/benchmarks/results/current/officelife-memory-bench-evidence-multimodal-v5-2026-07-16.json)
 
 This establishes deterministic behavior on synthetic probes, not field productivity.
 
@@ -58,8 +58,8 @@ The fixture covers text, image text, audio commitments, aligned video observatio
 - Fixture SHA-256: `d494d1aac58cb9b09fc4eb0aaf9b64666bd7a223655b5b68b595099af174cf51`
 - Network calls: 0; model calls: 0.
 - Unsupported / forbidden / scope leakage: 0 / 0 / 0.
-- [Markdown report](https://github.com/jappre/citefold/blob/main/benchmarks/results/current/multimodal-memory-pack-v5.md)
-- [Machine-readable result](https://github.com/jappre/citefold/blob/main/benchmarks/results/current/multimodal-memory-pack-v5.json)
+- [Markdown report](https://github.com/VIAIM/citefold/blob/main/benchmarks/results/current/multimodal-memory-pack-v5.md)
+- [Machine-readable result](https://github.com/VIAIM/citefold/blob/main/benchmarks/results/current/multimodal-memory-pack-v5.json)
 
 Supplied observations deliberately isolate memory behavior from OCR, ASR, vision-model, codec, and reader-LLM quality.
 
@@ -89,7 +89,7 @@ python -m benchmarks.longmemeval_citefold_benchmark \
 
 QA generation and judging make paid external model calls. Inspect `--help`, pin model/provider where possible, record the manifest, and never commit API keys or raw private traces.
 
-See [`benchmarks/README.md`](https://github.com/jappre/citefold/blob/main/benchmarks/README.md) for runner details and result-handling rules.
+See [`benchmarks/README.md`](https://github.com/VIAIM/citefold/blob/main/benchmarks/README.md) for runner details and result-handling rules.
 
 ## Reporting rules
 

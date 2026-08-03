@@ -90,7 +90,7 @@ PyPI publication is performed only by `.github/workflows/release.yml` through
 Trusted Publishing; do not upload distributions from a maintainer laptop.
 
 Before the first release, configure a PyPI Trusted Publisher for owner
-`jappre`, repository `citefold`, workflow `release.yml`, and environment
+`VIAIM`, repository `citefold`, workflow `release.yml`, and environment
 `pypi`. Protect that GitHub environment so only release tags can publish.
 Also enable GitHub private vulnerability reporting so the channel documented
 in `SECURITY.md` is available before the first tagged release.

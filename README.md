@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/jappre/citefold/main/assets/citefold-wordmark.svg" alt="Citefold — Every memory remembers its source." width="640">
+  <img src="https://raw.githubusercontent.com/VIAIM/citefold/main/assets/citefold-wordmark.svg" alt="Citefold — Every memory remembers its source." width="640">
 </p>
 
 <p align="center">
@@ -8,18 +8,18 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/jappre/citefold/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/jappre/citefold/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://github.com/VIAIM/citefold/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/VIAIM/citefold/actions/workflows/ci.yml/badge.svg"></a>
   <img alt="Python 3.9+" src="https://img.shields.io/badge/Python-3.9%2B-3776AB?logo=python&logoColor=white">
-  <a href="https://github.com/jappre/citefold/blob/main/LICENSE"><img alt="Apache 2.0" src="https://img.shields.io/badge/License-Apache--2.0-2CC8B2"></a>
+  <a href="https://github.com/VIAIM/citefold/blob/main/LICENSE"><img alt="Apache 2.0" src="https://img.shields.io/badge/License-Apache--2.0-2CC8B2"></a>
   <img alt="Status: alpha" src="https://img.shields.io/badge/Status-alpha-F2A65A">
 </p>
 
 <p align="center">
   <a href="#60-second-quickstart">Quickstart</a> ·
-  <a href="https://github.com/jappre/citefold/blob/main/docs/index.md">Documentation</a> ·
-  <a href="https://github.com/jappre/citefold/blob/main/docs/architecture.md">Architecture</a> ·
-  <a href="https://github.com/jappre/citefold/blob/main/docs/benchmarks.md">Benchmarks</a> ·
-  <a href="https://github.com/jappre/citefold/blob/main/README.zh-CN.md">中文</a>
+  <a href="https://github.com/VIAIM/citefold/blob/main/docs/index.md">Documentation</a> ·
+  <a href="https://github.com/VIAIM/citefold/blob/main/docs/architecture.md">Architecture</a> ·
+  <a href="https://github.com/VIAIM/citefold/blob/main/docs/benchmarks.md">Benchmarks</a> ·
+  <a href="https://github.com/VIAIM/citefold/blob/main/README.zh-CN.md">中文</a>
 </p>
 
 > **Alpha software.** Citefold is usable as an embedded Python library, but its API and on-disk format may change before 1.0. It is not a hosted service and does not provide authentication or encryption at rest.
@@ -51,7 +51,7 @@ flowchart LR
 Citefold's local text path uses only Python's standard library. The PyPI distribution is not published yet; clone and run the deterministic example:
 
 ```bash
-git clone https://github.com/jappre/citefold.git
+git clone https://github.com/VIAIM/citefold.git
 cd citefold
 python -m pip install -e .
 citefold demo
@@ -108,7 +108,7 @@ Query: What is the launch codename and when should I send the brief?
 coverage: supported
 ```
 
-See [Quickstart](https://github.com/jappre/citefold/blob/main/docs/quickstart.md) for persistence, candidate approval, and CLI usage.
+See [Quickstart](https://github.com/VIAIM/citefold/blob/main/docs/quickstart.md) for persistence, candidate approval, and CLI usage.
 
 ## Design principles
 
@@ -119,7 +119,7 @@ See [Quickstart](https://github.com/jappre/citefold/blob/main/docs/quickstart.md
 5. **Scope is part of every operation.** Tenant, user, and namespace boundaries are enforced in storage and retrieval—not left to prompt wording.
 6. **Indexes are disposable.** JSONL ledgers and content-addressed assets are authoritative; FTS and embeddings can be rebuilt.
 
-Read the rationale in [Concepts](https://github.com/jappre/citefold/blob/main/docs/concepts.md).
+Read the rationale in [Concepts](https://github.com/VIAIM/citefold/blob/main/docs/concepts.md).
 
 ## What works today
 
@@ -133,7 +133,7 @@ Read the rationale in [Concepts](https://github.com/jappre/citefold/blob/main/do
 | Lifecycle | Candidate list/approve/reject, correct, archive, decay, soft/hard forget, rebuild | — | Public pin/unpin API is not implemented |
 | Safety | Evidence gate, quoted media, scope isolation, provenance ledger | OpenRouter requests require ZDR and deny data collection | This SDK is not a sandbox for malicious code in the same Python process |
 
-The [CLI reference](https://github.com/jappre/citefold/blob/main/docs/cli.md), [multimodal guide](https://github.com/jappre/citefold/blob/main/docs/multimodal.md), and runnable [examples](https://github.com/jappre/citefold/tree/main/examples) show the supported paths without hiding optional dependencies.
+The [CLI reference](https://github.com/VIAIM/citefold/blob/main/docs/cli.md), [multimodal guide](https://github.com/VIAIM/citefold/blob/main/docs/multimodal.md), and runnable [examples](https://github.com/VIAIM/citefold/tree/main/examples) show the supported paths without hiding optional dependencies.
 
 ## Current architecture
 
@@ -143,7 +143,7 @@ Citefold has three deliberately separate planes:
 - **Memory plane:** candidates, policy decisions, active records, conflicts, and revisions.
 - **Recall plane:** rebuildable lexical/FTS/embedding indexes followed by an evidence gate and bounded renderer.
 
-Durable state is stored below an identity-scoped root as content-addressed assets, append-only JSONL ledgers, human-readable projections, and a rebuildable SQLite index. See [Architecture](https://github.com/jappre/citefold/blob/main/docs/architecture.md) for write, read, correction, and deletion paths.
+Durable state is stored below an identity-scoped root as content-addressed assets, append-only JSONL ledgers, human-readable projections, and a rebuildable SQLite index. See [Architecture](https://github.com/VIAIM/citefold/blob/main/docs/architecture.md) for write, read, correction, and deletion paths.
 
 ## v0.1 readiness scorecard
 
@@ -168,7 +168,7 @@ These are **checked-in measurements generated on 2026-07-16**, not universal pro
 | OfficeLife synthetic A/B | **100%** MemoryPack vs **33.33%** no-memory | Deterministic lift on 24 scoped office/life probes | Real-user productivity or field performance |
 | Multimodal lifecycle regression | **100%** MemoryPack vs **30%** no-memory | Evidence, coverage, deletion, conflict, and injection contracts across 10 fixtures | OCR, ASR, vision-model, codec, or reader-LLM quality |
 
-The reports, dataset hashes, environments, and caveats are preserved in [Benchmarks](https://github.com/jappre/citefold/blob/main/docs/benchmarks.md). Retrieval and QA are different measurements and should not be compared as if they were the same score.
+The reports, dataset hashes, environments, and caveats are preserved in [Benchmarks](https://github.com/VIAIM/citefold/blob/main/docs/benchmarks.md). Retrieval and QA are different measurements and should not be compared as if they were the same score.
 
 ## Security and privacy posture
 
@@ -178,7 +178,7 @@ The reports, dataset hashes, environments, and caveats are preserved in [Benchma
 - OpenRouter is opt-in. Requests require ZDR, deny provider data collection, and fail closed rather than weakening those constraints.
 - API keys are read from process environment variables and are not written to memory ledgers.
 
-Citefold does **not** provide user authentication, operating-system isolation, encryption at rest, a remote authorization service, or a defense against hostile code with direct filesystem access. Read the [Security model](https://github.com/jappre/citefold/blob/main/docs/security.md) before using sensitive data and report vulnerabilities through [SECURITY.md](https://github.com/jappre/citefold/blob/main/SECURITY.md).
+Citefold does **not** provide user authentication, operating-system isolation, encryption at rest, a remote authorization service, or a defense against hostile code with direct filesystem access. Read the [Security model](https://github.com/VIAIM/citefold/blob/main/docs/security.md) before using sensitive data and report vulnerabilities through [SECURITY.md](https://github.com/VIAIM/citefold/blob/main/SECURITY.md).
 
 ## When to use Citefold
 
@@ -215,7 +215,7 @@ memory.ingest_chat(                                     # after the completed tu
 )
 ```
 
-Run [`examples/agent_loop.py`](https://github.com/jappre/citefold/blob/main/examples/agent_loop.py) or see [Integrations](https://github.com/jappre/citefold/blob/main/docs/integrations.md). Citefold does not force a particular agent framework or model provider.
+Run [`examples/agent_loop.py`](https://github.com/VIAIM/citefold/blob/main/examples/agent_loop.py) or see [Integrations](https://github.com/VIAIM/citefold/blob/main/docs/integrations.md). Citefold does not force a particular agent framework or model provider.
 
 ## Roadmap
 
@@ -224,14 +224,14 @@ Run [`examples/agent_loop.py`](https://github.com/jappre/citefold/blob/main/exam
 - **0.3:** real-media quality evaluation, scale/latency/cost measurements, and framework adapters.
 - **1.0 gate:** stable schemas, migration policy, threat-model review, and independent real-user evaluation.
 
-The roadmap is directional, not a delivery promise. See [Roadmap](https://github.com/jappre/citefold/blob/main/docs/roadmap.md) and [Limitations](https://github.com/jappre/citefold/blob/main/docs/limitations.md).
+The roadmap is directional, not a delivery promise. See [Roadmap](https://github.com/VIAIM/citefold/blob/main/docs/roadmap.md) and [Limitations](https://github.com/VIAIM/citefold/blob/main/docs/limitations.md).
 
 ## Contributing
 
-Bug reports, benchmark reproductions, documentation fixes, and narrowly scoped adapters are welcome. Start with [CONTRIBUTING.md](https://github.com/jappre/citefold/blob/main/CONTRIBUTING.md), use the issue templates, and include evidence for performance or quality claims.
+Bug reports, benchmark reproductions, documentation fixes, and narrowly scoped adapters are welcome. Start with [CONTRIBUTING.md](https://github.com/VIAIM/citefold/blob/main/CONTRIBUTING.md), use the issue templates, and include evidence for performance or quality claims.
 
 ## License and citation
 
-Citefold is licensed under the [Apache License 2.0](https://github.com/jappre/citefold/blob/main/LICENSE). Benchmark datasets and protocols may have their own terms; see [THIRD_PARTY_NOTICES.md](https://github.com/jappre/citefold/blob/main/THIRD_PARTY_NOTICES.md).
+Citefold is licensed under the [Apache License 2.0](https://github.com/VIAIM/citefold/blob/main/LICENSE). Benchmark datasets and protocols may have their own terms; see [THIRD_PARTY_NOTICES.md](https://github.com/VIAIM/citefold/blob/main/THIRD_PARTY_NOTICES.md).
 
-If Citefold supports published work, use the repository metadata in [CITATION.cff](https://github.com/jappre/citefold/blob/main/CITATION.cff) and cite the exact release plus benchmark configuration.
+If Citefold supports published work, use the repository metadata in [CITATION.cff](https://github.com/VIAIM/citefold/blob/main/CITATION.cff) and cite the exact release plus benchmark configuration.

@@ -7,7 +7,7 @@ This path stays local and makes no network or model calls.
 PyPI publishing is planned for the first release but is not available yet.
 
 ```bash
-git clone https://github.com/jappre/citefold.git
+git clone https://github.com/VIAIM/citefold.git
 cd citefold
 python3 -m venv .venv
 source .venv/bin/activate
