@@ -9,6 +9,10 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Added
 
+- Frozen OfficeLifeMemoryBench Track B execution profile and an offline
+  private-input preflight/aggregate-calculation harness. Its synthetic tests
+  validate evaluator contracts and redaction/non-claimability guards only; they are not a Track B
+  product result.
 - Versioned `agent-turn-v1` prepare/complete hooks with a stable JSON-compatible
   context envelope, trusted-host turn IDs, and an installed-wheel consumer test.
 - Auditable Python API and CLI operations to pin active records against decay

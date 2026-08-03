@@ -163,4 +163,11 @@ These gates are provisional until the first pilot establishes variance and annot
 
 ## Current Status
 
-Track A is implemented in `officelife_memory_benchmark.py`. Track B has no qualifying dataset yet, so there is currently no trustworthy OfficeLife product-effect score. The next work item is consented data collection and annotation under this protocol, not generating more synthetic markers.
+Track A is implemented in `officelife_memory_benchmark.py`. Track B now has a
+frozen execution profile and an offline private-artifact preflight/aggregate
+calculation harness with synthetic contract tests. The harness does not collect
+data, execute paired agent arms, obtain blinded human ratings, run the
+controlled latency assay, or establish product lift. No qualifying consented
+hidden dataset or trustworthy Track B product-effect score exists yet. The next
+step is independent custody, consented collection and annotation, followed by a
+sealed paired run and complete audit.

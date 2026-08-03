@@ -99,9 +99,12 @@ jobs:
               f"{root}/assets/citefold-wordmark.svg",
               f"{root}/tests/test_agent_turn.py",
               f"{root}/tests/test_citefold.py",
+              f"{root}/tests/test_officelife_track_b_benchmark.py",
               f"{root}/tests/fixtures/v0_1_store/FIXTURE.json",
               f"{root}/tests/fixtures/v0_1_store/store/tenants/tenant-a/users/user-1/namespaces/personal/indexes/memory.sqlite3",
               f"{root}/benchmarks/fixtures/multimodal_memory_bench_v1.json",
+              f"{root}/benchmarks/OFFICELIFE_TRACK_B_EXECUTION_PROFILE_V1.md",
+              f"{root}/benchmarks/officelife_track_b_benchmark.py",
               f"{root}/docs/architecture.md",
               f"{root}/examples/quickstart.py",
           }
