@@ -9,6 +9,7 @@
 
 <p align="center">
   <a href="https://github.com/VIAIM/citefold/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/VIAIM/citefold/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://pypi.org/project/citefold/"><img alt="PyPI" src="https://img.shields.io/pypi/v/citefold"></a>
   <img alt="Python 3.9+" src="https://img.shields.io/badge/Python-3.9%2B-3776AB?logo=python&logoColor=white">
   <a href="https://github.com/VIAIM/citefold/blob/main/LICENSE"><img alt="Apache 2.0" src="https://img.shields.io/badge/License-Apache--2.0-2CC8B2"></a>
   <img alt="Status: alpha" src="https://img.shields.io/badge/Status-alpha-F2A65A">
@@ -16,7 +17,7 @@
 
 <p align="center">
   <a href="#60-second-quickstart">Quickstart</a> ·
-  <a href="https://github.com/VIAIM/citefold/blob/main/docs/index.md">Documentation</a> ·
+  <a href="https://viaim.github.io/citefold/">Documentation</a> ·
   <a href="https://github.com/VIAIM/citefold/blob/main/docs/architecture.md">Architecture</a> ·
   <a href="https://github.com/VIAIM/citefold/blob/main/docs/benchmarks.md">Benchmarks</a> ·
   <a href="https://github.com/VIAIM/citefold/blob/main/README.zh-CN.md">中文</a>
@@ -48,16 +49,21 @@ flowchart LR
 
 ## 60-second quickstart
 
-Citefold's local text path uses only Python's standard library. The PyPI distribution is not published yet; clone and run the deterministic example:
+Citefold's local text path uses only Python's standard library. Install the alpha release from PyPI and run the deterministic demo:
+
+```bash
+python -m pip install citefold
+citefold demo
+```
+
+To inspect the source or run the checked-in Python example:
 
 ```bash
 git clone https://github.com/VIAIM/citefold.git
 cd citefold
 python -m pip install -e .
-citefold demo
+python examples/quickstart.py
 ```
-
-Then run `python examples/quickstart.py` to see the same evidence-first flow in the Python API.
 
 Or embed the same flow:
 
