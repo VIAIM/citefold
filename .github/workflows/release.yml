@@ -211,6 +211,11 @@ jobs:
       contents: write
 
     steps:
+      - name: Check out released revision for tag verification
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.ref_name }}
+
       - name: Download release distributions
         uses: actions/download-artifact@v8
         with:
