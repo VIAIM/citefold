@@ -115,6 +115,7 @@ RUN_REQUIRED_ROLES = {
     "tool-definitions",
     "tool-schemas",
     "recent-context-builder",
+    "qualification-plan",
 }
 GOVERNANCE_ROLES = {
     "consent_policy": "consent-policy",
@@ -1451,7 +1452,6 @@ def _validate_dataset_semantics(
                 referenced_executor_paths.add(snapshot_ref[0])
 
     task_fingerprints: dict[str, tuple[str, ...]] = {}
-    tasks_by_fingerprint: dict[tuple[str, ...], str] = {}
     for task_id in sorted(inputs_by_id):
         fingerprint = _task_counting_fingerprint(
             inputs_by_id[task_id],
@@ -1460,13 +1460,14 @@ def _validate_dataset_semantics(
         if fingerprint is None:
             continue
         task_fingerprints[task_id] = fingerprint
-        prior_task_id = tasks_by_fingerprint.setdefault(fingerprint, task_id)
-        if prior_task_id != task_id:
-            _add_error(
-                errors,
-                "duplicate_task_counting_fingerprint",
-                "task-inputs",
-            )
+    if len(_representative_task_ids(inputs_by_id, task_fingerprints)) != len(
+        task_fingerprints
+    ):
+        _add_error(
+            errors,
+            "duplicate_task_counting_fingerprint",
+            "task-inputs",
+        )
 
     for role, entry in entries_by_role.items():
         path = entry.get("path")
@@ -1612,6 +1613,7 @@ def _validate_invalidation_graph(
         ):
             _add_error(errors, "invalidation_scope_mismatch", "events")
         source_time = event_times.get(event_id)
+        source_available = event_available.get(event_id)
         target_time = event_times.get(str(invalidating_id))
         target_available = event_available.get(str(invalidating_id))
         invalidated_at = _parse_utc(event.get("invalidated_at"))
@@ -1624,6 +1626,7 @@ def _validate_invalidation_graph(
         if (
             invalidated_at is None
             or (source_time is not None and invalidated_at < source_time)
+            or (source_available is not None and invalidated_at < source_available)
             or (target_time is not None and invalidated_at > target_time)
         ):
             _add_error(errors, "invalidation_timestamp_invalid", "events")
@@ -2413,12 +2416,36 @@ def _task_counting_fingerprint(
         task.get("snapshot_artifact"),
         content_fingerprints_by_path,
     )
-    if snapshot_fingerprint is None:
+    material_fingerprints = [
+        _artifact_reference_content_fingerprint(
+            task.get(field_name),
+            content_fingerprints_by_path,
+        )
+        for field_name in (
+            "input_artifact",
+            "recent_context_artifact",
+            "tool_fixture_artifact",
+        )
+    ]
+    if snapshot_fingerprint is None or any(
+        fingerprint is None for fingerprint in material_fingerprints
+    ):
         return None
     scope_value = json.dumps(scope, ensure_ascii=True, separators=(",", ":"))
-    return tuple(str(item) for item in fields) + (
-        scope_value,
-        snapshot_fingerprint,
+    identity = tuple(str(item) for item in fields) + (scope_value,)
+    material_value = json.dumps(
+        [*identity, *material_fingerprints],
+        ensure_ascii=True,
+        separators=(",", ":"),
+    )
+    snapshot_value = json.dumps(
+        [*identity, snapshot_fingerprint],
+        ensure_ascii=True,
+        separators=(",", ":"),
+    )
+    return (
+        f"task-material:{_sha256(material_value.encode('utf-8'))}",
+        f"task-snapshot:{_sha256(snapshot_value.encode('utf-8'))}",
     )
 
 
@@ -2426,15 +2453,36 @@ def _representative_task_ids(
     inputs_by_id: dict[str, dict[str, Any]],
     task_fingerprints: dict[str, tuple[str, ...]],
 ) -> list[str]:
-    seen: set[tuple[str, ...]] = set()
-    result: list[str] = []
-    for task_id in sorted(inputs_by_id):
-        fingerprint = task_fingerprints.get(task_id)
-        if fingerprint is None or fingerprint in seen:
-            continue
-        seen.add(fingerprint)
-        result.append(task_id)
-    return result
+    task_ids = [
+        task_id
+        for task_id in sorted(inputs_by_id)
+        if task_id in task_fingerprints
+    ]
+    parents = list(range(len(task_ids)))
+
+    def find(index: int) -> int:
+        while parents[index] != index:
+            parents[index] = parents[parents[index]]
+            index = parents[index]
+        return index
+
+    def union(left: int, right: int) -> None:
+        left_root = find(left)
+        right_root = find(right)
+        if left_root != right_root:
+            parents[right_root] = left_root
+
+    owner_by_fingerprint: dict[str, int] = {}
+    for index, task_id in enumerate(task_ids):
+        for fingerprint in task_fingerprints[task_id]:
+            prior = owner_by_fingerprint.setdefault(fingerprint, index)
+            union(index, prior)
+
+    return [
+        task_id
+        for index, task_id in enumerate(task_ids)
+        if find(index) == index
+    ]
 
 
 def _calculate_declared_counts(

@@ -1,8 +1,8 @@
 name: Release to PyPI
 
 on:
-  release:
-    types: [published]
+  push:
+    tags: ["v*"]
 
 permissions:
   contents: read
@@ -12,14 +12,12 @@ jobs:
     name: Build release distributions
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    permissions:
-      contents: write
 
     steps:
       - name: Check out released revision
         uses: actions/checkout@v7
         with:
-          ref: ${{ github.event.release.tag_name }}
+          ref: ${{ github.ref_name }}
 
       - name: Set up Python
         uses: actions/setup-python@v6
@@ -35,7 +33,7 @@ jobs:
 
       - name: Verify tag matches package version
         env:
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_TAG: ${{ github.ref_name }}
         run: |
           python - <<'PY'
           import os
@@ -80,10 +78,14 @@ jobs:
               f"{root}/benchmarks/OFFICELIFE_TRACK_B_ARTIFACT_CONTRACT_V1.md",
               f"{root}/benchmarks/OFFICELIFE_TRACK_B_EXECUTOR_V1.md",
               f"{root}/benchmarks/OFFICELIFE_TRACK_B_EXECUTION_PROFILE_V1.md",
+              f"{root}/benchmarks/OFFICELIFE_TRACK_B_QUALIFICATION_V1.md",
               f"{root}/benchmarks/officelife_track_b_benchmark.py",
               f"{root}/benchmarks/officelife_track_b_contract.py",
               f"{root}/benchmarks/officelife_track_b_executor.py",
+              f"{root}/benchmarks/officelife_track_b_latency.py",
+              f"{root}/benchmarks/officelife_track_b_qualification.py",
               f"{root}/benchmarks/schemas/officelife_track_b_executor/v1/execution.schema.json",
+              f"{root}/benchmarks/schemas/officelife_track_b_qualification/v1/qualification.schema.json",
               f"{root}/benchmarks/schemas/officelife_track_b/v1/common.schema.json",
               f"{root}/benchmarks/schemas/officelife_track_b/v1/dataset-manifest.schema.json",
               f"{root}/benchmarks/schemas/officelife_track_b/v1/event.schema.json",
@@ -94,6 +96,9 @@ jobs:
               f"{root}/tests/test_officelife_track_b_benchmark.py",
               f"{root}/tests/test_officelife_track_b_contract.py",
               f"{root}/tests/test_officelife_track_b_executor.py",
+              f"{root}/tests/test_officelife_track_b_latency.py",
+              f"{root}/tests/test_officelife_track_b_qualification.py",
+              f"{root}/tests/test_officelife_track_b_qualification_bundles.py",
           }
           missing = sorted(required - set(names))
           assert not missing, f"source distribution is missing: {missing}"
@@ -167,11 +172,12 @@ jobs:
           path: dist/
           if-no-files-found: error
 
-      - name: Attach distributions to the GitHub Release
-        env:
-          GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
-        run: gh release upload "$RELEASE_TAG" dist/* SHA256SUMS --clobber
+      - name: Upload release checksums
+        uses: actions/upload-artifact@v7
+        with:
+          name: citefold-checksums
+          path: SHA256SUMS
+          if-no-files-found: error
 
   publish:
     name: Publish to PyPI
@@ -195,3 +201,30 @@ jobs:
         uses: pypa/gh-action-pypi-publish@v1.14.0
         with:
           print-hash: true
+
+  release:
+    name: Create GitHub Release
+    needs: [build, publish]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download release distributions
+        uses: actions/download-artifact@v8
+        with:
+          name: citefold-distributions
+          path: dist/
+
+      - name: Download release checksums
+        uses: actions/download-artifact@v8
+        with:
+          name: citefold-checksums
+          path: .
+
+      - name: Create release after PyPI publication
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: gh release create "$RELEASE_TAG" dist/* SHA256SUMS --verify-tag --generate-notes

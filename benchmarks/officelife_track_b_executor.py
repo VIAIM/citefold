@@ -67,8 +67,10 @@ WORKER_RUN_ROLES = {
     "tool-definitions",
     "tool-schemas",
     "recent-context-builder",
+    "qualification-plan",
     EXECUTOR_CONFIG_ROLE,
 }
+WORKSPACE_RUN_ROLES = WORKER_RUN_ROLES - {"qualification-plan"}
 WORKER_DERIVED_ENTRIES = {
     "task-inputs": ("task-inputs.jsonl", "derived", "task-inputs", "derived"),
     "preflight-report": ("preflight-report.json", "derived", None, "derived"),
@@ -1014,6 +1016,20 @@ def _validate_worker_semantics(
         errors.append("source-sealed-run-manifest# schema_invalid")
     if _sha256(source_run_raw) != manifest.get("source_run_manifest_sha256"):
         errors.append("worker-manifest# source_run_manifest_sha256_mismatch")
+    source_run_entries = _entries_by_role(source_run_manifest, "source run")
+    for role in WORKER_RUN_ROLES:
+        worker_entry = entries.get(role)
+        source_entry = source_run_entries.get(role)
+        if (
+            worker_entry is None
+            or source_entry is None
+            or any(
+                worker_entry.get(field) != source_entry.get(field)
+                for field in ("path", "sha256", "size_bytes", "media_type")
+            )
+        ):
+            errors.append("worker-manifest# run_artifact_binding_mismatch")
+            break
     task_validator = _task_input_validator()
     for record in tasks:
         if list(task_validator.iter_errors(record)):
@@ -1599,7 +1615,7 @@ def _materialize_workspace(
     )
     by_role = _entries_by_role(worker_manifest, "worker")
     run_artifact_paths: dict[str, Path] = {}
-    for role in sorted(WORKER_RUN_ROLES):
+    for role in sorted(WORKSPACE_RUN_ROLES):
         entry = by_role.get(role)
         if entry is None:
             raise ExecutorValidationError("worker run artifact disappeared before execution")

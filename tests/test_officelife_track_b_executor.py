@@ -125,6 +125,10 @@ class RecordingHandler:
     def assertions(self, request: ArmRequest, visible: list[str]) -> None:
         if any("label" in item.lower() for item in visible):
             raise AssertionError(f"label file exposed to handler: {visible}")
+        if "run/qualification-plan" in visible:
+            raise AssertionError(
+                f"qualification plan exposed to handler workspace: {visible}"
+            )
         if request.memory_mode == "no_memory" and request.memory_pack_present:
             raise AssertionError("no_memory request claims a MemoryPack")
         if request.memory_mode == "memory_pack" and not request.memory_pack_present:
@@ -261,7 +265,31 @@ class OfficeLifeTrackBExecutorTest(unittest.TestCase):
         self.assertNotIn(task_label_sha, manifest_text)
         self.assertIn("task-inputs.jsonl", paths)
         self.assertIn("snapshots/snapshot-01.tar.zst", paths)
+        self.assertIn("artifacts/qualification-plan.json", paths)
         self.assertFalse(report["qualification_eligible"])
+
+    def test_worker_rejects_resealed_qualification_plan_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            dataset_root, run_root, worker_root = self.build_inputs(root)
+            prepare_worker_bundle(
+                dataset_root,
+                run_root,
+                worker_root,
+                enforce_minimum_dataset_gates=False,
+            )
+            plan_path = worker_root / "artifacts/qualification-plan.json"
+            plan_path.write_text('{"tampered":true}\n', encoding="utf-8")
+            refresh_manifest_entry(
+                worker_root,
+                "worker-manifest.json",
+                "artifacts/qualification-plan.json",
+            )
+
+            report = validate_worker_bundle(worker_root)
+
+        self.assertFalse(report["passed"])
+        self.assertIn("worker-manifest# run_artifact_binding_mismatch", report["errors"])
 
     def test_worker_task_jsonl_uses_the_frozen_contract_size_limit(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

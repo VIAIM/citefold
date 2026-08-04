@@ -9,6 +9,8 @@ The benchmark suite keeps retrieval, end-to-end QA, synthetic task utility, and 
 | `officelife_memory_benchmark.py` | 0 / 0 | MemoryPack vs no-memory on scoped synthetic office/life probes |
 | `officelife_track_b_contract.py` | 0 / 0 | Fail-closed validation of the strict Track B dataset and sealed-run artifact contract |
 | `officelife_track_b_executor.py` | handler-defined | Label-free worker handoff and private paired-arm execution; current callable adapter is test-only |
+| `officelife_track_b_latency.py` | 0 / 0 | Validates a private, release-bound recall-latency assay artifact |
+| `officelife_track_b_qualification.py` | 0 / 0 | Validates the sealed scoring, adjudication, latency, qualification, and public-projection chain |
 | `officelife_track_b_benchmark.py` | 0 / 0 | Legacy private-artifact diagnostic and aggregate calculator; not the controlled executor or public projector |
 | `multimodal_memory_benchmark.py` | 0 / 0 | Multimodal evidence, conflict, correction, injection, and deletion contracts |
 | `longmemeval_citefold_benchmark.py` | 0 / 0 | Citefold MemoryPack/session retrieval used for the published diagnostic |
@@ -65,6 +67,14 @@ output remains test-only, non-qualifying, and non-claimable. Neither tool
 collects participant histories, obtains human ratings, or measures Citefold's
 real-world effect.
 
+The corresponding
+[`OFFICELIFE_TRACK_B_QUALIFICATION_V1.md`](OFFICELIFE_TRACK_B_QUALIFICATION_V1.md)
+adds the other half of the audit path: a qualification plan sealed before the
+worker handoff, deterministic scoring, blinded rating/adjudication bindings, a
+release-bound latency artifact, and a receipt-bound public projection validator.
+It verifies hashes and structural invariants; it cannot convert a synthetic or
+test-only execution into a qualifying product result.
+
 Keep the dataset, run inputs, labels, validation reports, raw answers, and audit
 records in access-controlled directories outside the repository. Install the
 source development dependencies, then validate the strict contract:
@@ -119,12 +129,13 @@ calculation. It never marks the run qualified or claimable.
 
 The preflight JSON contains per-user pseudonymous identifiers and is not a
 publication artifact. The aggregate output is a non-claimable diagnostic
-summary, not a sanitized publication artifact. A strict allowlist-based public
-projector is still pending, as are the qualifying external-process executor and
-snapshot adapter, adjudication, the latency artifact, custody evidence,
-consent, privacy review, and re-identification review. A qualifying calculation
-must retain the frozen defaults of 100,000 user-cluster bootstrap repetitions
-and seed `20260804`.
+summary, not a sanitized publication artifact. The qualification module has a
+strict allowlist-based public projector, but a qualifying run still needs an
+external-process executor and snapshot adapter, independent custody evidence,
+consent, privacy review, re-identification review, real blinded raters, and a
+separately controlled signing key. A qualifying calculation must retain the
+frozen defaults of 100,000 user-cluster bootstrap repetitions and seed
+`20260804`.
 
 ## End-to-end QA
 
