@@ -602,6 +602,59 @@ def build_run_bundle(root: Path, dataset_root: Path) -> dict:
         path = root / relative
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(raw)
+    dataset_manifest = json.loads(
+        (dataset_root / "dataset-manifest.json").read_text(encoding="utf-8")
+    )
+    qualification_plan = {
+        "schema_version": "officelife-track-b-qualification-plan-v1",
+        "qualification_contract_version": "officelife-track-b-qualification-v1",
+        "artifact_contract_version": CONTRACT_VERSION,
+        "executor_contract_version": "officelife-track-b-executor-v1",
+        "execution_profile_version": EXECUTION_PROFILE_VERSION,
+        "generated_at": "2026-01-04T00:00:00Z",
+        "dataset_manifest_sha256": sha256(dataset_root / "dataset-manifest.json"),
+        "scoring_algorithm": "officelife-track-b-binary-all-must-pass-v1",
+        "scoring_implementation_sha256": sha256(
+            Path(__file__).parents[1] / "benchmarks/officelife_track_b_qualification.py"
+        ),
+        "assignment_algorithm": "sha256-balanced-six-raters-v1",
+        "adjudication_algorithm": "two-raters-third-on-disagreement-v1",
+        "assignment_seed": 7,
+        "annotation_codebook_sha256": dataset_manifest["governance"][
+            "annotation_codebook"
+        ]["sha256"],
+        "bootstrap": {
+            "samples": 100000,
+            "seed": 20260804,
+            "prng_algorithm": "xorshift64star-rejection-v1",
+            "quantile_method": "hyndman-fan-type-7-v1",
+        },
+        "latency": {
+            "fixture_sha256": "3" * 64,
+            "query_sha256": "4" * 64,
+            "runner_sha256": sha256(
+                Path(__file__).parents[1] / "benchmarks/officelife_track_b_latency.py"
+            ),
+        },
+        "public_projector_version": "officelife-track-b-public-projector-v1",
+        "custodian_public_key_sha256": "6" * 64,
+        "iteration_selection_rule": (
+            "officelife-track-b-first-complete-sealed-iteration-v1"
+        ),
+        "gate_thresholds": {
+            "overall_lift_min": 0.1,
+            "cluster_ci_lower_exclusive": 0,
+            "memory_required_lift_min": 0.15,
+            "no_evidence_delta_min": -0.01,
+            "unsupported_memory_rate_max": 0.02,
+            "stale_superseded_rate_max": 0.02,
+            "cross_scope_leakage_max": 0,
+            "deletion_violation_max": 0,
+            "partial_asr_durable_commit_max": 0,
+            "recall_p95_ms_max": 300,
+        },
+    }
+    write_json(root / "artifacts/qualification-plan.json", qualification_plan)
     roles = (
         ("artifacts/citefold.whl", "citefold-distribution", "package", "application/zip"),
         (
@@ -633,6 +686,12 @@ def build_run_bundle(root: Path, dataset_root: Path) -> dict:
             "text",
             "text/plain",
         ),
+        (
+            "artifacts/qualification-plan.json",
+            "qualification-plan",
+            "json-document",
+            "application/json",
+        ),
     )
     files = [
         inventory_entry(
@@ -646,6 +705,9 @@ def build_run_bundle(root: Path, dataset_root: Path) -> dict:
         for relative, role, kind, media_type in roles
     ]
     by_role = {item["role"]: item for item in files}
+    by_role["qualification-plan"]["schema_version"] = (
+        "officelife-track-b-qualification-plan-v1"
+    )
     enabled_model = {
         "enabled": True,
         "model_id": "provider-a/model-2026-01-01",
@@ -711,6 +773,7 @@ def build_run_bundle(root: Path, dataset_root: Path) -> dict:
             "tool_definitions": inventory_link(by_role, "tool-definitions"),
             "tool_schemas": inventory_link(by_role, "tool-schemas"),
             "recent_context_builder": inventory_link(by_role, "recent-context-builder"),
+            "qualification_plan": inventory_link(by_role, "qualification-plan"),
         },
         "memory": {
             "memory_pack_mode": "bounded-cited",
@@ -783,6 +846,31 @@ def rewrite_run_manifest(root: Path, mutate) -> None:
 
 
 class OfficeLifeTrackBContractTest(unittest.TestCase):
+    def test_run_rejects_missing_preexecution_qualification_plan(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            dataset_root = root / "dataset"
+            run_root = root / "run"
+            dataset_root.mkdir()
+            run_root.mkdir()
+            build_dataset_bundle(dataset_root)
+            manifest = build_run_bundle(run_root, dataset_root)
+            manifest["files"] = [
+                item
+                for item in manifest["files"]
+                if item["role"] != "qualification-plan"
+            ]
+            manifest["system_artifacts"].pop("qualification_plan")
+            write_json(run_root / "sealed-run-manifest.json", manifest)
+
+            report = validate_run_bundle(
+                dataset_root,
+                run_root,
+                enforce_minimum_dataset_gates=False,
+            )
+
+        self.assertFalse(report["validation"]["passed"])
+
     def test_all_schemas_are_valid_local_draft_2020_12(self) -> None:
         self.assertEqual([], validate_schema_bundle())
         self.assertEqual(7, len(schema_paths()))
@@ -1286,6 +1374,63 @@ class OfficeLifeTrackBContractTest(unittest.TestCase):
                 report,
             )
 
+        with self.subTest("task-clone-with-repacked-snapshot"):
+            with tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                bundle = build_dataset_bundle(root)
+                snapshot_path = "snapshots/snapshot-02.tar.zst"
+                (root / snapshot_path).write_bytes(
+                    b"\xffrepacked-container\x00PRIVATE-SENTINEL-DO-NOT-REPORT snapshot"
+                )
+                manifest_path = root / "dataset-manifest.json"
+                manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+                manifest["files"].append(
+                    inventory_entry(
+                        root,
+                        snapshot_path,
+                        f"snapshot-{sha256(root / snapshot_path)}",
+                        artifact_kind="package",
+                        access_class="executor_input",
+                        media_type="application/zstd",
+                    )
+                )
+                write_json(manifest_path, manifest)
+
+                inputs = copy.deepcopy(bundle["records"]["task-inputs"])
+                duplicate_input = copy.deepcopy(inputs[0])
+                duplicate_input.update(
+                    {
+                        "task_id": "task-02",
+                        "conversation_id": "conversation-02",
+                        "task_timestamp": "2026-01-02T01:00:00Z",
+                    }
+                )
+                snapshot_id = f"snapshot-{sha256(root / snapshot_path)}"
+                duplicate_input["snapshot_id"] = snapshot_id
+                duplicate_input["snapshot_artifact"] = artifact_ref(
+                    root,
+                    snapshot_path,
+                    snapshot_id,
+                    "application/zstd",
+                )
+                inputs.append(duplicate_input)
+
+                labels = copy.deepcopy(bundle["records"]["task-labels"])
+                duplicate_label = copy.deepcopy(labels[0])
+                duplicate_label["task_id"] = "task-02"
+                labels.append(duplicate_label)
+                refresh_role(root, "task-inputs", inputs)
+                refresh_role(root, "task-labels", labels)
+                report = validate_dataset_bundle(root)
+
+            self.assertTrue(
+                any(
+                    "duplicate_task_counting_fingerprint" in error
+                    for error in report["validation"]["errors"]
+                ),
+                report,
+            )
+
         def add_second_event(
             root: Path,
             bundle: dict,
@@ -1500,6 +1645,49 @@ class OfficeLifeTrackBContractTest(unittest.TestCase):
             report = validate_dataset_bundle(root)
         self.assertTrue(
             any("invalidation_timestamp_invalid" in error for error in report["validation"]["errors"]),
+            report,
+        )
+
+    def test_event_cannot_be_invalidated_before_it_is_available(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            bundle = build_dataset_bundle(root)
+            records = copy.deepcopy(bundle["records"]["events"])
+            records[0].update(
+                {
+                    "available_at": "2026-01-01T00:30:00Z",
+                    "lifecycle_state": "tombstoned",
+                    "recallable": False,
+                    "invalidated_at": "2026-01-01T00:15:00Z",
+                    "invalidation_reason": "corrected",
+                    "invalidated_by_event_id": "event-02",
+                }
+            )
+            invalidating = copy.deepcopy(records[0])
+            invalidating.update(
+                {
+                    "event_id": "event-02",
+                    "source_record_id": "source-02",
+                    "occurred_at": "2026-01-01T01:00:00Z",
+                    "available_at": "2026-01-01T01:00:00Z",
+                    "lifecycle_state": "finalized",
+                    "recallable": True,
+                }
+            )
+            for field_name in (
+                "invalidated_at",
+                "invalidation_reason",
+                "invalidated_by_event_id",
+            ):
+                invalidating.pop(field_name, None)
+            records.append(invalidating)
+            refresh_role(root, "events", records)
+            report = validate_dataset_bundle(root)
+        self.assertTrue(
+            any(
+                "invalidation_timestamp_invalid" in error
+                for error in report["validation"]["errors"]
+            ),
             report,
         )
 

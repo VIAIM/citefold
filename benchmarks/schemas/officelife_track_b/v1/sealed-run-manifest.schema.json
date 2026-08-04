@@ -276,7 +276,8 @@
         "evaluator_prompt",
         "tool_definitions",
         "tool_schemas",
-        "recent_context_builder"
+        "recent_context_builder",
+        "qualification_plan"
       ],
       "properties": {
         "system_prompt": {
@@ -372,6 +373,20 @@
               "properties": {
                 "file_role": {
                   "const": "recent-context-builder"
+                }
+              }
+            }
+          ]
+        },
+        "qualification_plan": {
+          "allOf": [
+            {
+              "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/inventoryLink"
+            },
+            {
+              "properties": {
+                "file_role": {
+                  "const": "qualification-plan"
                 }
               }
             }
@@ -704,7 +719,7 @@
     },
     "files": {
       "type": "array",
-      "minItems": 10,
+      "minItems": 11,
       "items": {
         "$ref": "urn:viaim:officelife-track-b:artifact-contract-v1:common#/$defs/inventoryEntry"
       },
@@ -844,6 +859,20 @@
             "properties": {
               "role": {
                 "const": "recent-context-builder"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "required": [
+              "role"
+            ],
+            "properties": {
+              "role": {
+                "const": "qualification-plan"
               }
             }
           },

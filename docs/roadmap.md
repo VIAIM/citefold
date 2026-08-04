@@ -23,6 +23,9 @@ The roadmap follows evidence and release gates. It is directional and may change
   dataset/sealed-run artifact contract and non-claimable aggregate diagnostics.
 - [x] Add the label-free Track B worker handoff and non-qualifying controlled
   executor draft with paired-arm recovery, blinding, and private audit closure.
+- [x] Add a pre-execution qualification plan and a fail-closed cross-root
+  validation chain for rating, adjudication, latency, qualification, and public
+  projection artifacts. This is audit infrastructure, not a Track B result.
 - [ ] Complete an independently custodied qualifying Track B run on consented,
   de-identified longitudinal data.
 - [x] Public pin/unpin operations.

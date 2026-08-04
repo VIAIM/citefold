@@ -69,8 +69,9 @@ run-root/
 The run manifest binds the exact dataset-manifest SHA-256, Citefold release and
 distribution, code and dependency identities, storage/migration state, all
 model roles and actual providers, prompts, tool definitions and schemas,
-recent-context builder, MemoryPack configuration, generation/provider policy,
-randomization, and reference environment. Every referenced run file has access
+recent-context builder, pre-execution qualification plan, MemoryPack
+configuration, generation/provider policy, randomization, and reference
+environment. Every referenced run file has access
 class `run_config` and is exhaustively inventoried.
 
 The manifest binds bytes; it is not a signature. Custodian access controls and

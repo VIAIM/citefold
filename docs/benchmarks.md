@@ -56,8 +56,8 @@ This establishes deterministic behavior on synthetic probes, not field productiv
 
 Track B now has a frozen execution profile, a versioned private dataset and
 sealed-run artifact contract, a fail-closed structural validator, a label-free
-paired-arm executor draft, and a legacy post-run aggregate calculator. The
-strict contract physically separates
+paired-arm executor draft, a sealed qualification plan, and an auditable
+scoring/adjudication/latency/public-projection validation chain. The strict contract physically separates
 generator-visible task inputs from custodian-only labels and binds an exhaustive
 inventory, hashes, record schemas, event lifecycle, minimum dataset gates, and
 the frozen system/provider configuration. Exact clones and common Unicode,
@@ -68,12 +68,14 @@ prove semantic dataset diversity.
 
 The executor draft prepares an exhaustive label-free handoff, runs randomized
 paired arms, enforces frozen retry and provider identity, and binds private
-outputs, traces, blinding maps, and audit events. Its implemented handler is an
-in-process callable and its snapshot adapter treats state as opaque bytes. It
-therefore does not enforce OS file denial, establish eligible Citefold snapshot
-state, conduct blinded judging, execute the controlled latency assay, or produce
-a qualifying/public artifact. Generated synthetic fixtures test contracts,
-failure semantics, recovery, and redaction guards only.
+outputs, traces, blinding maps, and audit events. The qualification pipeline
+then validates deterministic scoring, blinded ratings and adjudication,
+release-bound latency, and a receipt-bound public projection. Its implemented
+handler is an in-process callable and its snapshot adapter treats state as
+opaque bytes. It therefore does not enforce OS file denial, establish eligible
+Citefold snapshot state, conduct real blinded judging, execute a real controlled
+latency assay, or produce a qualifying/public artifact. Generated synthetic
+fixtures test contracts, failure semantics, recovery, and redaction guards only.
 
 No qualifying consented hidden dataset has been run, so Citefold has no
 trustworthy Track B product-effect score. A result remains non-claimable until
@@ -82,6 +84,7 @@ human adjudication, privacy review, and the full audit chain are complete. See
 the [frozen execution profile](https://github.com/VIAIM/citefold/blob/main/benchmarks/OFFICELIFE_TRACK_B_EXECUTION_PROFILE_V1.md),
 [artifact contract](https://github.com/VIAIM/citefold/blob/main/benchmarks/OFFICELIFE_TRACK_B_ARTIFACT_CONTRACT_V1.md),
 [executor contract](https://github.com/VIAIM/citefold/blob/main/benchmarks/OFFICELIFE_TRACK_B_EXECUTOR_V1.md),
+[qualification pipeline](https://github.com/VIAIM/citefold/blob/main/benchmarks/OFFICELIFE_TRACK_B_QUALIFICATION_V1.md),
 and [benchmark operator guide](https://github.com/VIAIM/citefold/blob/main/benchmarks/README.md).
 
 ## Multimodal lifecycle

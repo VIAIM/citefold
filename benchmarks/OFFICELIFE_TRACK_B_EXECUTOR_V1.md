@@ -31,7 +31,10 @@ Execution has two explicit phases:
 
 The worker bundle contains only hidden-test `task-inputs`, their referenced
 task/recent-context/tool/snapshot artifacts, an allowlisted projection of the
-sealed run, and the exact run artifacts needed by the Agent. It excludes
+sealed run, the byte-bound pre-execution qualification plan, and the exact run
+artifacts needed by the Agent. The plan is retained for worker audit but is not
+mounted in an individual Agent workspace; the Agent receives only its frozen
+hash reference through the run configuration. The worker excludes
 `task-labels`, global event/user files, evaluator-prompt bytes, governance files,
 identity mappings, and every unreferenced dataset artifact. Excluding the global
 event file also prevents a handler from reading events after a task cutoff.

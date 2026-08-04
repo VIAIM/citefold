@@ -7,6 +7,8 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## Unreleased
 
+## 0.2.0 — 2026-08-04
+
 ### Added
 
 - Frozen OfficeLifeMemoryBench Track B execution profile, versioned private
@@ -21,6 +23,10 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   recovery, output blinding, exhaustive inventories, and result-bound audit
   events. Its callable and opaque-snapshot adapters are explicitly test-only
   and cannot produce a qualifying result.
+- Track B pre-execution qualification-plan sealing, scoring/adjudication/
+  latency/qualification cross-root hash validation, and a receipt-bound public
+  projection validator. These operator tools close audit structure only; no
+  qualifying Track B result is included in this release.
 - Versioned `agent-turn-v1` prepare/complete hooks with a stable JSON-compatible
   context envelope, trusted-host turn IDs, and an installed-wheel consumer test.
 - Auditable Python API and CLI operations to pin active records against decay
