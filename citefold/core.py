@@ -1373,6 +1373,8 @@ class Citefold:
 
         def relevant(record: dict[str, Any]) -> bool:
             category = record.get("metadata", {}).get("category")
+            if category == "identity" and self._identity_query_requested(query):
+                return True
             if category == "preference" and self._contains_any(normalized, ["偏好", "喜欢", "习惯", "风格", "什么时候"]):
                 return True
             if category in {"task", "waiting"} and self._contains_any(normalized, ["待办", "任务", "提醒", "安排", "承诺", "跟进", "等"]):
@@ -1775,6 +1777,9 @@ class Citefold:
         if path == "profile/preferences.md":
             records = [item for item in active if item.get("metadata", {}).get("category") == "preference"]
             title = "Preferences"
+        elif path == "profile/identity.md":
+            records = [item for item in active if item.get("metadata", {}).get("category") == "identity"]
+            title = "Identity"
         elif path == "tasks/commitments.md":
             records = [item for item in active if item.get("metadata", {}).get("category") == "task"]
             title = "Commitments"
@@ -2071,6 +2076,31 @@ class Citefold:
         source_origin: str,
     ) -> None:
         if mode != "voice":
+            identity = self._extract_identity(text) if source_origin == "user_reported" else None
+            if identity:
+                identity_field, name = identity
+                content = (
+                    f"用户姓名：{name}"
+                    if identity_field == "name"
+                    else f"用户希望被称为：{name}"
+                )
+                current = self._active_identity_record(scope, identity_field)
+                supersede = current is not None and current.get("content") != content
+                self._submit_trusted_candidate(
+                    scope=scope,
+                    memory_type="semantic",
+                    content=content,
+                    evidence_ref=evidence_ref,
+                    source=source,
+                    category="identity",
+                    result=result,
+                    committed_name="profile.identity",
+                    source_origin=source_origin,
+                    metadata={"identity_field": identity_field, "subject": identity_field},
+                    proposed_operation="SUPERSEDE" if supersede else "ADD",
+                    target_record_id=current["record_id"] if supersede else None,
+                )
+
             preference = self._extract_preference(text)
             if preference:
                 self._submit_trusted_candidate(
@@ -2216,7 +2246,12 @@ class Citefold:
         result: IngestResult,
         committed_name: str,
         source_origin: str,
+        metadata: dict[str, Any] | None = None,
+        proposed_operation: str = "ADD",
+        target_record_id: str | None = None,
     ) -> None:
+        candidate_metadata = {"category": category, "source_agent": source}
+        candidate_metadata.update(metadata or {})
         candidate, _decision, record = self.consolidator.submit(
             scope=scope,
             memory_type=memory_type,
@@ -2224,7 +2259,9 @@ class Citefold:
             evidence_refs=[evidence_ref],
             source_origin=source_origin,
             confidence=1.0,
-            metadata={"category": category, "source_agent": source},
+            proposed_operation=proposed_operation,
+            target_record_id=target_record_id,
+            metadata=candidate_metadata,
             user_authorized=source_origin == "user_reported",
         )
         result.candidates.append(candidate.candidate_id)
@@ -2324,6 +2361,9 @@ class Citefold:
 
         if self._contains_any(normalized, ["偏好", "喜欢", "风格", "画像", "习惯"]):
             add("profile.preferences", "profile/preferences.md", "query asks about user preferences")
+
+        if self._identity_query_requested(query):
+            add("profile.identity", "profile/identity.md", "query asks for an explicitly saved identity fact")
 
         entities = self._read_json(user_root / "indexes" / "entities.json", {})
         for name, rel_path in entities.get("people", {}).items():
@@ -2825,10 +2865,12 @@ class Citefold:
             return "\n".join(lines).rstrip() + "\n"
 
         preferences = [item for item in active if item.get("metadata", {}).get("category") == "preference"]
+        identity = [item for item in active if item.get("metadata", {}).get("category") == "identity"]
         tasks = [item for item in active if item.get("metadata", {}).get("category") == "task"]
         waiting = [item for item in active if item.get("metadata", {}).get("category") == "waiting"]
         procedures = [item for item in active if item.get("memory_type") == "procedural"]
         self._atomic_write(user_root / "profile" / "preferences.md", render("Preferences", preferences))
+        self._atomic_write(user_root / "profile" / "identity.md", render("Identity", identity))
         self._atomic_write(user_root / "tasks" / "commitments.md", render("Commitments", tasks))
         self._atomic_write(user_root / "tasks" / "waiting_on.md", render("Waiting On", waiting))
         self._atomic_write(user_root / "procedures" / "verified.md", render("Verified Procedures", procedures))
@@ -3037,6 +3079,55 @@ class Citefold:
             return None
         match = re.search(r"记住[：:，,\s]*(.+?)(?:。|$)", text)
         return match.group(1).strip() if match else text.strip()
+
+    def _extract_identity(self, text: str) -> tuple[str, str] | None:
+        patterns = [
+            ("preferred_name", r"(?:请\s*)?记住[：:，,\s]*(?:以后\s*)?(?:请\s*)?叫我\s*(?P<name>[^\n，,。.!！?？；;]{1,64})"),
+            ("preferred_name", r"(?:以后\s*)?(?:请\s*)?叫我\s*(?P<name>[^\n，,。.!！?？；;]{1,64})"),
+            ("name", r"(?:请\s*)?记住[：:，,\s]*(?:我叫|我的名字是)\s*(?P<name>[^\n，,。.!！?？；;]{1,64})"),
+            ("name", r"(?:我叫|我的名字是)\s*(?P<name>[^\n，,。.!！?？；;]{1,64})[，,。.!！?？；;]\s*(?:请\s*)?记住"),
+            ("name", r"(?:please\s+)?remember(?:\s+that)?\s+my\s+name\s+is\s+(?P<name>[^\n,，.。!！?？;；]{1,64})"),
+            ("preferred_name", r"(?:please\s+)?call\s+me\s+(?P<name>[^\n,，.。!！?？;；]{1,64})"),
+        ]
+        for field, pattern in patterns:
+            match = re.search(pattern, text, flags=re.IGNORECASE)
+            if match is None:
+                continue
+            name = self._normalize_identity_name(match.group("name"))
+            if name is not None:
+                return field, name
+        return None
+
+    @staticmethod
+    def _normalize_identity_name(value: str) -> str | None:
+        normalized = " ".join(value.strip().split())
+        if re.fullmatch(r"[\u4e00-\u9fff]{1,4}(?:·[\u4e00-\u9fff]{1,8})?", normalized):
+            return normalized
+        if re.fullmatch(r"[A-Za-z][A-Za-z'-]{0,31}(?: [A-Za-z][A-Za-z'-]{0,31}){0,3}", normalized):
+            return normalized
+        return None
+
+    def _active_identity_record(self, scope: MemoryScope, identity_field: str) -> dict[str, Any] | None:
+        records = [
+            record
+            for record in self.store.current_records(scope, include_inactive=False)
+            if record.get("metadata", {}).get("category") == "identity"
+            and record.get("metadata", {}).get("identity_field") == identity_field
+            and record.get("evidence_refs")
+            and all(self.store.validate_evidence(scope, ref) for ref in record["evidence_refs"])
+        ]
+        if not records:
+            return None
+        return max(records, key=lambda record: (str(record.get("valid_from", "")), str(record["record_id"])))
+
+    def _identity_query_requested(self, query: str) -> bool:
+        normalized = query.lower()
+        if self._contains_any(normalized, ["我叫什么", "我的名字", "怎么称呼我", "该怎么叫我", "叫什么名字"]):
+            return True
+        return self._contains_any(
+            normalized,
+            ["what is my name", "what's my name", "what should you call me", "how should you call me"],
+        )
 
     def _extract_reminders(self, text: str) -> list[str]:
         reminders: list[str] = []

@@ -7,6 +7,20 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## Unreleased
 
+## 0.2.1 — 2026-08-05
+
+### Added
+
+- Explicit text-authorized identity facts for a user's name and preferred form
+  of address, with evidence-backed identity projections and direct name-query
+  retrieval across sessions.
+
+### Changed
+
+- Voice transcripts, ordinary self-introductions, agent output, and external
+  content no longer create durable identity facts automatically. Explicit name
+  corrections supersede only the matching identity field and preserve history.
+
 ## 0.2.0 — 2026-08-04
 
 ### Added

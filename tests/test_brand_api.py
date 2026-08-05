@@ -9,7 +9,7 @@ from citefold import Citefold, MemoryScope
 
 class CitefoldBrandApiTest(unittest.TestCase):
     def test_public_api_exposes_brand_and_version(self) -> None:
-        self.assertEqual("0.2.0", citefold.__version__)
+        self.assertEqual("0.2.1", citefold.__version__)
         self.assertIn("__version__", citefold.__all__)
         self.assertIn("Citefold", citefold.__all__)
         self.assertIn("Citefold", Citefold.__doc__ or "")

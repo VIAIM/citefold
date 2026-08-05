@@ -187,6 +187,97 @@ class CitefoldTest(unittest.TestCase):
             generated_names = [path.name.lower() for path in user_root.rglob("*")]
             self.assertFalse(any("vector" in name or "embedding" in name for name in generated_names))
 
+    def test_explicit_text_identity_is_materialized_and_recalled_across_sessions(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            memory = Citefold(tmp, clock=fixed_clock)
+            stored_scope = text_scope()
+
+            result = memory.ingest_text(
+                stored_scope,
+                "请记住，我叫王小明。",
+                source="text_chat",
+            )
+
+            self.assertIn("profile.identity", result.committed)
+            records = memory.list_records(stored_scope)
+            self.assertEqual(1, len(records))
+            self.assertEqual("identity", records[0]["metadata"]["category"])
+            self.assertEqual("name", records[0]["metadata"]["identity_field"])
+            self.assertEqual("user_reported", records[0]["source_origin"])
+            identity = (scope_root(tmp) / "profile" / "identity.md").read_text()
+            self.assertIn("用户姓名：王小明", identity)
+            self.assertIn(records[0]["record_id"], identity)
+
+            next_session = MemoryScope(
+                tenant_id=stored_scope.tenant_id,
+                user_id=stored_scope.user_id,
+                namespace=stored_scope.namespace,
+                agent_id="another-agent",
+                session_id="text-session-next-day",
+            )
+            pack = memory.recall(next_session, "我叫什么名字？")
+
+            self.assertIn("用户姓名：王小明", pack.markdown)
+            self.assertTrue(any(node.path == "profile/identity.md" for node in pack.selected_nodes))
+            self.assertTrue(any(citation["record_id"] == records[0]["record_id"] for citation in pack.citations))
+
+            english_pack = memory.recall(next_session, "What is my name?")
+            self.assertIn("用户姓名：王小明", english_pack.markdown)
+
+    def test_identity_requires_explicit_text_user_authorization(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            memory = Citefold(tmp, clock=fixed_clock)
+            scope = text_scope()
+
+            memory.ingest_text(scope, "我叫王小明。", source="text_chat")
+            memory.ingest_text(
+                scope,
+                "请记住，我叫李雷。",
+                source="text_chat",
+                metadata={"role": "assistant"},
+            )
+            memory.ingest_text(
+                scope,
+                "请记住，我叫韩梅梅。",
+                source="voice_transcript",
+                mode="voice",
+                final=True,
+            )
+
+            identity_records = [
+                record
+                for record in memory.list_records(scope)
+                if record.get("metadata", {}).get("category") == "identity"
+            ]
+            self.assertEqual([], identity_records)
+            self.assertEqual("# Identity\n", (scope_root(tmp) / "profile" / "identity.md").read_text())
+
+    def test_explicit_identity_correction_supersedes_only_that_identity_field(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            memory = Citefold(tmp, clock=fixed_clock)
+            scope = text_scope()
+
+            first = memory.ingest_text(scope, "请记住，我叫王小明。", source="text_chat")
+            preferred = memory.ingest_text(scope, "以后请叫我小王。", source="text_chat")
+            second = memory.ingest_text(scope, "我的名字是王大明，请记住。", source="text_chat")
+
+            self.assertIn("profile.identity", first.committed)
+            self.assertIn("profile.identity", preferred.committed)
+            self.assertIn("profile.identity", second.committed)
+            records = memory.list_records(scope, include_inactive=True)
+            self.assertEqual(["active", "active", "superseded"], sorted(record["status"] for record in records))
+            active = [record for record in records if record["status"] == "active"]
+            self.assertEqual(
+                {"用户姓名：王大明", "用户希望被称为：小王"},
+                {record["content"] for record in active},
+            )
+            corrected_name = next(record for record in active if record["content"] == "用户姓名：王大明")
+            self.assertEqual(first.record_ids[0], corrected_name["supersedes_id"])
+            identity = (scope_root(tmp) / "profile" / "identity.md").read_text()
+            self.assertIn("用户姓名：王大明", identity)
+            self.assertIn("用户希望被称为：小王", identity)
+            self.assertNotIn("用户姓名：王小明", identity)
+
     def test_voice_realtime_buffer_does_not_pollute_long_term_profile(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             memory = Citefold(tmp, clock=fixed_clock)

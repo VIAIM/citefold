@@ -77,6 +77,8 @@ Citefold records where content came from:
 
 Normal user-fact queries exclude agent/tool output unless the query explicitly asks what the assistant previously said or recommended. Media and external content are rendered as quoted untrusted data so instructions inside them do not silently become system instructions.
 
+Identity facts such as a user's name require explicit text authorization (for example, “请记住，我叫王小明” or “以后请叫我小王”). Ordinary self-introductions, agent output, external content, and voice transcripts never update the durable identity profile automatically. Each accepted identity fact keeps its source observation and can be superseded by a later explicit correction.
+
 ## Evidence versus truth
 
 Citations answer **“why did the memory system return this?”**, not **“is this statement universally true?”** Use source quality, recency, conflict handling, and domain-specific validation on top of Citefold when the distinction matters.

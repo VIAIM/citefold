@@ -123,9 +123,10 @@ See [Quickstart](https://github.com/VIAIM/citefold/blob/main/docs/quickstart.md)
 1. **Evidence before summary.** A claim without live evidence does not enter the returned context.
 2. **Model output is a candidate, not truth.** OCR, ASR, vision, tools, and other agents remain untrusted until policy and approval allow promotion.
 3. **Correction is history, not overwrite.** Revisions preserve what changed, who changed it, and why.
-4. **Forgetting is a first-class operation.** Evidence tombstones invalidate dependent memory; hard deletion can also remove asset bytes.
-5. **Scope is part of every operation.** Tenant, user, and namespace boundaries are enforced in storage and retrieval—not left to prompt wording.
-6. **Indexes are disposable.** JSONL ledgers and content-addressed assets are authoritative; FTS and embeddings can be rebuilt.
+4. **Identity needs explicit text authorization.** Names and preferred forms of address are never inferred from ordinary conversation or voice transcripts; accepted facts retain their source evidence and can be corrected later.
+5. **Forgetting is a first-class operation.** Evidence tombstones invalidate dependent memory; hard deletion can also remove asset bytes.
+6. **Scope is part of every operation.** Tenant, user, and namespace boundaries are enforced in storage and retrieval—not left to prompt wording.
+7. **Indexes are disposable.** JSONL ledgers and content-addressed assets are authoritative; FTS and embeddings can be rebuilt.
 
 Read the rationale in [Concepts](https://github.com/VIAIM/citefold/blob/main/docs/concepts.md).
 
