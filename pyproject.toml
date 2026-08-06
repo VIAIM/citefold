@@ -41,13 +41,13 @@ dependencies = []
 
 [project.optional-dependencies]
 test = [
-  "jsonschema>=4.23,<4.26",
+  "jsonschema>=4.23,<4.27",
   "pytest>=8,<9",
   "referencing>=0.28.4,<0.37",
 ]
 dev = [
   "build>=1.2,<2",
-  "jsonschema>=4.23,<4.26",
+  "jsonschema>=4.23,<4.27",
   "pytest>=8,<9",
   "referencing>=0.28.4,<0.37",
   "twine>=5,<7",
